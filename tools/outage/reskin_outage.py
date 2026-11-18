@@ -95,8 +95,18 @@ def pass2_css(W_, H_, L_, T_):
     left: calc({L_} + {W_} * {lx:.5f}); top: calc({T_} + {H_} * {ly:.5f});
     width: calc({W_} * {lw:.5f}); height: calc({H_} * {lh:.5f}); }}
   #leverbox img {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
-    transform-origin: {px * 100:.2f}% {py * 100:.2f}%; transition: transform .26s cubic-bezier(.3, 1.7, .5, 1), filter .15s; }}
-  body.poweron #leverbox img {{ transform: scaleY(-1); }}
+    transform-origin: {px * 100:.2f}% {py * 100:.2f}%; transform: perspective(260px) rotateX(0deg);
+    transition: transform .32s cubic-bezier(.45, 1.45, .5, 1), filter .15s; }}
+  /* a real toggle: it rocks over its pivot in the slot (toward you, through edge-on, to pointing up) */
+  body.poweron #leverbox img {{ transform: perspective(260px) rotateX(180deg); }}
+  /* the power cord: its own box the size of the frame, under the frame (it comes out from under the clamp) */
+  #cablebox {{ position: absolute; z-index: 2; pointer-events: none;
+    left: calc({L_}); top: calc({T_}); width: calc({W_}); height: calc({H_}); }}
+  #cablebox .cablecv {{ position: absolute; pointer-events: none; }}
+  #cablebox .cablegrab {{ position: absolute; width: 8%; height: 9%; margin: -4.5% 0 0 -4%; border-radius: 50%;
+    pointer-events: auto; cursor: grab; touch-action: none; }}
+  #cablebox .cablegrab.held {{ cursor: grabbing; }}
+  body.replay #cablebox .cablegrab {{ pointer-events: none; }}
   #leverbox:hover img {{ filter: brightness(1.15) drop-shadow(0 0 6px rgba(255, 213, 74, .6)); }}
   body.replay #leverbox {{ pointer-events: none; cursor: default; }}
   /* the HUD's bonus button is an emblem now (a red power button, a bulb, cash and a BONUS ribbon), not just the word */
@@ -107,14 +117,16 @@ def pass2_css(W_, H_, L_, T_):
   .bonusbtn:hover:not(:disabled)::after {{ filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 213, 74, .7)); }}
   @keyframes bonusIconBob {{ 0%, 100% {{ translate: 0 0; scale: 1; }} 50% {{ translate: 0 -3%; scale: 1.04; }} }}
   .bonusbtn .bglow {{ display: none; }}
-  /* the multiplier values glow in their own heat colour (no dark plate, no drop shadow) and are alive: a soft glow
-     breathing behind them and the figures bobbing in a wave */
-  .multlayer .gmult::before {{ inset: auto -2% -4% auto !important; width: 78%; height: 54%; mix-blend-mode: screen;
-    background: radial-gradient(closest-side, color-mix(in srgb, var(--heat, #3FE0FF) 52%, transparent),
-      color-mix(in srgb, var(--heat, #3FE0FF) 18%, transparent) 55%, transparent) !important;
-    animation: gmGlow 1.6s ease-in-out infinite alternate; }}
-  @keyframes gmGlow {{ from {{ opacity: .35; scale: .9; }} to {{ opacity: .85; scale: 1.1; }} }}
-  .multlayer .gmult {{ filter: drop-shadow(0 0 2px var(--heat, #3FE0FF)) drop-shadow(0 0 7px var(--heat, #3FE0FF)); }}
+  /* owner pass 3: the multiplier values ARE their colour - the numerals filled with the value's heat colour (green ->
+     red -> purple for the max wins: heatHue), their black outline, shade and shine kept (vnum_ink.py) - and they glow
+     only slightly, from the lettering itself: nothing underneath them */
+  .vg {{ --vg-fill: linear-gradient(color-mix(in srgb, var(--heat, #3FE0FF) 55%, #fff), var(--heat, #3FE0FF) 48%,
+      color-mix(in srgb, var(--heat, #3FE0FF) 72%, #000));
+    background-size: contain, 100% 100% !important; background-position: center !important; background-repeat: no-repeat !important;
+    -webkit-mask: var(--vgm) center / contain no-repeat; mask: var(--vgm) center / contain no-repeat; }}
+  .multlayer .gmult::before {{ display: none !important; }}
+  .multlayer .gmult {{ filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--heat, #3FE0FF) 85%, #fff))
+      drop-shadow(0 0 4px color-mix(in srgb, var(--heat, #3FE0FF) 55%, transparent)); }}
   .multlayer .gmult .vg, .cell.booster .multface .mv .vg {{ animation: vgWave 1.8s ease-in-out infinite; }}
   .multlayer .gmult .vg:nth-child(2), .cell.booster .multface .mv .vg:nth-child(2) {{ animation-delay: -.15s; }}
   .multlayer .gmult .vg:nth-child(3), .cell.booster .multface .mv .vg:nth-child(3) {{ animation-delay: -.3s; }}
@@ -123,13 +135,13 @@ def pass2_css(W_, H_, L_, T_):
   .multlayer .gmult .vg:nth-child(6), .cell.booster .multface .mv .vg:nth-child(6) {{ animation-delay: -.75s; }}
   .multlayer .gmult .vg:nth-child(7), .cell.booster .multface .mv .vg:nth-child(7) {{ animation-delay: -.9s; }}
   @keyframes vgWave {{ 0%, 100% {{ translate: 0 0; }} 50% {{ translate: 0 -10%; }} }}
-  /* the Surge's own value: no hazard ring and no shadow - a glowing ring of its heat colour that breathes */
-  .cell.booster .multface .mv {{
-    background: radial-gradient(closest-side, transparent 66%, color-mix(in srgb, var(--heat, #3FE0FF) 60%, #fff) 72%,
-      var(--heat, #3FE0FF) 78%, color-mix(in srgb, var(--heat, #3FE0FF) 35%, transparent) 86%, transparent) !important;
-    filter: drop-shadow(0 0 3px var(--heat, #3FE0FF)) drop-shadow(0 0 9px var(--heat, #3FE0FF)) !important;
+  /* the Surge's own value: just its coloured numerals with the same slight glow (no ring, no plate, no shadow) */
+  .cell.booster .multface .mv {{ background: none !important;
+    filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--heat, #3FE0FF) 85%, #fff))
+      drop-shadow(0 0 4px color-mix(in srgb, var(--heat, #3FE0FF) 55%, transparent)) !important;
     animation: mvPulse 1.1s ease-in-out infinite alternate; }}
-  @keyframes mvPulse {{ from {{ scale: .95; }} to {{ scale: 1.07; }} }}
+  @keyframes mvPulse {{ from {{ scale: .96; }} to {{ scale: 1.06; }} }}
+  .fbox .fmult {{ filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--heat, #3FE0FF) 85%, #fff)); }}
   @media (prefers-reduced-motion: reduce) {{ .multlayer .gmult::before, .multlayer .gmult .vg, .cell.booster .multface .mv,
     .cell.booster .multface .mv .vg, .bonusbtn::after {{ animation: none; }} }}
   /* the Xtreme Bonus's red emergency room: on its intro screen and on phones too */
@@ -392,7 +404,29 @@ function drawHexLight(ctx, b, now) {
     d.rep("    state.fsTotal = spins;\n    await bonusIntro(spins, true);",
           "    state.fsTotal = spins;\n    document.body.classList.add(\"xtreme\");   // the red emergency room for the Xtreme Bonus\n    await bonusIntro(spins, true);")
     d.rep('wander(() => [frame, $("paintback"), $("candleflame"), document.querySelector("#board .sprayrim")].filter(Boolean)',
-          'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
+          'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), $("cablebox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
+    # owner pass 3: the Multi values are coloured by their size - green, through yellow and orange, to red at x100, on
+    # to magenta, and purple for the max wins over x500 (heatHue normalised so a hue past red wraps round)
+    d.rep("const HEAT_ANCHORS = [[1.25, 100], [3, 75], [5, 58], [10, 45], [20, 32], [50, 18], [100, 8], [500, 0]];   // [value, hue]",
+          "const HEAT_ANCHORS = [[1.25, 125], [2, 110], [3, 92], [5, 70], [10, 48], [20, 30], [50, 12], [100, 0], [250, -22], [500, -45]];   // [value, hue]: green -> red -> magenta (owner pass 3)")
+    d.rep("  if (v > 500) return HEAT_PURPLE;", "  if (v > 500) return HEAT_PURPLE;   // the max wins: purple")
+    d.rep("    if (x <= v1) { const t = Math.log(x / v0) / Math.log(v1 / v0); hue = h0 + (h1 - h0) * t; break; }\n  }\n  return hue;",
+          "    if (x <= v1) { const t = Math.log(x / v0) / Math.log(v1 / v0); hue = h0 + (h1 - h0) * t; break; }\n  }\n  return ((hue % 360) + 360) % 360;")
+    # the glyphs' boxes: the new numerals' own proportions (the voodoo ones squeezed them), each drawn as its ink over
+    # a gradient of the value's colour, masked by its silhouette (tools/outage/vnum_ink.py)
+    from PIL import Image as _I
+    def _glyph(m):
+        n = m.group(1)
+        w, h = _I.open(os.path.join(FRONT, "assets", "vnum", n + ".webp")).size
+        return (f'  .vg.g-{n} {{ --vgm: url("assets/vnum/{n}.webp"); aspect-ratio: {w} / {h}; '
+                f'background-image: url("assets/vnum/ink_{n}.webp"), var(--vg-fill); }}')
+    d.s, c = re.subn(r'  \.vg\.g-(\w+) \{ background-image: url\("assets/vnum/\1\.webp"\); aspect-ratio: \d+ / \d+; \}', _glyph, d.s)
+    assert c == 12, c
+    # the win figure's multiplier ink follows the same scale (POTION_INK by the Surge's tier)
+    d.s = d.s.replace("const POTION_INK = { M: [90, 226, 255], M2: [130, 240, 120], M3: [196, 150, 255], M4: [255, 170, 60], M5: [255, 72, 64] };",
+                      "const POTION_INK = { M: [110, 240, 90], M2: [240, 232, 70], M3: [255, 150, 50], M4: [255, 64, 60], M5: [196, 96, 255] };")
+    # the power cord's physics (frontend/cable.js; its box is made with the frame's, before this runs)
+    d.rep('<script src="boardgl.js"></script>\n', '<script src="boardgl.js"></script>\n<script src="cable.js"></script>\n')
     # what each symbol lands like (tools/sfx/outage_spec.py LAND)
     d.rep('''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landIron", L2: "landBeads", L3: "landShell", L4: "landPastry", L5: "landWax", L6: "landIron", L7: "landDoubloon", L8: "landTarot", L9: "landBone", L10: "landBrass", M: "landGlass",''',
           '''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landWax", L3: "landIron", L4: "landShell", M: "landGlass",''')
@@ -463,6 +497,9 @@ def main():
         if (s && !s.disabled) s.click();
       });
       if (pf && pf.parentNode) pf.parentNode.appendChild(lb);
+      // the dangling power cord's box (frontend/cable.js swings the cord in it with physics)
+      const cb = document.createElement("div"); cb.id = "cablebox"; cb.setAttribute("aria-hidden", "true");
+      if (pf && pf.parentNode) pf.parentNode.appendChild(cb);
       // the Xtreme Bonus's room is fetched while the base game plays, so it is there the moment the bonus lands
       if (!window.MOBILE) setTimeout(() => { new Image().src = "assets/bonus_wall_xtreme.webp"; }, 8000); }''')
     d.save()

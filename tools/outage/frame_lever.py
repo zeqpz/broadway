@@ -54,6 +54,52 @@ oy, ox = np.nonzero(oldbox | handle)
 bx0, by0, bx1, by1 = int(ox.min()) - 6, int(oy.min()) - 6, min(W, int(ox.max()) + 10), int(oy.max()) + 6
 box = Image.open(os.path.join(ROOT, "art", "outage-src", "ui", "switchbox.png")).convert("RGBA")
 box = box.crop(box.getchannel("A").point(lambda v: 255 if v > 20 else 0).getbbox())
+# owner pass 3: a real breaker's toggle sits in the MIDDLE of its box and rocks up and down inside it - move the
+# drawn slot from the top of the inner panel to its centre (PANEL_MID: the panel's middle, measured on the art)
+PANEL_MID = .559
+bxa = np.asarray(box).astype(np.int32)
+BH, BW = bxa.shape[:2]
+sdark = (bxa[..., :3].mean(-1) < 50) & (bxa[..., 3] > 200)
+sdark[int(BH * .45):] = False
+sdark[:int(BH * .08)] = False
+slab, _ = ndimage.label(sdark)
+cand = [sl for sl in ndimage.find_objects(slab) if BW * .2 < sl[1].stop - sl[1].start < BW * .85 and sl[0].stop - sl[0].start < BH * .12]
+sl = max(cand, key=lambda s: s[1].stop - s[1].start)
+m = 10
+py0, py1, px0, px1 = sl[0].start - m, sl[0].stop + m + 6, sl[1].start - m, sl[1].stop + m
+patch = bxa[py0:py1, px0:px1].copy()
+# the slot alone (its dark opening and its lip): the pixels that differ from the panel round it
+ref = np.median(np.concatenate([patch[:4, :, :3].reshape(-1, 3), patch[-4:, :, :3].reshape(-1, 3)]), axis=0)
+diff = np.abs(patch[..., :3] - ref).max(-1)
+patch[..., 3] = np.where(diff > 14, patch[..., 3], 0)
+# the inner panel's interior, found from its black outline along the middle column and row
+cxm = BW // 2
+col = bxa[:, cxm, :3].mean(-1)
+yt = int(BH * .1)
+while col[yt] > 60: yt += 1                         # the panel's top outline
+while col[yt] <= 60: yt += 1
+yb = int(BH * .95)
+while col[yb] > 60: yb -= 1                         # its bottom outline
+while col[yb] <= 60: yb -= 1
+rowm = bxa[int(BH * PANEL_MID) + 40, :, :3].mean(-1)
+xl = cxm
+while rowm[xl] > 60: xl -= 1
+xr = cxm
+while rowm[xr] > 60: xr += 1
+iy0, iy1, ix0, ix1 = yt + 8, yb - 8, xl + 10, xr - 10
+# one smooth vertical gradient over it, from the panel's colour at its top to its colour at the bottom (no band, no
+# flat patch left by the generator's smudge or by the old slot)
+ctop = np.median(bxa[iy0:iy0 + 6, ix0 + 20:ix1 - 20, :3].reshape(-1, 3), axis=0).astype(np.float32)
+cbot = np.median(bxa[iy1 - 6:iy1, ix0 + 20:ix1 - 20, :3].reshape(-1, 3), axis=0).astype(np.float32)
+for yy in range(iy0, iy1):
+    k = (yy - iy0) / max(1, iy1 - iy0)
+    bxa[yy, ix0:ix1, :3] = ctop * (1 - k) + cbot * k
+# the slot, pasted in the middle
+ny0 = round(BH * PANEL_MID - (py1 - py0) / 2)
+region = bxa[ny0:ny0 + (py1 - py0), px0:px1]
+al = patch[..., 3:4] / 255.
+region[..., :3] = (patch[..., :3] * al + region[..., :3] * (1 - al)).round()
+box = Image.fromarray(bxa.astype(np.uint8), "RGBA")
 bw = bx1 - bx0
 bh = round(bw * box.height / box.width)
 cy = (by0 + by1) / 2
@@ -64,8 +110,8 @@ out.alpha_composite(boxr, (bx0, by0n))
 # the new slot (the darkest wide bar in the box's upper third), where the handle's top end goes
 ba = np.asarray(boxr).astype(np.int32)
 dark = (ba[..., :3].mean(-1) < 50) & (ba[..., 3] > 200)
-dark[int(bh * .45):] = False
-dark[:int(bh * .08)] = False
+dark[int(bh * .75):] = False
+dark[:int(bh * .3)] = False
 dlab, dn = ndimage.label(dark)
 best, bestw = None, 0
 for i, sl in enumerate(ndimage.find_objects(dlab)):
@@ -76,7 +122,11 @@ sy = (best[0].start + best[0].stop) / 2 + by0n
 sx = (best[1].start + best[1].stop) / 2 + bx0
 out.save(FR, "WEBP", quality=92, alpha_quality=100, method=6)
 
-# ---- the handle's place: its top end on the slot's centre
+# ---- the handle's place: shrunk so it stays inside the box both thrown up and down (HANDLE_K), its top end on the
+# slot's centre
+HANDLE_K = .4
+spr = spr.convert("RGBa").resize((round(spr.width * HANDLE_K), round(spr.height * HANDLE_K)), Image.LANCZOS).convert("RGBA")
+tx, top = hx0 + (tx - hx0) * HANDLE_K, hy0 + (top - hy0) * HANDLE_K
 ox_, oy_ = sx - (tx - hx0), sy - (top - hy0)
 spr.save(os.path.join(A, "lever.webp"), "WEBP", quality=92, alpha_quality=100, method=6)
 info = {"box": [ox_ / W, oy_ / H, spr.width / W, spr.height / H],
