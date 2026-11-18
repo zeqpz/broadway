@@ -124,7 +124,7 @@ out.save(FR, "WEBP", quality=92, alpha_quality=100, method=6)
 
 # ---- the handle's place: shrunk so it stays inside the box both thrown up and down (HANDLE_K), its top end on the
 # slot's centre
-HANDLE_K = .4
+HANDLE_K = .56                                        # (owner: bigger; still inside the box)
 spr = spr.convert("RGBa").resize((round(spr.width * HANDLE_K), round(spr.height * HANDLE_K)), Image.LANCZOS).convert("RGBA")
 tx, top = hx0 + (tx - hx0) * HANDLE_K, hy0 + (top - hy0) * HANDLE_K
 ox_, oy_ = sx - (tx - hx0), sy - (top - hy0)

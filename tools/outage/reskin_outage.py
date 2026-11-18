@@ -67,19 +67,23 @@ REVIEW_CSS = '''  /* ---- Power Outage review fixes (2026-11-18) ---- */
   .fbox p { color: #232a45; -webkit-text-stroke: 0; text-shadow: none; font-weight: 600; }
   .fbox p b { color: #B4410A; }
   .fbox .ficon img { filter: none; }
-  @container (max-width: 230px) {   /* a small card (phones) shows only its icon and title: the title stays in the band */
+  @container (max-width: 230px) {   /* a small card (phones): the title stays in the band */
     .fbox .fin { justify-content: flex-start; }
     .fbox h3 { margin-top: 0; font-size: 6.6cqw; }
-    .fbox .ficon { margin-top: 10cqw; }
+    .fbox .ficon { margin-top: 3cqw; }
   }
-  /* a cell's value is a badge in the cell's lower-right corner, over the symbol: the chunky symbols covered it */
-  .multlayer { z-index: 3; }
-  .multlayer .gmult:not(.gone) { opacity: 1; }
-  .multlayer .gmult { align-items: flex-end !important; justify-content: flex-end !important; padding: 0 3% 4% 0;
-    font-size: calc(var(--boxh, 82) * .3px * var(--shrink, 1)) !important; }
-  .multlayer .gmult::before { inset: auto 0 0 auto !important; width: 80%; height: 54%;
-    background: radial-gradient(closest-side, rgba(8, 10, 26, .85), rgba(8, 10, 26, .55) 62%, rgba(8, 10, 26, 0)) !important; }
-  .multlayer .gmult .vg { filter: none; }
+  /* (owner, 2026-11-18) every intro card has its description at every size: the full one on a big card, a short one
+     at a size that reads (min 10px) where the card is small - a laptop's or a phone's - instead of none or 9px type */
+  .fbox p.fshort { display: none; margin: 2.5cqw 0 0; font-size: max(5.4cqw, 10px); line-height: 1.3; font-weight: 600;
+    color: #232a45; -webkit-text-stroke: 0; text-shadow: none; }
+  .fbox p.fshort b { color: #B4410A; }
+  @container (max-width: 300px) {
+    .fbox p.flong { display: none; }
+    .fbox p.fshort { display: block; }
+    .fbox .ficon { width: 44%; }
+  }
+  /* (owner, 2026-11-18) the multiplier values stay in the background: behind the symbols, filling the cell, still
+     (the corner badges over the symbols are gone) */
 '''
 
 
@@ -127,13 +131,13 @@ def pass2_css(W_, H_, L_, T_):
   .multlayer .gmult::before {{ display: none !important; }}
   .multlayer .gmult {{ filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--heat, #3FE0FF) 85%, #fff))
       drop-shadow(0 0 4px color-mix(in srgb, var(--heat, #3FE0FF) 55%, transparent)); }}
-  .multlayer .gmult .vg, .cell.booster .multface .mv .vg {{ animation: vgWave 1.8s ease-in-out infinite; }}
-  .multlayer .gmult .vg:nth-child(2), .cell.booster .multface .mv .vg:nth-child(2) {{ animation-delay: -.15s; }}
-  .multlayer .gmult .vg:nth-child(3), .cell.booster .multface .mv .vg:nth-child(3) {{ animation-delay: -.3s; }}
-  .multlayer .gmult .vg:nth-child(4), .cell.booster .multface .mv .vg:nth-child(4) {{ animation-delay: -.45s; }}
-  .multlayer .gmult .vg:nth-child(5), .cell.booster .multface .mv .vg:nth-child(5) {{ animation-delay: -.6s; }}
-  .multlayer .gmult .vg:nth-child(6), .cell.booster .multface .mv .vg:nth-child(6) {{ animation-delay: -.75s; }}
-  .multlayer .gmult .vg:nth-child(7), .cell.booster .multface .mv .vg:nth-child(7) {{ animation-delay: -.9s; }}
+  .cell.booster .multface .mv .vg {{ animation: vgWave 1.8s ease-in-out infinite; }}
+  .cell.booster .multface .mv .vg:nth-child(2) {{ animation-delay: -.15s; }}
+  .cell.booster .multface .mv .vg:nth-child(3) {{ animation-delay: -.3s; }}
+  .cell.booster .multface .mv .vg:nth-child(4) {{ animation-delay: -.45s; }}
+  .cell.booster .multface .mv .vg:nth-child(5) {{ animation-delay: -.6s; }}
+  .cell.booster .multface .mv .vg:nth-child(6) {{ animation-delay: -.75s; }}
+  .cell.booster .multface .mv .vg:nth-child(7) {{ animation-delay: -.9s; }}
   @keyframes vgWave {{ 0%, 100% {{ translate: 0 0; }} 50% {{ translate: 0 -10%; }} }}
   /* the Surge's own value: just its coloured numerals with the same slight glow (no ring, no plate, no shadow) */
   .cell.booster .multface .mv {{ background: none !important;
@@ -405,6 +409,16 @@ function drawHexLight(ctx, b, now) {
           "    state.fsTotal = spins;\n    document.body.classList.add(\"xtreme\");   // the red emergency room for the Xtreme Bonus\n    await bonusIntro(spins, true);")
     d.rep('wander(() => [frame, $("paintback"), $("candleflame"), document.querySelector("#board .sprayrim")].filter(Boolean)',
           'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), $("cablebox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
+    # (owner, 2026-11-18) every intro card has a short description too, shown where the card is small
+    d.rep('  const box = (icon, title, text) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p>${text}</p></div></div>`;',
+          '  const box = (icon, title, text, short) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p class="flong">${text}</p><p class="fshort">${short}</p></div></div>`;')
+    SHORT = [("T(\"Multi\"),", "T(`Lands at <b>x1.25</b> to <b>x1000</b>, clears 5 cells and leaves its value there - winning clusters on them are multiplied.`)"),
+             ("T(\"FS scatter \\u00b7 Bonus\"),", "T(`<b>3</b>, <b>4</b> or <b>5</b> award <b>10</b>, <b>12</b> or <b>15</b> free spins. Every value stays for the whole bonus.`)"),
+             ("T(\"XFS scatter \\u00b7 Extreme\"),", "T(`<b>2</b> award <b>17</b> Xtreme free spins. Every Multi is <b>x2</b> or more.`)")]
+    for title, short in SHORT:
+        i = d.s.index(title, d.s.index("const box = (icon, title, text, short)"))   # the intro cards' own calls
+        j = d.s.index("`))", i)                          # the end of this card's long text, closing box(
+        d.s = d.s[:j] + "`), " + short + ")" + d.s[j + 3:]
     # owner pass 3: the Multi values are coloured by their size - green, through yellow and orange, to red at x100, on
     # to magenta, and purple for the max wins over x500 (heatHue normalised so a hue past red wraps round)
     d.rep("const HEAT_ANCHORS = [[1.25, 100], [3, 75], [5, 58], [10, 45], [20, 32], [50, 18], [100, 8], [500, 0]];   // [value, hue]",

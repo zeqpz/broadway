@@ -3575,26 +3575,30 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   .fbox p { color: #232a45; -webkit-text-stroke: 0; text-shadow: none; font-weight: 600; }
   .fbox p b { color: #B4410A; }
   .fbox .ficon img { filter: none; }
-  @container (max-width: 230px) {   /* a small card (phones) shows only its icon and title: the title stays in the band */
+  @container (max-width: 230px) {   /* a small card (phones): the title stays in the band */
     .fbox .fin { justify-content: flex-start; }
     .fbox h3 { margin-top: 0; font-size: 6.6cqw; }
-    .fbox .ficon { margin-top: 10cqw; }
+    .fbox .ficon { margin-top: 3cqw; }
   }
-  /* a cell's value is a badge in the cell's lower-right corner, over the symbol: the chunky symbols covered it */
-  .multlayer { z-index: 3; }
-  .multlayer .gmult:not(.gone) { opacity: 1; }
-  .multlayer .gmult { align-items: flex-end !important; justify-content: flex-end !important; padding: 0 3% 4% 0;
-    font-size: calc(var(--boxh, 82) * .3px * var(--shrink, 1)) !important; }
-  .multlayer .gmult::before { inset: auto 0 0 auto !important; width: 80%; height: 54%;
-    background: radial-gradient(closest-side, rgba(8, 10, 26, .85), rgba(8, 10, 26, .55) 62%, rgba(8, 10, 26, 0)) !important; }
-  .multlayer .gmult .vg { filter: none; }
+  /* (owner, 2026-11-18) every intro card has its description at every size: the full one on a big card, a short one
+     at a size that reads (min 10px) where the card is small - a laptop's or a phone's - instead of none or 9px type */
+  .fbox p.fshort { display: none; margin: 2.5cqw 0 0; font-size: max(5.4cqw, 10px); line-height: 1.3; font-weight: 600;
+    color: #232a45; -webkit-text-stroke: 0; text-shadow: none; }
+  .fbox p.fshort b { color: #B4410A; }
+  @container (max-width: 300px) {
+    .fbox p.flong { display: none; }
+    .fbox p.fshort { display: block; }
+    .fbox .ficon { width: 44%; }
+  }
+  /* (owner, 2026-11-18) the multiplier values stay in the background: behind the symbols, filling the cell, still
+     (the corner badges over the symbols are gone) */
   /* ---- owner pass 2 (2026-11-18) ---- */
   /* the breaker on the frame: click it to spin; it is thrown up (ON) while a round plays and drops back after */
   #leverbox { position: absolute; z-index: 4; cursor: pointer; pointer-events: auto; user-select: none;
-    left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.90873); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.53391);
-    width: calc((100% - 36px) / 0.7186 * 0.03864); height: calc((100% - 36px) / 0.5979 * 0.07013); }
+    left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.90441); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.53294);
+    width: calc((100% - 36px) / 0.7186 * 0.05409); height: calc((100% - 36px) / 0.5979 * 0.09788); }
   #leverbox img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
-    transform-origin: 27.99% 3.45%; transform: perspective(260px) rotateX(0deg);
+    transform-origin: 27.99% 3.46%; transform: perspective(260px) rotateX(0deg);
     transition: transform .32s cubic-bezier(.45, 1.45, .5, 1), filter .15s; }
   /* a real toggle: it rocks over its pivot in the slot (toward you, through edge-on, to pointing up) */
   body.poweron #leverbox img { transform: perspective(260px) rotateX(180deg); }
@@ -3626,13 +3630,13 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   .multlayer .gmult::before { display: none !important; }
   .multlayer .gmult { filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--heat, #3FE0FF) 85%, #fff))
       drop-shadow(0 0 4px color-mix(in srgb, var(--heat, #3FE0FF) 55%, transparent)); }
-  .multlayer .gmult .vg, .cell.booster .multface .mv .vg { animation: vgWave 1.8s ease-in-out infinite; }
-  .multlayer .gmult .vg:nth-child(2), .cell.booster .multface .mv .vg:nth-child(2) { animation-delay: -.15s; }
-  .multlayer .gmult .vg:nth-child(3), .cell.booster .multface .mv .vg:nth-child(3) { animation-delay: -.3s; }
-  .multlayer .gmult .vg:nth-child(4), .cell.booster .multface .mv .vg:nth-child(4) { animation-delay: -.45s; }
-  .multlayer .gmult .vg:nth-child(5), .cell.booster .multface .mv .vg:nth-child(5) { animation-delay: -.6s; }
-  .multlayer .gmult .vg:nth-child(6), .cell.booster .multface .mv .vg:nth-child(6) { animation-delay: -.75s; }
-  .multlayer .gmult .vg:nth-child(7), .cell.booster .multface .mv .vg:nth-child(7) { animation-delay: -.9s; }
+  .cell.booster .multface .mv .vg { animation: vgWave 1.8s ease-in-out infinite; }
+  .cell.booster .multface .mv .vg:nth-child(2) { animation-delay: -.15s; }
+  .cell.booster .multface .mv .vg:nth-child(3) { animation-delay: -.3s; }
+  .cell.booster .multface .mv .vg:nth-child(4) { animation-delay: -.45s; }
+  .cell.booster .multface .mv .vg:nth-child(5) { animation-delay: -.6s; }
+  .cell.booster .multface .mv .vg:nth-child(6) { animation-delay: -.75s; }
+  .cell.booster .multface .mv .vg:nth-child(7) { animation-delay: -.9s; }
   @keyframes vgWave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10%; } }
   /* the Surge's own value: just its coloured numerals with the same slight glow (no ring, no plate, no shadow) */
   .cell.booster .multface .mv { background: none !important;
@@ -10560,19 +10564,19 @@ function runFeatures() {
   wrap.className = "features";
   wrap.setAttribute("role", "dialog");
   wrap.setAttribute("aria-label", T("How the game works"));
-  const box = (icon, title, text) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p>${text}</p></div></div>`;
+  const box = (icon, title, text, short) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p class="flong">${text}</p><p class="fshort">${short}</p></div></div>`;
   wrap.innerHTML =
     `<img class="ftitle" src="${mobArt("assets/title_logo.webp")}" alt="${T("Power Outage")}" draggable="false">` +
     `<div class="fboxes">` +
       box(`<img src="${SYM.M.img}" alt="${T("Multi")}" draggable="false"><div class="fmult" id="featMult" aria-label="x${fmtMult(FEATURE_VALUES[0])}">${[..."x" + fmtMult(FEATURE_VALUES[0])].map(ch => `<i class="vg g-${VGLYPH[ch] || ch}"></i>`).join("")}</div>`,
         T("Multi"),
-        T(`Lands with a value from <b>x1.25</b> to <b>x1000</b> - sometimes in a line of 3 or 4, and once in a long while over the whole board. Every winning cluster is paid first; then it blows out and leaves its value on five cells, and a cluster on those cells is multiplied by the <b>sum</b> it covers. Winning clusters drop small multipliers under themselves too.`)) +
+        T(`Lands with a value from <b>x1.25</b> to <b>x1000</b> - sometimes in a line of 3 or 4, and once in a long while over the whole board. Every winning cluster is paid first; then it blows out and leaves its value on five cells, and a cluster on those cells is multiplied by the <b>sum</b> it covers. Winning clusters drop small multipliers under themselves too.`), T(`Lands at <b>x1.25</b> to <b>x1000</b>, clears 5 cells and leaves its value there - winning clusters on them are multiplied.`)) +
       box(`<img src="${mobArt(SYM.BS.img)}" alt="${T("FS scatter")}" draggable="false">`,
         T("FS scatter \u00b7 Bonus"),
-        T(`<b>3</b>, <b>4</b> or <b>5</b> anywhere award <b>10</b>, <b>12</b> or <b>15</b> free spins. Multis land more often and drop in lines, and every value - a Multi's or a cluster's drop - stays on the board for the whole bonus.`)) +
+        T(`<b>3</b>, <b>4</b> or <b>5</b> anywhere award <b>10</b>, <b>12</b> or <b>15</b> free spins. Multis land more often and drop in lines, and every value - a Multi's or a cluster's drop - stays on the board for the whole bonus.`), T(`<b>3</b>, <b>4</b> or <b>5</b> award <b>10</b>, <b>12</b> or <b>15</b> free spins. Every value stays for the whole bonus.`)) +
       box(`<img src="${mobArt(SYM.ES.img)}" alt="${T("XFS scatter")}" draggable="false">`,
         T("XFS scatter \u00b7 Extreme"),
-        T(`<b>2</b> anywhere award <b>17</b> free spins under Extreme rules: Multis land more often still, drop in lines, and every value is <b>x2</b> or more. A FS scatter trigger with a XFS scatter on the same spin is upgraded to Extreme.`)) +
+        T(`<b>2</b> anywhere award <b>17</b> free spins under Extreme rules: Multis land more often still, drop in lines, and every value is <b>x2</b> or more. A FS scatter trigger with a XFS scatter on the same spin is upgraded to Extreme.`), T(`<b>2</b> award <b>17</b> Xtreme free spins. Every Multi is <b>x2</b> or more.`)) +
     `</div>` +
     `<div class="fcont"><span class="fhit"><span class="ftxt">${T("Click to play")}</span></span></div>`;
   document.body.appendChild(wrap);
