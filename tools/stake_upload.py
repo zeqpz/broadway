@@ -1,7 +1,7 @@
 """Upload changed frontend/ and math files to the Stake Engine (engine.io) scratch bucket.
 
 There is no API key. engine.io only trusts the logged-in browser session, so the minting happens
-in a logged-in tab on https://studio.engine.io/teams/smukiez/games/voodoo-on-bourbon/files and the
+in a logged-in tab on https://studio.engine.io/teams/smukiez/games/power-outage/files and the
 bytes go up from this machine. Two ways:
 
   Whole game, only what changed (the usual one):
@@ -37,7 +37,7 @@ import urllib.parse
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONT = os.path.join(ROOT, "frontend")
 PUBLISH = os.path.join(ROOT, "math-sdk", "games", "outage_5x5", "library", "publish_files")   # the 5x5 math (2026-11-09)
-TEAM, GAME = "smukiez", "voodoo-on-bourbon"
+TEAM, GAME = "smukiez", "power-outage"
 SKIP_DIRS, SKIP_FILES = {"__pycache__"}, {"mock_rgs.py"}   # the local dev server is not part of the bundle
 
 # target -> (local base dir, remote prefix). `front` files live in frontend/,
@@ -100,7 +100,10 @@ const json = JSON.stringify({ origin, tokens, creds, rows });
 def manifest(out_dir):
     """Write the local manifest and the tab script that diffs and mints against it."""
     lines = []
+    only = os.environ.get("ONLY")                     # e.g. ONLY=math: just that bundle in the manifest
     for target, (base, prefix) in TARGETS.items():
+        if only and target != only:
+            continue
         for d, dirs, files in os.walk(base):
             dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
             for f in files:
