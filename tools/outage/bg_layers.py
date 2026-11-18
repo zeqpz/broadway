@@ -74,5 +74,13 @@ scene = {
     "chandelier": f(763, 84) + [round(150 / W, 5)],
     "lights": [f(x, y) for x, y in lights],
 }
+# the Xtreme Bonus's room (assets/bonus_wall_xtreme.webp, a redraw of the same room under red emergency light) has its
+# candles a touch lower (measured on bg_xtreme_v1.png: the desk candle +0.6%, the candelabra +1.6%) and its own alarm
+# beacon painted on the ceiling
+dy = [.006, .016, .016, .016]
+scene["xtreme"] = {"flames": [[f[0], round(f[1] + d, 5), f[2]] for f, d in zip(scene["flames"], dy)],
+                   "pools": [[scene["pools"][0][0], round(scene["pools"][0][1] + .006, 5), scene["pools"][0][2]],
+                             [scene["pools"][1][0], round(scene["pools"][1][1] + .016, 5), scene["pools"][1][2]]],
+                   "beacon": [0.6003, 0.058]}
 json.dump(scene, open(os.path.join(OUT, "scene.json"), "w"), indent=1)
 print("sky", skyim.size, "lights", len(lights), "->", OUT)

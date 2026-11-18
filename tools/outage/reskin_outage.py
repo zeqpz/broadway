@@ -83,6 +83,65 @@ REVIEW_CSS = '''  /* ---- Power Outage review fixes (2026-11-18) ---- */
 '''
 
 
+def pass2_css(W_, H_, L_, T_):
+    """Owner pass 2 (2026-11-18): the throwable breaker, the illustrated bonus button, glowing living Multi values,
+    the Xtreme Bonus's own room. W_/H_/L_/T_ are the frame box's calc() terms (the same as #paintframe's)."""
+    LV = json.load(open(os.path.join(ROOT, "art", "outage-src", "lever.json")))
+    lx, ly, lw, lh = LV["box"]
+    px, py = LV["pivot"]
+    return f'''  /* ---- owner pass 2 (2026-11-18) ---- */
+  /* the breaker on the frame: click it to spin; it is thrown up (ON) while a round plays and drops back after */
+  #leverbox {{ position: absolute; z-index: 4; cursor: pointer; pointer-events: auto; user-select: none;
+    left: calc({L_} + {W_} * {lx:.5f}); top: calc({T_} + {H_} * {ly:.5f});
+    width: calc({W_} * {lw:.5f}); height: calc({H_} * {lh:.5f}); }}
+  #leverbox img {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+    transform-origin: {px * 100:.2f}% {py * 100:.2f}%; transition: transform .26s cubic-bezier(.3, 1.7, .5, 1), filter .15s; }}
+  body.poweron #leverbox img {{ transform: scaleY(-1); }}
+  #leverbox:hover img {{ filter: brightness(1.15) drop-shadow(0 0 6px rgba(255, 213, 74, .6)); }}
+  body.replay #leverbox {{ pointer-events: none; cursor: default; }}
+  /* the HUD's bonus button is an emblem now (a red power button, a bulb, cash and a BONUS ribbon), not just the word */
+  .bonusbtn {{ width: calc(176px * var(--hs, 1)); height: calc(176px * var(--hs, 1)); }}
+  .bonusbtn::before {{ display: none; }}
+  .bonusbtn::after {{ inset: 0; background-image: url("assets/bonus_icon.webp"); filter: none;
+    animation: bonusIconBob 2.6s ease-in-out infinite; }}
+  .bonusbtn:hover:not(:disabled)::after {{ filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 213, 74, .7)); }}
+  @keyframes bonusIconBob {{ 0%, 100% {{ translate: 0 0; scale: 1; }} 50% {{ translate: 0 -3%; scale: 1.04; }} }}
+  .bonusbtn .bglow {{ display: none; }}
+  /* the multiplier values glow in their own heat colour (no dark plate, no drop shadow) and are alive: a soft glow
+     breathing behind them and the figures bobbing in a wave */
+  .multlayer .gmult::before {{ inset: auto -2% -4% auto !important; width: 78%; height: 54%; mix-blend-mode: screen;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--heat, #3FE0FF) 52%, transparent),
+      color-mix(in srgb, var(--heat, #3FE0FF) 18%, transparent) 55%, transparent) !important;
+    animation: gmGlow 1.6s ease-in-out infinite alternate; }}
+  @keyframes gmGlow {{ from {{ opacity: .35; scale: .9; }} to {{ opacity: .85; scale: 1.1; }} }}
+  .multlayer .gmult {{ filter: drop-shadow(0 0 2px var(--heat, #3FE0FF)) drop-shadow(0 0 7px var(--heat, #3FE0FF)); }}
+  .multlayer .gmult .vg, .cell.booster .multface .mv .vg {{ animation: vgWave 1.8s ease-in-out infinite; }}
+  .multlayer .gmult .vg:nth-child(2), .cell.booster .multface .mv .vg:nth-child(2) {{ animation-delay: -.15s; }}
+  .multlayer .gmult .vg:nth-child(3), .cell.booster .multface .mv .vg:nth-child(3) {{ animation-delay: -.3s; }}
+  .multlayer .gmult .vg:nth-child(4), .cell.booster .multface .mv .vg:nth-child(4) {{ animation-delay: -.45s; }}
+  .multlayer .gmult .vg:nth-child(5), .cell.booster .multface .mv .vg:nth-child(5) {{ animation-delay: -.6s; }}
+  .multlayer .gmult .vg:nth-child(6), .cell.booster .multface .mv .vg:nth-child(6) {{ animation-delay: -.75s; }}
+  .multlayer .gmult .vg:nth-child(7), .cell.booster .multface .mv .vg:nth-child(7) {{ animation-delay: -.9s; }}
+  @keyframes vgWave {{ 0%, 100% {{ translate: 0 0; }} 50% {{ translate: 0 -10%; }} }}
+  /* the Surge's own value: no hazard ring and no shadow - a glowing ring of its heat colour that breathes */
+  .cell.booster .multface .mv {{
+    background: radial-gradient(closest-side, transparent 66%, color-mix(in srgb, var(--heat, #3FE0FF) 60%, #fff) 72%,
+      var(--heat, #3FE0FF) 78%, color-mix(in srgb, var(--heat, #3FE0FF) 35%, transparent) 86%, transparent) !important;
+    filter: drop-shadow(0 0 3px var(--heat, #3FE0FF)) drop-shadow(0 0 9px var(--heat, #3FE0FF)) !important;
+    animation: mvPulse 1.1s ease-in-out infinite alternate; }}
+  @keyframes mvPulse {{ from {{ scale: .95; }} to {{ scale: 1.07; }} }}
+  @media (prefers-reduced-motion: reduce) {{ .multlayer .gmult::before, .multlayer .gmult .vg, .cell.booster .multface .mv,
+    .cell.booster .multface .mv .vg, .bonusbtn::after {{ animation: none; }} }}
+  /* the Xtreme Bonus's red emergency room: on its intro screen and on phones too */
+  .bonusintro.x .wall {{ background-image: url("assets/bonus_wall_xtreme.webp") !important; }}
+  html.mob body.xtreme #bgwall {{ background-image: url("assets/mobile/bg_portrait_xtreme.webp") !important; }}
+  html.mob body.xtreme .bonusintro.x .wall {{ background-image: url("assets/mobile/bg_portrait_xtreme.webp") !important; }}
+  @media (orientation: landscape) {{
+    html.mob body.xtreme #bgwall, html.mob body.xtreme .bonusintro.x .wall {{ background-image: url("assets/mobile/bg_landscape_xtreme.webp") !important; }}
+  }}
+'''
+
+
 def recolour(d):
     for a, b in COLOURS:
         d.s = d.s.replace(a, b)
@@ -243,24 +302,42 @@ function drawHexLight(ctx, b, now) {
   #bgscene .bgbolt svg { display: block; width: 100%; height: 100%; }
   #bgscene .bglight { z-index: 1; background: #FFD54A; opacity: 0; transition: opacity .3s steps(2); }
   #bgscene .bglight.on { opacity: .95; }
-  #bgscene .bgpool { z-index: 2; border-radius: 50%; mix-blend-mode: screen;
-    background: radial-gradient(circle, rgba(255, 213, 74, .2) 0 52%, rgba(255, 213, 74, .09) 52% 100%);
-    animation: bgpool var(--dur) steps(3) infinite alternate; }
-  @keyframes bgpool { from { opacity: .5; transform: scale(.94); } to { opacity: 1; transform: scale(1.05); } }
-  #bgscene .bgflame { z-index: 3; transform-origin: 50% 100%; animation: bgflame var(--dur) steps(6) var(--delay) infinite; }
+  /* owner pass 2: soft, realistic candle light - every layer of a candle is driven by its flicker (bgscene.js) */
+  #bgscene .bgdark { inset: 0; z-index: 2; opacity: .22; background: radial-gradient(130% 110% at 50% 45%, rgba(4, 6, 18, 0) 30%, rgba(4, 6, 18, .7)); }
+  #bgscene .bgglow { z-index: 2; border-radius: 50%; mix-blend-mode: screen; will-change: opacity;
+    background: radial-gradient(closest-side, rgba(255, 170, 70, .22), rgba(255, 150, 60, .1) 45%, rgba(255, 140, 50, 0)); }
+  #bgscene .bgpool { z-index: 2; border-radius: 50%; mix-blend-mode: screen; will-change: opacity, transform;
+    background: radial-gradient(closest-side, rgba(255, 226, 150, .42), rgba(255, 196, 96, .2) 40%, rgba(255, 170, 70, .06) 72%, rgba(255, 170, 70, 0)); }
+  #bgscene .bghalo { z-index: 3; border-radius: 50%; mix-blend-mode: screen; will-change: opacity, transform;
+    background: radial-gradient(closest-side, rgba(255, 250, 220, .75), rgba(255, 214, 110, .38) 30%, rgba(255, 170, 60, .1) 62%, rgba(255, 170, 60, 0)); }
+  #bgscene .bgflame { z-index: 3; transform-origin: 50% 100%; will-change: transform; }
   #bgscene .bgflame svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  @keyframes bgflame {
-    0%, 100% { transform: scale(1, 1) skewX(0); } 20% { transform: scale(.9, 1.1) skewX(-5deg); }
-    40% { transform: scale(1.05, .93) skewX(3deg); } 60% { transform: scale(.94, 1.12) skewX(6deg); }
-    80% { transform: scale(1.03, .96) skewX(-3deg); }
-  }
-  #bgscene .bgbeam { z-index: 4; right: -3%; top: 50%; width: 72%; height: 34%; transform-origin: 100% 50%; opacity: 0;
-    clip-path: polygon(100% 45%, 0 0, 0 100%, 100% 55%); mix-blend-mode: screen;
-    background: linear-gradient(to left, rgba(255, 242, 176, .36), rgba(255, 242, 176, .12)); }
-  #bgscene .bgbeam.go { animation: bgbeam 7s ease-in-out 1; }
-  @keyframes bgbeam { 0% { opacity: 0; transform: rotate(16deg); } 12%, 86% { opacity: 1; } 50% { transform: rotate(-4deg); }
-    100% { opacity: 0; transform: rotate(-20deg); } }
-  @media (prefers-reduced-motion: reduce) { #bgscene .bgflame, #bgscene .bgpool, #bgscene .bgcloud { animation: none; } }''')
+  /* the flashlights: a soft cone with a bright hotspot where it lands, swung from off-screen right (or left) */
+  #bgscene .bgbeam { z-index: 4; right: -4%; top: 44%; width: 78%; height: 40%; transform-origin: 100% 50%; opacity: 0;
+    mix-blend-mode: screen; will-change: opacity, transform; }
+  #bgscene .bgbeam.left { right: auto; left: -4%; transform-origin: 0 50%; }
+  #bgscene .bgbeam .cone { position: absolute; inset: 0;
+    background: linear-gradient(to left, rgba(255, 246, 210, .5), rgba(255, 240, 190, .2) 45%, rgba(255, 236, 180, .07) 85%, rgba(255, 236, 180, 0));
+    clip-path: polygon(100% 46%, 0 4%, 0 96%, 100% 54%);
+    -webkit-mask: linear-gradient(transparent, #000 22%, #000 78%, transparent); mask: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+  #bgscene .bgbeam.left .cone { transform: scaleX(-1); }
+  #bgscene .bgbeam .spot { position: absolute; left: -6%; top: 6%; width: 30%; height: 88%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 252, 230, .55), rgba(255, 240, 190, .22) 50%, rgba(255, 236, 180, 0)); }
+  #bgscene .bgbeam.left .spot { left: auto; right: -6%; }
+  /* the Xtreme Bonus: the red emergency room (its own painting), its alarm beacon turning on the ceiling */
+  body.xtreme #bgscene { background-image: url("assets/bonus_wall_xtreme.webp"); }
+  #bgscene.xtreme .bgsky, #bgscene.xtreme .bglight, #bgscene.xtreme .bgchand { display: none; }
+  #bgscene .bgbeacon { z-index: 4; width: 0; height: 0; display: none; }
+  #bgscene.xtreme .bgbeacon { display: block; }
+  #bgscene .bgbeacon .lamp { left: -2.6cqh; top: -2.6cqh; width: 5.2cqh; height: 5.2cqh; border-radius: 50%; mix-blend-mode: screen;
+    background: radial-gradient(closest-side, rgba(255, 120, 110, .95), rgba(255, 40, 40, .45) 45%, rgba(255, 0, 0, 0));
+    animation: bgbeaconpulse .6s ease-in-out infinite alternate; }
+  @keyframes bgbeaconpulse { from { opacity: .55; } to { opacity: 1; } }
+  #bgscene .bgbeacon .ray { left: 0; top: -14cqh; width: 120cqh; height: 28cqh; transform-origin: 0 50%; mix-blend-mode: screen;
+    rotate: var(--spin, 0deg); clip-path: polygon(0 47%, 100% 0, 100% 100%, 0 53%);
+    background: linear-gradient(to right, rgba(255, 60, 50, .4), rgba(255, 40, 40, .12) 55%, rgba(255, 40, 40, 0)); }
+  #bgscene .bgbeacon .ray.b { rotate: calc(var(--spin, 0deg) + 180deg); }
+  @media (prefers-reduced-motion: reduce) { #bgscene .bgcloud, #bgscene .bgbeacon .lamp { animation: none; } }''')
 
     # the soundtrack: a sneaky dark-comedy cartoon score (tools/music/cues.py; MUSIC printed by tools/music/build.py)
     d.between("const MUSIC = {   // Voodoo on Bourbon", "const MUSIC_RATE = 48000;", '''const MUSIC = {   // Power Outage: a dark-comedy cartoon score (pizzicato, bassoon, tuba, glockenspiel, muted trumpet, mains hum) - tools/music
@@ -289,7 +366,7 @@ function drawHexLight(ctx, b, now) {
             x, y, w, h = M[k]
             css += (f"  html.mobart .fbar.fb-{k} {{ left: calc({L_} + {W_} * {x:.5f}); top: calc({T_} + {H_} * {y:.5f}); "
                     f"width: calc({W_} * {w:.5f}); height: calc({H_} * {h:.5f}); }}\n")
-        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS)
+        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_))
     # the symbols fill their cells like the reference's (the voodoo build drew them at 88% of the cell)
     d.rep("  const w = c.clientWidth * .88, h = c.clientHeight * .88;",
           "  const w = c.clientWidth * 1.2, h = c.clientHeight * 1.2;   // Power Outage: chunky symbols that fill the cell")
@@ -305,6 +382,17 @@ function drawHexLight(ctx, b, now) {
           "--hud-on: #F2B230; --hud-fill: rgba(16, 22, 48, .88); --hud-soft: #c9d4ee; --hud-ink: #fbf8ee;")
     d.rep("    fill: var(--hud-fill); stroke: var(--hud-line); stroke-width: 3; stroke-linejoin: round;",
           "    fill: var(--hud-fill); stroke: var(--hud-line); stroke-width: 4; stroke-linejoin: round;")
+    # owner pass 2: the breaker is thrown ON while a round plays (button, space, autoplay or the lever itself) and
+    # drops back with a click when it ends; the Xtreme Bonus swaps in the red emergency room until the round is over
+    d.rep("  state.playing = true; state.skip = false; state.mode = mode;\n  setButtons(false);",
+          "  state.playing = true; state.skip = false; state.mode = mode;\n  document.body.classList.add(\"poweron\");   // the breaker on the frame is thrown\n  setButtons(false);")
+    d.rep("  state.playing = false; state.skip = false;\n  setButtons(true);\n  return ok;",
+          "  state.playing = false; state.skip = false;\n  document.body.classList.remove(\"poweron\", \"xtreme\");   // the breaker drops; back to the dark office\n"
+          "  sfx(\"fsTick\");   // its click\n  setButtons(true);\n  return ok;")
+    d.rep("    state.fsTotal = spins;\n    await bonusIntro(spins, true);",
+          "    state.fsTotal = spins;\n    document.body.classList.add(\"xtreme\");   // the red emergency room for the Xtreme Bonus\n    await bonusIntro(spins, true);")
+    d.rep('wander(() => [frame, $("paintback"), $("candleflame"), document.querySelector("#board .sprayrim")].filter(Boolean)',
+          'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
     # what each symbol lands like (tools/sfx/outage_spec.py LAND)
     d.rep('''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landIron", L2: "landBeads", L3: "landShell", L4: "landPastry", L5: "landWax", L6: "landIron", L7: "landDoubloon", L8: "landTarot", L9: "landBone", L10: "landBrass", M: "landGlass",''',
           '''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landWax", L3: "landIron", L4: "landShell", M: "landGlass",''')
@@ -314,13 +402,10 @@ function drawHexLight(ctx, b, now) {
     position: absolute;''', '''  #logosign {
     position: absolute; z-index: 5; pointer-events: none; user-select: none;
     width: calc(.46 * var(--bw, 963px)); right: calc(100% + .045 * var(--bw, 963px)); top: 4%;
-    transform-origin: 50% 0; animation: logosway 5s ease-in-out infinite alternate, logoflicker 7s steps(1) infinite;
+    transform-origin: 50% 0; animation: logosway 7s ease-in-out infinite alternate;   /* (owner: no flicker in its opacity) */
     filter: drop-shadow(0 10px 14px rgba(6, 8, 20, .5));
   }
-  @keyframes logosway { from { rotate: -1.8deg; } to { rotate: 1.5deg; } }
-  @keyframes logoflicker {   /* the sign's bulb is dying: now and then the whole sign dips as the power stutters */
-    0%, 61%, 63.5%, 66%, 100% { opacity: 1; } 62% { opacity: .55; } 64.5% { opacity: .7; }
-  }
+  @keyframes logosway { from { rotate: -1.2deg; } to { rotate: 1deg; } }
   @media (prefers-reduced-motion: reduce) { #logosign { animation: none; } }
   @media (max-aspect-ratio: 3/2) { #logosign { display: none; } }   /* (review: at 4:3 it ran off-screen / over the rail) */
   html.mob #logosign { display: none; }
@@ -365,7 +450,21 @@ def main():
     d.rep(anchor, anchor + '''
     { const pf = document.getElementById("paintframe"), sign = document.createElement("img");   // Power Outage: the title board
       sign.id = "logosign"; sign.alt = ""; sign.draggable = false; sign.src = "assets/logo_sign.webp";
-      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign); }''')
+      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign);
+      // the breaker switch on the frame (owner pass 2): its handle is its own picture (tools/outage/frame_lever.py),
+      // thrown with the round (body.poweron); clicking it is the same as pressing Spin
+      const lb = document.createElement("div");
+      lb.id = "leverbox"; lb.setAttribute("role", "button"); lb.setAttribute("aria-label", "Spin"); lb.title = "Spin";
+      lb.innerHTML = '<img src="assets/lever.webp" alt="" draggable="false">';
+      lb.addEventListener("click", e => {
+        e.stopPropagation();
+        if (typeof REPLAY !== "undefined" && REPLAY) return;
+        const s = document.getElementById("spinBtn");
+        if (s && !s.disabled) s.click();
+      });
+      if (pf && pf.parentNode) pf.parentNode.appendChild(lb);
+      // the Xtreme Bonus's room is fetched while the base game plays, so it is there the moment the bonus lands
+      if (!window.MOBILE) setTimeout(() => { new Image().src = "assets/bonus_wall_xtreme.webp"; }, 8000); }''')
     d.save()
     rules().save()
 

@@ -3291,24 +3291,42 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   #bgscene .bgbolt svg { display: block; width: 100%; height: 100%; }
   #bgscene .bglight { z-index: 1; background: #FFD54A; opacity: 0; transition: opacity .3s steps(2); }
   #bgscene .bglight.on { opacity: .95; }
-  #bgscene .bgpool { z-index: 2; border-radius: 50%; mix-blend-mode: screen;
-    background: radial-gradient(circle, rgba(255, 213, 74, .2) 0 52%, rgba(255, 213, 74, .09) 52% 100%);
-    animation: bgpool var(--dur) steps(3) infinite alternate; }
-  @keyframes bgpool { from { opacity: .5; transform: scale(.94); } to { opacity: 1; transform: scale(1.05); } }
-  #bgscene .bgflame { z-index: 3; transform-origin: 50% 100%; animation: bgflame var(--dur) steps(6) var(--delay) infinite; }
+  /* owner pass 2: soft, realistic candle light - every layer of a candle is driven by its flicker (bgscene.js) */
+  #bgscene .bgdark { inset: 0; z-index: 2; opacity: .22; background: radial-gradient(130% 110% at 50% 45%, rgba(4, 6, 18, 0) 30%, rgba(4, 6, 18, .7)); }
+  #bgscene .bgglow { z-index: 2; border-radius: 50%; mix-blend-mode: screen; will-change: opacity;
+    background: radial-gradient(closest-side, rgba(255, 170, 70, .22), rgba(255, 150, 60, .1) 45%, rgba(255, 140, 50, 0)); }
+  #bgscene .bgpool { z-index: 2; border-radius: 50%; mix-blend-mode: screen; will-change: opacity, transform;
+    background: radial-gradient(closest-side, rgba(255, 226, 150, .42), rgba(255, 196, 96, .2) 40%, rgba(255, 170, 70, .06) 72%, rgba(255, 170, 70, 0)); }
+  #bgscene .bghalo { z-index: 3; border-radius: 50%; mix-blend-mode: screen; will-change: opacity, transform;
+    background: radial-gradient(closest-side, rgba(255, 250, 220, .75), rgba(255, 214, 110, .38) 30%, rgba(255, 170, 60, .1) 62%, rgba(255, 170, 60, 0)); }
+  #bgscene .bgflame { z-index: 3; transform-origin: 50% 100%; will-change: transform; }
   #bgscene .bgflame svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  @keyframes bgflame {
-    0%, 100% { transform: scale(1, 1) skewX(0); } 20% { transform: scale(.9, 1.1) skewX(-5deg); }
-    40% { transform: scale(1.05, .93) skewX(3deg); } 60% { transform: scale(.94, 1.12) skewX(6deg); }
-    80% { transform: scale(1.03, .96) skewX(-3deg); }
-  }
-  #bgscene .bgbeam { z-index: 4; right: -3%; top: 50%; width: 72%; height: 34%; transform-origin: 100% 50%; opacity: 0;
-    clip-path: polygon(100% 45%, 0 0, 0 100%, 100% 55%); mix-blend-mode: screen;
-    background: linear-gradient(to left, rgba(255, 242, 176, .36), rgba(255, 242, 176, .12)); }
-  #bgscene .bgbeam.go { animation: bgbeam 7s ease-in-out 1; }
-  @keyframes bgbeam { 0% { opacity: 0; transform: rotate(16deg); } 12%, 86% { opacity: 1; } 50% { transform: rotate(-4deg); }
-    100% { opacity: 0; transform: rotate(-20deg); } }
-  @media (prefers-reduced-motion: reduce) { #bgscene .bgflame, #bgscene .bgpool, #bgscene .bgcloud { animation: none; } }
+  /* the flashlights: a soft cone with a bright hotspot where it lands, swung from off-screen right (or left) */
+  #bgscene .bgbeam { z-index: 4; right: -4%; top: 44%; width: 78%; height: 40%; transform-origin: 100% 50%; opacity: 0;
+    mix-blend-mode: screen; will-change: opacity, transform; }
+  #bgscene .bgbeam.left { right: auto; left: -4%; transform-origin: 0 50%; }
+  #bgscene .bgbeam .cone { position: absolute; inset: 0;
+    background: linear-gradient(to left, rgba(255, 246, 210, .5), rgba(255, 240, 190, .2) 45%, rgba(255, 236, 180, .07) 85%, rgba(255, 236, 180, 0));
+    clip-path: polygon(100% 46%, 0 4%, 0 96%, 100% 54%);
+    -webkit-mask: linear-gradient(transparent, #000 22%, #000 78%, transparent); mask: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+  #bgscene .bgbeam.left .cone { transform: scaleX(-1); }
+  #bgscene .bgbeam .spot { position: absolute; left: -6%; top: 6%; width: 30%; height: 88%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 252, 230, .55), rgba(255, 240, 190, .22) 50%, rgba(255, 236, 180, 0)); }
+  #bgscene .bgbeam.left .spot { left: auto; right: -6%; }
+  /* the Xtreme Bonus: the red emergency room (its own painting), its alarm beacon turning on the ceiling */
+  body.xtreme #bgscene { background-image: url("assets/bonus_wall_xtreme.webp"); }
+  #bgscene.xtreme .bgsky, #bgscene.xtreme .bglight, #bgscene.xtreme .bgchand { display: none; }
+  #bgscene .bgbeacon { z-index: 4; width: 0; height: 0; display: none; }
+  #bgscene.xtreme .bgbeacon { display: block; }
+  #bgscene .bgbeacon .lamp { left: -2.6cqh; top: -2.6cqh; width: 5.2cqh; height: 5.2cqh; border-radius: 50%; mix-blend-mode: screen;
+    background: radial-gradient(closest-side, rgba(255, 120, 110, .95), rgba(255, 40, 40, .45) 45%, rgba(255, 0, 0, 0));
+    animation: bgbeaconpulse .6s ease-in-out infinite alternate; }
+  @keyframes bgbeaconpulse { from { opacity: .55; } to { opacity: 1; } }
+  #bgscene .bgbeacon .ray { left: 0; top: -14cqh; width: 120cqh; height: 28cqh; transform-origin: 0 50%; mix-blend-mode: screen;
+    rotate: var(--spin, 0deg); clip-path: polygon(0 47%, 100% 0, 100% 100%, 0 53%);
+    background: linear-gradient(to right, rgba(255, 60, 50, .4), rgba(255, 40, 40, .12) 55%, rgba(255, 40, 40, 0)); }
+  #bgscene .bgbeacon .ray.b { rotate: calc(var(--spin, 0deg) + 180deg); }
+  @media (prefers-reduced-motion: reduce) { #bgscene .bgcloud, #bgscene .bgbeacon .lamp { animation: none; } }
   #bgscene .bgl { position: absolute; mix-blend-mode: plus-lighter; will-change: opacity; }
   #bgscene .bgl img { position: absolute; inset: 0; width: 100%; height: 100%; }
   #bgscene .bgl b { position: absolute; inset: -60%; border-radius: 50%; pointer-events: none; }
@@ -3346,13 +3364,10 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   #logosign {
     position: absolute; z-index: 5; pointer-events: none; user-select: none;
     width: calc(.46 * var(--bw, 963px)); right: calc(100% + .045 * var(--bw, 963px)); top: 4%;
-    transform-origin: 50% 0; animation: logosway 5s ease-in-out infinite alternate, logoflicker 7s steps(1) infinite;
+    transform-origin: 50% 0; animation: logosway 7s ease-in-out infinite alternate;   /* (owner: no flicker in its opacity) */
     filter: drop-shadow(0 10px 14px rgba(6, 8, 20, .5));
   }
-  @keyframes logosway { from { rotate: -1.8deg; } to { rotate: 1.5deg; } }
-  @keyframes logoflicker {   /* the sign's bulb is dying: now and then the whole sign dips as the power stutters */
-    0%, 61%, 63.5%, 66%, 100% { opacity: 1; } 62% { opacity: .55; } 64.5% { opacity: .7; }
-  }
+  @keyframes logosway { from { rotate: -1.2deg; } to { rotate: 1deg; } }
   @media (prefers-reduced-motion: reduce) { #logosign { animation: none; } }
   @media (max-aspect-ratio: 3/2) { #logosign { display: none; } }   /* (review: at 4:3 it ran off-screen / over the rail) */
   html.mob #logosign { display: none; }
@@ -3547,10 +3562,10 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   }
   html.mobart #paintframe { visibility: hidden; }
   html.mobart .fbar { position: absolute; z-index: 3; pointer-events: none; user-select: none; display: block; }
-  html.mobart .fbar.fb-top { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.00000); width: calc((100% - 36px) / 0.7186 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.19667); }
-  html.mobart .fbar.fb-bottom { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.78906); width: calc((100% - 36px) / 0.7186 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.21094); }
-  html.mobart .fbar.fb-left { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19667); width: calc((100% - 36px) / 0.7186 * 0.13643); height: calc((100% - 36px) / 0.5979 * 0.59239); }
-  html.mobart .fbar.fb-right { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.84429); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19667); width: calc((100% - 36px) / 0.7186 * 0.15571); height: calc((100% - 36px) / 0.5979 * 0.59239); }
+  html.mobart .fbar.fb-top { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.00000); width: calc((100% - 36px) / 0.7186 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.19588); }
+  html.mobart .fbar.fb-bottom { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.79064); width: calc((100% - 36px) / 0.7186 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.20936); }
+  html.mobart .fbar.fb-left { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19588); width: calc((100% - 36px) / 0.7186 * 0.13857); height: calc((100% - 36px) / 0.5979 * 0.59477); }
+  html.mobart .fbar.fb-right { left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.84214); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19588); width: calc((100% - 36px) / 0.7186 * 0.15786); height: calc((100% - 36px) / 0.5979 * 0.59477); }
   /* ---- Power Outage review fixes (2026-11-18) ---- */
   /* the feature cards are cream: navy lettering without the black outline, the title in the card's yellow band
      (feature_box.webp: the band runs 3.4%-14.5% down the card) */
@@ -3573,6 +3588,56 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   .multlayer .gmult::before { inset: auto 0 0 auto !important; width: 80%; height: 54%;
     background: radial-gradient(closest-side, rgba(8, 10, 26, .85), rgba(8, 10, 26, .55) 62%, rgba(8, 10, 26, 0)) !important; }
   .multlayer .gmult .vg { filter: none; }
+  /* ---- owner pass 2 (2026-11-18) ---- */
+  /* the breaker on the frame: click it to spin; it is thrown up (ON) while a round plays and drops back after */
+  #leverbox { position: absolute; z-index: 4; cursor: pointer; pointer-events: auto; user-select: none;
+    left: calc(18px - (100% - 36px) * 0.17710 + (100% - 36px) / 0.7186 * 0.89251); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.44273);
+    width: calc((100% - 36px) / 0.7186 * 0.09682); height: calc((100% - 36px) / 0.5979 * 0.17508); }
+  #leverbox img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+    transform-origin: 27.93% 3.46%; transition: transform .26s cubic-bezier(.3, 1.7, .5, 1), filter .15s; }
+  body.poweron #leverbox img { transform: scaleY(-1); }
+  #leverbox:hover img { filter: brightness(1.15) drop-shadow(0 0 6px rgba(255, 213, 74, .6)); }
+  body.replay #leverbox { pointer-events: none; cursor: default; }
+  /* the HUD's bonus button is an emblem now (a red power button, a bulb, cash and a BONUS ribbon), not just the word */
+  .bonusbtn { width: calc(176px * var(--hs, 1)); height: calc(176px * var(--hs, 1)); }
+  .bonusbtn::before { display: none; }
+  .bonusbtn::after { inset: 0; background-image: url("assets/bonus_icon.webp"); filter: none;
+    animation: bonusIconBob 2.6s ease-in-out infinite; }
+  .bonusbtn:hover:not(:disabled)::after { filter: brightness(1.12) drop-shadow(0 0 10px rgba(255, 213, 74, .7)); }
+  @keyframes bonusIconBob { 0%, 100% { translate: 0 0; scale: 1; } 50% { translate: 0 -3%; scale: 1.04; } }
+  .bonusbtn .bglow { display: none; }
+  /* the multiplier values glow in their own heat colour (no dark plate, no drop shadow) and are alive: a soft glow
+     breathing behind them and the figures bobbing in a wave */
+  .multlayer .gmult::before { inset: auto -2% -4% auto !important; width: 78%; height: 54%; mix-blend-mode: screen;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--heat, #3FE0FF) 52%, transparent),
+      color-mix(in srgb, var(--heat, #3FE0FF) 18%, transparent) 55%, transparent) !important;
+    animation: gmGlow 1.6s ease-in-out infinite alternate; }
+  @keyframes gmGlow { from { opacity: .35; scale: .9; } to { opacity: .85; scale: 1.1; } }
+  .multlayer .gmult { filter: drop-shadow(0 0 2px var(--heat, #3FE0FF)) drop-shadow(0 0 7px var(--heat, #3FE0FF)); }
+  .multlayer .gmult .vg, .cell.booster .multface .mv .vg { animation: vgWave 1.8s ease-in-out infinite; }
+  .multlayer .gmult .vg:nth-child(2), .cell.booster .multface .mv .vg:nth-child(2) { animation-delay: -.15s; }
+  .multlayer .gmult .vg:nth-child(3), .cell.booster .multface .mv .vg:nth-child(3) { animation-delay: -.3s; }
+  .multlayer .gmult .vg:nth-child(4), .cell.booster .multface .mv .vg:nth-child(4) { animation-delay: -.45s; }
+  .multlayer .gmult .vg:nth-child(5), .cell.booster .multface .mv .vg:nth-child(5) { animation-delay: -.6s; }
+  .multlayer .gmult .vg:nth-child(6), .cell.booster .multface .mv .vg:nth-child(6) { animation-delay: -.75s; }
+  .multlayer .gmult .vg:nth-child(7), .cell.booster .multface .mv .vg:nth-child(7) { animation-delay: -.9s; }
+  @keyframes vgWave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10%; } }
+  /* the Surge's own value: no hazard ring and no shadow - a glowing ring of its heat colour that breathes */
+  .cell.booster .multface .mv {
+    background: radial-gradient(closest-side, transparent 66%, color-mix(in srgb, var(--heat, #3FE0FF) 60%, #fff) 72%,
+      var(--heat, #3FE0FF) 78%, color-mix(in srgb, var(--heat, #3FE0FF) 35%, transparent) 86%, transparent) !important;
+    filter: drop-shadow(0 0 3px var(--heat, #3FE0FF)) drop-shadow(0 0 9px var(--heat, #3FE0FF)) !important;
+    animation: mvPulse 1.1s ease-in-out infinite alternate; }
+  @keyframes mvPulse { from { scale: .95; } to { scale: 1.07; } }
+  @media (prefers-reduced-motion: reduce) { .multlayer .gmult::before, .multlayer .gmult .vg, .cell.booster .multface .mv,
+    .cell.booster .multface .mv .vg, .bonusbtn::after { animation: none; } }
+  /* the Xtreme Bonus's red emergency room: on its intro screen and on phones too */
+  .bonusintro.x .wall { background-image: url("assets/bonus_wall_xtreme.webp") !important; }
+  html.mob body.xtreme #bgwall { background-image: url("assets/mobile/bg_portrait_xtreme.webp") !important; }
+  html.mob body.xtreme .bonusintro.x .wall { background-image: url("assets/mobile/bg_portrait_xtreme.webp") !important; }
+  @media (orientation: landscape) {
+    html.mob body.xtreme #bgwall, html.mob body.xtreme .bonusintro.x .wall { background-image: url("assets/mobile/bg_landscape_xtreme.webp") !important; }
+  }
 </style>
 <script>
 // (phone art) the stylesheet's pictures with a phone copy point at it before anything has asked for them
@@ -3618,7 +3683,21 @@ if (window.MOBART) (() => {
     } else document.getElementById("paintframe").src = mobArt("assets/frame.webp");
     { const pf = document.getElementById("paintframe"), sign = document.createElement("img");   // Power Outage: the title board
       sign.id = "logosign"; sign.alt = ""; sign.draggable = false; sign.src = "assets/logo_sign.webp";
-      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign); }
+      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign);
+      // the breaker switch on the frame (owner pass 2): its handle is its own picture (tools/outage/frame_lever.py),
+      // thrown with the round (body.poweron); clicking it is the same as pressing Spin
+      const lb = document.createElement("div");
+      lb.id = "leverbox"; lb.setAttribute("role", "button"); lb.setAttribute("aria-label", "Spin"); lb.title = "Spin";
+      lb.innerHTML = '<img src="assets/lever.webp" alt="" draggable="false">';
+      lb.addEventListener("click", e => {
+        e.stopPropagation();
+        if (typeof REPLAY !== "undefined" && REPLAY) return;
+        const s = document.getElementById("spinBtn");
+        if (s && !s.disabled) s.click();
+      });
+      if (pf && pf.parentNode) pf.parentNode.appendChild(lb);
+      // the Xtreme Bonus's room is fetched while the base game plays, so it is there the moment the bonus lands
+      if (!window.MOBILE) setTimeout(() => { new Image().src = "assets/bonus_wall_xtreme.webp"; }, 8000); }
     </script>
     <div class="ticker" id="ticker">Draws come from the optimized 96.7% RTP lookup tables — the real math.</div>
     <div class="banner" id="banner"><div class="big" id="bannerBig"></div><div class="sub2" id="bannerSub"></div><img id="bannerMural" class="muralimg" alt=""></div>
@@ -4046,7 +4125,7 @@ function frameIdle() {
   const frame = $("paintframe");
   if (REDUCED_MOTION || !frame || window.MOBILE) return;   // (the mobile tier: the frame holds still)
   const dx = drift(2.5, 4.5), dy = drift(2.5, 4.5), dr = drift(3, 5), dsx = drift(2.5, 4.5), dsy = drift(2.5, 4.5);
-  wander(() => [frame, $("paintback"), $("candleflame"), document.querySelector("#board .sprayrim")].filter(Boolean), t => ({   // the velvet backing drifts with its frame
+  wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), document.querySelector("#board .sprayrim")].filter(Boolean), t => ({   // the velvet backing drifts with its frame
     transform: `translate(${(5 * dx(t)).toFixed(2)}px, ${(5 * dy(t)).toFixed(2)}px) rotate(${(.35 * dr(t)).toFixed(3)}deg) scale(${(1 + .004 * dsx(t)).toFixed(4)}, ${(1 + .004 * dsy(t)).toFixed(4)})`,
   }), { seg: 8, rate: 6 });
 }
@@ -7440,6 +7519,7 @@ const handlers = {
     if (ev.reason !== "extreme_upgrade") sfx("bonusStart");   // an upgrade's note already played with its trigger
     const spins = ev.totalFs ?? (ev.reason === "extreme_upgrade" ? state.fsTotal : EXTREME_DIRECT_SPINS);
     state.fsTotal = spins;
+    document.body.classList.add("xtreme");   // the red emergency room for the Xtreme Bonus
     await bonusIntro(spins, true);
   },
 
@@ -8226,6 +8306,7 @@ async function playRound(mode) {
   state.lastPlayAt = performance.now();
 
   state.playing = true; state.skip = false; state.mode = mode;
+  document.body.classList.add("poweron");   // the breaker on the frame is thrown
   setButtons(false);
   bounceFx();
   // (the board's fire no longer flares on every spin: it pops only for a line, an FS trigger or a multiplier - boardFlash)
@@ -8251,6 +8332,8 @@ async function playRound(mode) {
   if (left > 0) await new Promise(r => setTimeout(r, left));   // real time: Rapid and Skip do not shorten a legal floor
 
   state.playing = false; state.skip = false;
+  document.body.classList.remove("poweron", "xtreme");   // the breaker drops; back to the dark office
+  sfx("fsTick");   // its click
   setButtons(true);
   return ok;
 }
