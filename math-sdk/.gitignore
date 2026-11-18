@@ -1,0 +1,51 @@
+__pycache__
+*/.pyc
+*.prof
+*/setup.txt
+*/setup.toml
+*.egg-info/
+*/SOURCES.txt
+
+**/library/**
+**/configs/*
+**/forces/*
+**/books/*
+**/lookup_tables/*
+**/books_compressed/*
+**temp_multi_threaded_files
+
+
+**/target/*
+**/debug/*
+**release/*
+**/optimization_files/**
+
+/env
+*.env
+*.DS_Store
+*.toml
+
+**/site/*
+
+
+# Smukiez Tag Run: keep the verified math release in the repo
+!**/library/
+!**/library/publish_files/
+!**/library/publish_files/**
+!**/library/configs/
+!**/library/configs/**
+!**/library/*.xlsx
+
+# pre-shrink backups written by tools/shrink_books.py stay local
+*.jsonl.zst.orig
+
+# Voodoo on Bourbon 5x5 (2026-11-09): the big books are over GitHub's 100 MB limit; uploaded to engine.io from disk
+games/voodoo_5x5/library/publish_files/books_base.jsonl.zst
+games/voodoo_5x5/library/publish_files/books_bonus.jsonl.zst
+games/voodoo_5x5/library/publish_files/books_extremebonus.jsonl.zst
+games/voodoo_5x5/library/publish_files/books_boost.jsonl.zst
+games/voodoo_5x5/logs/
+
+# Power Outage: the four big books are over GitHub's file limit (uploaded to engine.io from disk)
+games/outage_5x5/library/publish_files/books_*.jsonl.zst
+games/outage_5x5/library/beta_cache/
