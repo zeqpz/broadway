@@ -14,10 +14,12 @@ and uploaded to engine.io from disk (`tools/stake_upload.py`).
 |---|---|
 | Symbols | H1 The President (an unnamed caricature holding a candle), H2 The Bodyguard (flashlight under his chin), H3 Bankrupt CEO (in a barrel), H4 Market Crash (a chart smashing through its screen), H5 Red Hotline, H6 AI Server (smoking, sad face), H7 Broke Piggy Bank; L1 Candle, L3 Dead Battery, L4 Blown Bulb; **M** Power Surge (colour by value: cyan, green, violet, orange, red-hot); **BS = "FS"** on a lit bulb; **ES = "XFS"** on a high-voltage sign |
 | Animation | Every symbol has its own idle, land, win and multi clip, built and rendered in Blender (`tools/outage/blender/symanim.py`: the icon on a bone-bent mesh + flat cartoon effect sprites - coins, sparks, smoke, sweat, moths, red down-arrows, glass shards, cash) |
-| Wins | Winners don't burn away: they swell, buzz white-hot like a bulb about to blow, and short out in a yellow-and-cyan flash with sparks (`drawHex` / `drawHexLight` in index.html). The Multi crackles and flashes before it blows |
+| Wins | Winners don't burn away: they swell, buzz white-hot like a bulb about to blow, and short out in a yellow-and-cyan flash with sparks (`drawHex` / `drawHexLight` in index.html). The Multi crackles and flashes before it blows. The win line is a live electric arc (`drawWinLine`, from `tools/outage/pass5.py`): a jagged white-and-cyan bolt strikes through the cluster symbol to symbol, then keeps crackling with forks, a second strand and sparks |
 | Background | The oval office in a blackout, flat cartoon (`assets/bonus_wall.webp`), kept alive by `frontend/bgscene.js`: live flat candle flames and their light pools, lightning in the windows (twice, with a bolt), clouds drifting past the moon behind the dead skyline, a lit window now and then, the power sputtering back on in fits and dying again, and a bodyguard's flashlight sweeping the room |
 | Frame | A riveted breaker-panel frame with hazard stripes, a red breaker lever, cables over one corner, a frayed sparking wire and a dangling plug; the board backing is cut to its opening (`tools/outage/board_back.py`) |
-| Layout | No character: a hanging POWER OUTAGE sign at the board's left whose bulb stutters, like the reference layout |
+| Layout | No character: a riveted steel POWER OUTAGE sign at the board's left. Its lit letters throw light on the plate, and the dead G and E stutter and now and then come on (`tools/outage/sign_layers.py` makes the layers) |
+| Multis | The values sit behind the symbols, coloured by value (green to red to purple), with a bright keyline round the figure, slightly see-through |
+| Xtreme Bonus | Its own red emergency room: an alarm lamp bolted to the wall (`tools/outage/beacon_mount.py` draws the bracket and conduit) whose beam turns about the lamp, and an alarm that sounds when an XFS lands and when the bonus triggers |
 | UI | Candle-yellow chunky lettering (BIG / MEGA / XTREME / TOTAL WIN, BONUS), cream cards, steel and hazard-stripe plates, cyan Multi numerals in a hazard-stripe ring, lightning-bolt volatility pips, a solid navy HUD with a thick black outline |
 | Music | A sneaky dark-comedy cartoon score (pizzicato strings, bassoon, oompah tuba, glockenspiel, muted trumpet, a mains hum): base D minor, intro A minor, bonus D minor, total F major, menu C (Lyria 3 Pro, `tools/music/cues.py`) |
 | Sounds | 51 sets (`tools/sfx/outage_spec.py`): breaker clunks, transformer hum, light switches, zaps and arcs, a bulb flickering on, cash registers, rotary phone bells, coins, timpani and orchestra stings, a landing sound per symbol. HUD button sounds are the base build's |
@@ -43,7 +45,8 @@ The OpenRouter key is read from `%USERPROFILE%\Documents\gamdevkey.txt`; scripts
    from the one before): `frame_lever.py` (the breaker's handle becomes `assets/lever.webp` on a clean switch box from
    `gen_switchbox.py`) -> `frame_cable.py` (the dangling cord and plug come out: `assets/plug.webp`, `cable.json`) ->
    `frame_spark.py` (the painted spark star comes off the frayed wire: `spark.json`), then `make_mobile_art.py`
-   (phone copies + `mobile_fit.json`).
+   (phone copies + `mobile_fit.json`). `sign_layers.py` makes the title sign's glow and lit-GE layers;
+   `beacon_mount.py` mounts the Xtreme room's alarm lamp on the wall and re-exports that room.
    - `frontend/cable.js` swings the cord (a Verlet rope; capped speed, a solid frame bar, layout jumps ignored),
      `frontend/spark.js` throws the wire's sparks (flash, jagged filaments, cooling streaks that bounce on the bar),
      `frontend/hudfit.js` keeps the bar's three figures in their fixed columns (shrinking a long one) and moves the

@@ -80,7 +80,7 @@ const say = (ok, msg) => { if (!ok) fails++; console.log((ok ? "PASS " : "FAIL "
       await p.mouse.up();
       let maxFar = 0;
       for (let i = 0; i < 10; i++) { const q = await plug(); maxFar = Math.max(maxFar, Math.hypot(q[0] - rest[0], q[1] - rest[1])); await p.waitForTimeout(100); if (i === 2) await p.screenshot({ path: OUT + "p4_cord_thrown.png", clip: { x: L.frame.x + L.frame.w * .55, y: L.frame.y + L.frame.h * .45, width: L.frame.w * .6, height: Math.min(h - (L.frame.y + L.frame.h * .45), L.frame.h * .7) } }); }
-      await p.waitForTimeout(3500);
+      await p.waitForTimeout(5500);   // (pass 5) a slow headless frame rate settles it later: this checks that it returns, not how fast
       const end = await plug(), off = Math.hypot(end[0] - rest[0], end[1] - rest[1]);
       say(maxFar < .45, `cord thrown wildly: stayed within ${(maxFar * 100).toFixed(1)}% of the frame's width of rest`);
       say(off < .03, `cord back at rest after the throw (off by ${(off * 100).toFixed(2)}%)`);

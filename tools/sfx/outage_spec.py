@@ -140,3 +140,16 @@ def jobs():
 
 # one event per take: the landings, the clicks and the single hits are cut to their first event only
 SINGLE = {n for n in S if n.startswith("l_")} | {"n_pop", "n_tick", "n_tick1", "n_reelstop"}
+
+# owner pass 5 (2026-11-19): "add an alarm sound for the XFS" - a klaxon when an XFS scatter lands, and the full
+# emergency alarm as the Xtreme Bonus is triggered (the room turns red, the beacon turns)
+S.update({
+    "n_xfsalarm": (PRE_STING + "One loud short emergency alarm klaxon blast, a harsh electric buzzer horn going WHOOP once, rising "
+                   "in pitch.", 6, "sting", (.45, 1.1, 1, None),
+                   ("files", ["sfx_xfs_alarm.wav"], -20, "an XFS scatter lands: one klaxon whoop")),
+    "n_xtalarm": (PRE_STING + "A loud emergency alarm siren in a building: three urgent rising klaxon whoops, whoop whoop whoop, "
+                  "harsh and electric.", 6, "sting", (1.4, 3.0, 1, None),
+                  ("files", ["sfx_xtreme_alarm.wav"], -19, "the Xtreme Bonus triggers: the full alarm")),
+})
+FOUT.update({"n_xfsalarm": 120, "n_xtalarm": 250})
+TONAL |= {"n_xfsalarm", "n_xtalarm"}

@@ -194,9 +194,28 @@ def build_icon(sid):
 
 # ---------------------------------------------------------------- keying helpers
 
+SCAT = ("BS", "ES")
+RAY0 = .36                                                    # the scatters' rays at rest (they turn slowly behind them)
+
+
+def scat_rays(pools, f0, n, peak=0.0):
+    """The scatters' light rays through a clip: at rest level at both ends (so every clip hands over to the idle on
+    the same picture), turning one wedge-pair (60 deg: the sprite looks the same again) and swelling by `peak`."""
+    if "rays" not in pools:
+        return
+    ob = pools["rays"].obs[0]
+    for f in list(range(f0, f0 + n + 1, 2)) + [f0 + n]:
+        t = (f - f0) / n
+        k = math.sin(math.pi * t)
+        key_obj(ob, f, s=.86 + .12 * k * (1 if peak else 0) + .03 * math.sin(4 * math.pi * t), r=60 * t)
+        key_fade(ob, f, RAY0 + (peak - RAY0) * k if peak else RAY0 * (1 + .22 * math.sin(4 * math.pi * t)))
+
+
 def base_glow(sid):
     """The halo's resting level: a faint warm glow behind the paying tiers and the specials, none on the lows."""
-    return .12 if sid in ("M", "BS", "ES") else 0.0           # Miami: paying symbols rest clean, glow only when they win
+    if sid in SCAT:                                           # (owner pass 5) FS / XFS glow all the time: they must stand out
+        return .62
+    return .12 if sid == "M" else 0.0                         # paying symbols rest clean, glow only when they win
 
 
 def pb(arm, name):
@@ -349,6 +368,8 @@ def clip_idle(sid, arm, glow, pools, rng):
             pose["root"]["r"] = 6 * math.sin(2 * math.pi * t)
         key_pose(arm, f0 + i, **pose)
         key_fade(glow, f0 + i, base_glow(sid) * (1 + .4 * math.sin(2 * math.pi * t * 2)))
+    if sid in SCAT:
+        scat_rays(pools, f0, n)
     # ambient effects that loop: emit on fixed frames so the loop is seamless (each ends before the loop does)
     fx = P[sid]["fx"]
     kind = fx[0]
@@ -427,6 +448,8 @@ def clip_land(sid, arm, glow, pools, rng):
                                    rng, grow=(.5, .1), fade=(1, 1))
     # the clip's glow returns to the idle's starting level so the hand-over is seamless
     key_fade(glow, f0 + n, base_glow(sid))
+    if sid in SCAT:
+        scat_rays(pools, f0, n)
 
 
 def hit_pose(sid, t, i, n):
@@ -509,7 +532,9 @@ def clip_hit(sid, arm, glow, pools, rng):
     key_fade(glow, f0 + n, base_glow(sid))
     key_obj(glow, f0 + n, s=1.0)
     # rays behind the big ones
-    if "rays" in pools:
+    if sid in SCAT:
+        scat_rays(pools, f0, n, peak=.9)
+    elif "rays" in pools:
         ob = pools["rays"].obs[0]
         key_fade(ob, f0 + 4, 0)
         for f in range(f0 + 6, f0 + n - 2, 2):
@@ -584,6 +609,8 @@ def clip_multi(sid, arm, glow, pools, rng):
         key_obj(glow, f, s=1 + .05 * g)
     key_fade(glow, f0 + n, base_glow(sid))
     key_obj(glow, f0 + n, s=1.0)
+    if sid in SCAT:
+        scat_rays(pools, f0, n, peak=.8)
     if "ring" in pools:
         pools["ring"].particle(f0 + 18, f0 + 30, lambda t: (0, 0), rng, grow=(.55, 1.18), fade=(1, 0))
     if "sparkle" in pools:

@@ -5,6 +5,7 @@ match its base text the stated number of times, so a changed base fails loudly i
 usage: python tools/outage/reskin_outage.py           (rewrites frontend/index.html and rules.js)
 Frame fractions (the frame's opening, measured by tools/outage/frame_fit.py) are read from art/outage-src/frame_fit.json."""
 import json, os, re
+import pass5
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -396,15 +397,21 @@ function drawHexLight(ctx, b, now) {
   #bgscene.xtreme .bgsky, #bgscene.xtreme .bglight, #bgscene.xtreme .bgchand { display: none; }
   #bgscene .bgbeacon { z-index: 4; width: 0; height: 0; display: none; }
   #bgscene.xtreme .bgbeacon { display: block; }
-  #bgscene .bgbeacon .lamp { left: -2.6cqh; top: -2.6cqh; width: 5.2cqh; height: 5.2cqh; border-radius: 50%; mix-blend-mode: screen;
-    background: radial-gradient(closest-side, rgba(255, 120, 110, .95), rgba(255, 40, 40, .45) 45%, rgba(255, 0, 0, 0));
-    animation: bgbeaconpulse .6s ease-in-out infinite alternate; }
-  @keyframes bgbeaconpulse { from { opacity: .55; } to { opacity: 1; } }
-  #bgscene .bgbeacon .ray { left: 0; top: -14cqh; width: 120cqh; height: 28cqh; transform-origin: 0 50%; mix-blend-mode: screen;
-    rotate: var(--spin, 0deg); clip-path: polygon(0 47%, 100% 0, 100% 100%, 0 53%);
-    background: linear-gradient(to right, rgba(255, 60, 50, .4), rgba(255, 40, 40, .12) 55%, rgba(255, 40, 40, 0)); }
-  #bgscene .bgbeacon .ray.b { rotate: calc(var(--spin, 0deg) + 180deg); }
-  @media (prefers-reduced-motion: reduce) { #bgscene .bgcloud, #bgscene .bgbeacon .lamp { animation: none; } }''')
+  /* owner pass 5: the light sits on the lamp's glass (scene.json "beacon" = the glass's centre) and turns like a real
+     beacon - bgscene.js swings one beam round the lamp's upright axis (scaleX), flares the glass as it passes us and
+     lights the wall behind as it passes the wall */
+  #bgscene .bgbeacon .lamp { left: -3.4cqh; top: -3.8cqh; width: 6.8cqh; height: 7.6cqh; border-radius: 50%; mix-blend-mode: screen;
+    will-change: opacity, transform;
+    background: radial-gradient(closest-side, rgba(255, 236, 200, .95), rgba(255, 110, 90, .8) 30%, rgba(255, 40, 40, .4) 60%, rgba(255, 0, 0, 0)); }
+  #bgscene .bgbeacon .wash { left: -34cqh; top: -30cqh; width: 68cqh; height: 60cqh; border-radius: 50%; mix-blend-mode: screen;
+    will-change: opacity; opacity: .3;
+    background: radial-gradient(closest-side, rgba(255, 70, 60, .5), rgba(255, 40, 40, .2) 45%, rgba(255, 30, 30, 0)); }
+  #bgscene .bgbeacon .ray { left: 0; top: -17cqh; width: 135cqh; height: 34cqh; transform-origin: 0 50%; mix-blend-mode: screen;
+    will-change: opacity, transform; transform: rotate(7deg);
+    clip-path: polygon(0 43%, 100% 0, 100% 100%, 0 57%);
+    background: linear-gradient(to right, rgba(255, 90, 70, .55), rgba(255, 50, 45, .2) 50%, rgba(255, 40, 40, 0));
+    -webkit-mask: linear-gradient(transparent, #000 30%, #000 70%, transparent); mask: linear-gradient(transparent, #000 30%, #000 70%, transparent); }
+  @media (prefers-reduced-motion: reduce) { #bgscene .bgcloud { animation: none; } }''')
 
     # the soundtrack: a sneaky dark-comedy cartoon score (tools/music/cues.py; MUSIC printed by tools/music/build.py)
     d.between("const MUSIC = {   // Voodoo on Bourbon", "const MUSIC_RATE = 48000;", '''const MUSIC = {   // Power Outage: a dark-comedy cartoon score (pizzicato, bassoon, tuba, glockenspiel, muted trumpet, mains hum) - tools/music
@@ -433,7 +440,7 @@ function drawHexLight(ctx, b, now) {
             x, y, w, h = M[k]
             css += (f"  html.mobart .fbar.fb-{k} {{ left: calc({L_} + {W_} * {x:.5f}); top: calc({T_} + {H_} * {y:.5f}); "
                     f"width: calc({W_} * {w:.5f}); height: calc({H_} * {h:.5f}); }}\n")
-        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_) + pass4_css(W_, H_, L_, T_))
+        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_) + pass4_css(W_, H_, L_, T_) + pass5.CSS)
     # the symbols fill their cells like the reference's (the voodoo build drew them at 88% of the cell)
     d.rep("  const w = c.clientWidth * .88, h = c.clientHeight * .88;",
           "  const w = c.clientWidth * 1.2, h = c.clientHeight * 1.2;   // Power Outage: chunky symbols that fill the cell")
@@ -541,14 +548,12 @@ def boardgl():
 def main():
     boardgl().save()
     d = index()
+    pass5.apply(d)   # owner pass 5: the alarm, the electric win line
     recolour(d)
     # the logo sign is added next to the frame (it shares the frame's parent, so it moves with the board)
     anchor = 'document.getElementById("paintframe").src = mobArt("assets/frame.webp");'
     d.rep(anchor, anchor + '''
-    { const pf = document.getElementById("paintframe"), sign = document.createElement("img");   // Power Outage: the title board
-      sign.id = "logosign"; sign.alt = ""; sign.draggable = false; sign.src = "assets/logo_sign.webp";
-      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign);
-      // the breaker switch on the frame (owner pass 2): its handle is its own picture (tools/outage/frame_lever.py),
+''' + pass5.SIGN_NEW + '''      // the breaker switch on the frame (owner pass 2): its handle is its own picture (tools/outage/frame_lever.py),
       // thrown with the round (body.poweron); clicking it is the same as pressing Spin
       const lb = document.createElement("div");
       lb.id = "leverbox"; lb.setAttribute("role", "button"); lb.setAttribute("aria-label", "Spin"); lb.title = "Spin";

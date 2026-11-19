@@ -17,7 +17,9 @@
 //   clouds      flat clouds drift past the moon, behind the dark towers
 //   skyline     a lit window comes on somewhere in the dead city, and goes out again
 //   power       now and then the power sputters back on in fits and dies again (window "bgpower" event)
-//   alarm       in the Xtreme Bonus a red alarm beacon turns on the ceiling, its beam sweeping the room
+//   alarm       in the Xtreme Bonus the red alarm lamp on the wall turns: its beam swings round the lamp's own
+//               upright axis (long from the side, foreshortened as it comes round), the glass flares as the beam
+//               passes us and the wall behind it lights as it passes the wall
 // Only opacity and transform change per frame (the compositor's work); the loop runs at up to 30 fps and stops while
 // the tab is hidden. Reduced motion: everything lit and still. Seeded: the room behaves the same on every load.
 (function () {
@@ -123,7 +125,8 @@
 
     // the Xtreme Bonus's alarm beacon on the ceiling
     const beacon = el("bgbeacon");
-    beacon.innerHTML = `<i class="lamp"></i><i class="ray"></i><i class="ray b"></i>`;
+    beacon.innerHTML = `<i class="wash"></i><i class="ray"></i><i class="lamp"></i>`;
+    const [bWash, bRay, bLamp] = beacon.children;
     const [bxp, byp] = X ? X.beacon : [cx + .07, cy - .03];
     Object.assign(beacon.style, { left: pct(bxp), top: pct(byp) });
     setMode();
@@ -160,7 +163,17 @@
         b.root.style.opacity = Math.min(1, Math.min(u, 1 - u) * 6).toFixed(3);
         b.root.style.transform = `translateY(${b.y.toFixed(1)}%) rotate(${(b.side * ang).toFixed(2)}deg)`;
       }
-      if (xtreme()) beacon.style.setProperty("--spin", ((t * 220) % 360).toFixed(1) + "deg");
+      if (xtreme()) {
+        // one reflector turning about the lamp's upright axis, a turn every 1.7 s: c is how far the beam points
+        // right (+) or left (-), s how far toward us (+) or into the wall (-)
+        const a = t * 3.7, c = Math.cos(a), s = Math.sin(a);
+        const near = Math.max(0, s) ** 3, far = Math.max(0, -s) ** 2;
+        bRay.style.transform = `scaleX(${c.toFixed(3)}) rotate(7deg)`;
+        bRay.style.opacity = ((.2 + .8 * Math.abs(c)) * (1 - .5 * far)).toFixed(3);
+        bLamp.style.opacity = (.5 + .5 * near).toFixed(3);
+        bLamp.style.transform = `scale(${(1 + 1.5 * near).toFixed(3)})`;
+        bWash.style.opacity = (.16 + .5 * far + .34 * near).toFixed(3);
+      }
     };
     requestAnimationFrame(loop);
 
