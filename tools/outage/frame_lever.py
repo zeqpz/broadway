@@ -121,6 +121,8 @@ for i, sl in enumerate(ndimage.find_objects(dlab)):
 sy = (best[0].start + best[0].stop) / 2 + by0n
 sx = (best[1].start + best[1].stop) / 2 + bx0
 out.save(FR, "WEBP", quality=92, alpha_quality=100, method=6)
+# the next stage (tools/outage/frame_cable.py, then frame_spark.py) always starts from this
+out.save(os.path.join(ROOT, "art", "outage-src", "frame_precable.webp"), "WEBP", quality=96, alpha_quality=100, method=6)
 
 # ---- the handle's place: shrunk so it stays inside the box both thrown up and down (HANDLE_K), its top end on the
 # slot's centre

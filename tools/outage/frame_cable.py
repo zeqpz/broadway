@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 A = os.path.join(ROOT, "frontend", "assets")
 FR = os.path.join(A, "frame.webp")
 KEEP = os.path.join(ROOT, "art", "outage-src", "frame_precable.webp")
-if not os.path.exists(KEEP):
+if not os.path.exists(KEEP):                 # (frame_lever.py writes it; this is only for a frame made without it)
     shutil.copyfile(FR, KEEP)
 src = Image.open(KEEP).convert("RGBA")
 im = np.asarray(src).astype(np.int32)
@@ -61,6 +61,12 @@ neck = [float(top.mean()), float(py0)]
 out = im.copy()
 out[take, 3] = 0
 Image.fromarray(out.astype(np.uint8), "RGBA").save(FR, "WEBP", quality=92, alpha_quality=100, method=6)
-info = {"frame": [W, H], "line": line, "thick": round(thick, 1), "plug": [px0, py0, px1 - px0, py1 - py0], "neck": neck}
+# the bar the cord hangs beside (cable.js keeps the rope out of it): its right edge below the clamp, and its foot
+oa = out[..., 3] > 40
+rights = [int(np.nonzero(oa[y])[0].max()) for y in range(int(H * .775), int(H * .85), 6) if oa[y].any()]
+bar_right = float(np.median(rights))
+foot = int(np.nonzero(oa[:, int(bar_right) - 40])[0].max())
+info = {"frame": [W, H], "line": line, "thick": round(thick, 1), "plug": [px0, py0, px1 - px0, py1 - py0], "neck": neck,
+        "bar_right": bar_right, "frame_bottom": foot}
 json.dump(info, open(os.path.join(A, "cable.json"), "w"), indent=1)
-print("cord points", len(line), "thickness", thick, "plug", info["plug"], "neck", neck, "from", line[0], "to", line[-1])
+print("cord points", len(line), "thickness", thick, "plug", info["plug"], "neck", neck, "bar right", bar_right, "foot", foot)

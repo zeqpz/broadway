@@ -30,9 +30,12 @@ solid = al > 40
 sy, sx = np.nonzero(solid)
 over = dict(left=(ox0 - sx.min()) / ow, right=(sx.max() + 1 - ox1) / ow, top=(oy0 - sy.min()) / oh, bottom=(sy.max() + 1 - oy1) / oh)
 fit = {"fw": ow / W, "fh": oh / H, "kx": ox0 / ow, "ky": oy0 / oh,
-       # the board's margin covers the steel bars (about .11-.14 of the opening) plus a little: the cables at the
-       # top-left, the lever box and the dangling plug may hang past it (they are decoration, not the frame)
-       "mx": .19, "my": .23,   # (review: the lever ran off a phone, the spark off the top at every desktop size)
+       # (owner pass 4, 2026-11-18: "make the board bigger") the board's margins, each side its own, as fractions of
+       # the board's box - just what the frame needs past it (overhang x the opening, less the 18 px the opening sits
+       # inside the board): top .262 shows the cable loop and leaves the frayed wire's sparks room; bottom .12 is the
+       # hazard bar; right .185 is the breaker box; left .155 the cables (an upright phone lets them run off its
+       # edge: .08, the bar alone). The symmetric .19 / .23 of before left 86 px of air under the frame.
+       "mt": .262, "mb": .12, "ml": .155, "mr": .185, "ml_phone": .08,
        "opening_px": [int(ox0), int(oy0), int(ow), int(oh)], "frame_px": [W, H], "overhang": over}
 out = os.path.join(ROOT, "art", "outage-src", "frame_fit.json")
 json.dump(fit, open(out, "w"), indent=1)

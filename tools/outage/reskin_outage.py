@@ -158,6 +158,56 @@ def pass2_css(W_, H_, L_, T_):
 '''
 
 
+def pass4_css(W_, H_, L_, T_):
+    """Owner pass 4 (2026-11-18): live sparks, the bonus emblem clean at every size, the bar's fixed columns, a
+    bigger board."""
+    return f'''  /* ---- owner pass 4 (2026-11-18) ---- */
+  /* the frayed wire's sparks: the frame's own box, over the frame (frontend/spark.js draws in it) */
+  #sparkbox {{ position: absolute; z-index: 6; pointer-events: none;
+    left: calc({L_}); top: calc({T_}); width: calc({W_}); height: calc({H_}); }}
+  #sparkbox .sparkcv {{ position: absolute; pointer-events: none; }}
+  /* a bigger board: the page gives the frame only the room it needs (the margins above), not the 64 px of air over
+     it, the 44 under it and the 22 under that */
+  .main {{ padding-top: 4px; padding-bottom: 6px; gap: 10px; }}
+  .stage {{ padding-bottom: 30px; }}   /* the plug dangles here, just over the bar */
+  /* the cord's and the sparks' canvases hang past the frame: they are not page height (fitToScreen measures with
+     html.rimmeasure set) - counted, the cord's alone kept the board a fifth smaller than the screen allows */
+  html.rimmeasure #cablebox, html.rimmeasure #sparkbox {{ display: none; }}
+  /* the bonus emblem is only its picture: nothing behind it, nothing round it, in any state or browser */
+  .bonusbtn, .bonusbtn:hover, .bonusbtn:active, .bonusbtn:focus, .bonusbtn:focus-visible, .bonusbtn:disabled {{
+    background: none !important; background-color: transparent !important; border: 0 !important; outline: 0 !important;
+    box-shadow: none !important; -webkit-tap-highlight-color: transparent; appearance: none; -webkit-appearance: none; }}
+  .bonusbtn::before {{ content: none !important; }}
+  .bonusbtn::after {{ box-shadow: none; background-color: transparent; }}
+  .bonusbtn:hover:not(:disabled)::after {{ filter: brightness(1.14); }}
+  /* THE "black box" (owner pass 4): on a window narrow enough for the bar to reach the corner, the bar's dark buttons
+     lay over the emblem. hudfit.js moves it wherever that would happen: up onto the bar's left shoulder (.up), and a
+     size smaller if the frame is in the way there (.sm) - the bar never covers it */
+  .hud .bonusbtn.up {{ bottom: calc(100% + 2px); }}
+  .hud .bonusbtn.sm {{ width: calc(118px * var(--hs, 1)); height: calc(118px * var(--hs, 1)); }}
+  /* on an upright phone or tablet it sat on the bar's own buttons (their dark shapes boxed it in): it rides in the
+     band under the bar, lowered by half its new height (it was half the old 74 px button's), never off the screen */
+  @media (max-width: 1100px) and (orientation: portrait) {{
+    .hud .bonusbtn {{ width: calc(150px * var(--hs, 1)); height: calc(150px * var(--hs, 1));
+      bottom: max(calc(4px / max(var(--fit, 1), .2)), calc((6vh + env(safe-area-inset-bottom, 0px) * .4) / max(var(--fit, 1), .2) - 75px * var(--hs, 1))); }}
+  }}
+  /* the bar's figures: three fixed columns - BALANCE | WIN | BET - so nothing grows or shifts with the numbers; each
+     figure is shrunk to its slot by hudfit.js when it is long */
+  .hudbar {{ grid-template-columns: minmax(0, 1fr) calc(218px * var(--hs, 1)) minmax(0, 1fr); column-gap: calc(10px * var(--hs, 1)); }}
+  .hudbar > .hudstat:first-child {{ justify-self: stretch; overflow: hidden; }}
+  .hudstat.win {{ justify-self: stretch; min-width: 0; box-sizing: border-box; padding: 0 calc(12px * var(--hs, 1)); overflow: hidden; }}
+  .hudbar > .hudbet {{ justify-self: stretch; justify-content: flex-end; min-width: 0; }}
+  .hudbet .hudstat.bet {{ flex: 1 1 0; min-width: 0; overflow: hidden; }}
+  .hudstat .val {{ max-width: 100%; }}
+  #balance.long, #balance.vlong, #betVal.long, #betVal.vlong {{ font-size: calc(34px * var(--hs, 1)); }}
+  @keyframes winSlotPop {{ 0% {{ scale: 1; }} 30% {{ scale: 1.1; filter: brightness(1.5); }} 100% {{ scale: 1; filter: none; }} }}
+  @media (max-width: 1100px) and (orientation: portrait) {{
+    .hudbar {{ grid-template-columns: minmax(0, 1fr) calc(150px * var(--hs, 1)) minmax(0, 1fr); column-gap: calc(6px * var(--hs, 1)); }}
+    .hudstat.win {{ padding: 0 calc(8px * var(--hs, 1)); min-width: 0; }}
+  }}
+'''
+
+
 def recolour(d):
     for a, b in COLOURS:
         d.s = d.s.replace(a, b)
@@ -215,7 +265,8 @@ def index():
           f'''    width: calc((100% - 36px) / {FIT["fw"]:.4f}); height: calc((100% - 36px) / {FIT["fh"]:.4f});
     left: calc(18px - (100% - 36px) * {FIT["kx"]:.5f}); top: calc(18px - (100% - 36px) * {FIT["ky"]:.5f});''')
     d.rep('''  .board { margin: calc(.205 * var(--bh, 781px)) calc(.085 * var(--bw, 963px)); }''',
-          f'''  .board {{ margin: calc({FIT["my"]:.3f} * var(--bh, 781px)) calc({FIT["mx"]:.3f} * var(--bw, 963px)); }}
+          f'''  .board {{ margin: calc({FIT["mt"]:.3f} * var(--bh, 781px)) calc({FIT["mr"]:.3f} * var(--bw, 963px)) calc({FIT["mb"]:.3f} * var(--bh, 781px)) calc({FIT["ml"]:.3f} * var(--bw, 963px)); }}
+  @media (max-width: 1100px) and (orientation: portrait) {{ .board {{ margin-left: calc({FIT["ml_phone"]:.3f} * var(--bw, 963px)); }} }}
   #candleflame {{ display: none !important; }}''')
 
     # the Multi is a power surge: it crackles, swells and flashes white-hot before it blows
@@ -382,7 +433,7 @@ function drawHexLight(ctx, b, now) {
             x, y, w, h = M[k]
             css += (f"  html.mobart .fbar.fb-{k} {{ left: calc({L_} + {W_} * {x:.5f}); top: calc({T_} + {H_} * {y:.5f}); "
                     f"width: calc({W_} * {w:.5f}); height: calc({H_} * {h:.5f}); }}\n")
-        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_))
+        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_) + pass4_css(W_, H_, L_, T_))
     # the symbols fill their cells like the reference's (the voodoo build drew them at 88% of the cell)
     d.rep("  const w = c.clientWidth * .88, h = c.clientHeight * .88;",
           "  const w = c.clientWidth * 1.2, h = c.clientHeight * 1.2;   // Power Outage: chunky symbols that fill the cell")
@@ -408,7 +459,7 @@ function drawHexLight(ctx, b, now) {
     d.rep("    state.fsTotal = spins;\n    await bonusIntro(spins, true);",
           "    state.fsTotal = spins;\n    document.body.classList.add(\"xtreme\");   // the red emergency room for the Xtreme Bonus\n    await bonusIntro(spins, true);")
     d.rep('wander(() => [frame, $("paintback"), $("candleflame"), document.querySelector("#board .sprayrim")].filter(Boolean)',
-          'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), $("cablebox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
+          'wander(() => [frame, $("paintback"), $("candleflame"), $("leverbox"), $("cablebox"), $("sparkbox"), document.querySelector("#board .sprayrim")].filter(Boolean)')
     # (owner, 2026-11-18) every intro card has a short description too, shown where the card is small
     d.rep('  const box = (icon, title, text) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p>${text}</p></div></div>`;',
           '  const box = (icon, title, text, short) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p class="flong">${text}</p><p class="fshort">${short}</p></div></div>`;')
@@ -440,7 +491,7 @@ function drawHexLight(ctx, b, now) {
     d.s = d.s.replace("const POTION_INK = { M: [90, 226, 255], M2: [130, 240, 120], M3: [196, 150, 255], M4: [255, 170, 60], M5: [255, 72, 64] };",
                       "const POTION_INK = { M: [110, 240, 90], M2: [240, 232, 70], M3: [255, 150, 50], M4: [255, 64, 60], M5: [196, 96, 255] };")
     # the power cord's physics (frontend/cable.js; its box is made with the frame's, before this runs)
-    d.rep('<script src="boardgl.js"></script>\n', '<script src="boardgl.js"></script>\n<script src="cable.js"></script>\n')
+    d.rep('<script src="boardgl.js"></script>\n', '<script src="boardgl.js"></script>\n<script src="cable.js"></script>\n<script src="spark.js"></script>\n<script src="hudfit.js"></script>\n')
     # what each symbol lands like (tools/sfx/outage_spec.py LAND)
     d.rep('''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landIron", L2: "landBeads", L3: "landShell", L4: "landPastry", L5: "landWax", L6: "landIron", L7: "landDoubloon", L8: "landTarot", L9: "landBone", L10: "landBrass", M: "landGlass",''',
           '''  H1: "landMask", H2: "landDoll", H3: "landBrass", H4: "landBone", H5: "landPouch", H6: "landGator", H7: "landPastry", L1: "landWax", L3: "landIron", L4: "landShell", M: "landGlass",''')
@@ -450,11 +501,9 @@ function drawHexLight(ctx, b, now) {
     position: absolute;''', '''  #logosign {
     position: absolute; z-index: 5; pointer-events: none; user-select: none;
     width: calc(.46 * var(--bw, 963px)); right: calc(100% + .045 * var(--bw, 963px)); top: 4%;
-    transform-origin: 50% 0; animation: logosway 7s ease-in-out infinite alternate;   /* (owner: no flicker in its opacity) */
+    rotate: -3deg;   /* (owner pass 4) a steel plate bolted on at a tilt: it neither swings nor flickers */
     filter: drop-shadow(0 10px 14px rgba(6, 8, 20, .5));
   }
-  @keyframes logosway { from { rotate: -1.2deg; } to { rotate: 1deg; } }
-  @media (prefers-reduced-motion: reduce) { #logosign { animation: none; } }
   @media (max-aspect-ratio: 3/2) { #logosign { display: none; } }   /* (review: at 4:3 it ran off-screen / over the rail) */
   html.mob #logosign { display: none; }
   #candleflame {
@@ -514,6 +563,9 @@ def main():
       // the dangling power cord's box (frontend/cable.js swings the cord in it with physics)
       const cb = document.createElement("div"); cb.id = "cablebox"; cb.setAttribute("aria-hidden", "true");
       if (pf && pf.parentNode) pf.parentNode.appendChild(cb);
+      // the frayed wire's live sparks (frontend/spark.js), over the frame
+      const sb = document.createElement("div"); sb.id = "sparkbox"; sb.setAttribute("aria-hidden", "true");
+      if (pf && pf.parentNode) pf.parentNode.appendChild(sb);
       // the Xtreme Bonus's room is fetched while the base game plays, so it is there the moment the bonus lands
       if (!window.MOBILE) setTimeout(() => { new Image().src = "assets/bonus_wall_xtreme.webp"; }, 8000); }''')
     d.save()

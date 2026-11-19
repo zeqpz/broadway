@@ -19,7 +19,7 @@ def contain(im, size):
     return out
 
 
-sign = upscale4k.up4(Image.open(os.path.join(RAW, "logo_sign2.png")).convert("RGBA"), long_edge=2400)
+sign = upscale4k.up4(Image.open(os.path.join(RAW, "logo_sign3.png")).convert("RGBA"), long_edge=2400)
 contain(sign, (1200, 900)).save(os.path.join(A, "logo_sign.webp"), "WEBP", quality=90, alpha_quality=100, method=6)
 icon = upscale4k.up4(Image.open(os.path.join(RAW, "bonus_icon.png")).convert("RGBA"), long_edge=1600)
 contain(icon, (640, 640)).save(os.path.join(A, "bonus_icon.webp"), "WEBP", quality=90, alpha_quality=100, method=6)

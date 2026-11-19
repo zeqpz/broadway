@@ -38,8 +38,16 @@ The OpenRouter key is read from `%USERPROFILE%\Documents\gamdevkey.txt`; scripts
    `sh tools/outage/blender/render_all.sh` (13 symbols, 5 at a time) -> `qa_sym.py all` -> `tools/blender/pack_frames.py`
    -> `potion_tiers.py` (the surge's value colours) -> `make_phone_sheets.py`. The scenes can be opened and played in
    Blender (`art/blender/symbols/<ID>.blend`), or built live over the MCP (`runpy` the script and call `build(ID)`).
-6. **Frame**: `frame_fit.py` (the opening's fractions -> `art/outage-src/frame_fit.json`), `board_back.py`,
-   `make_mobile_art.py` (phone copies + `mobile_fit.json`).
+6. **Frame**: `frame_fit.py` (the opening's fractions and the board's per-side margins ->
+   `art/outage-src/frame_fit.json`), `board_back.py`, then the frame's three live parts, in this order (each starts
+   from the one before): `frame_lever.py` (the breaker's handle becomes `assets/lever.webp` on a clean switch box from
+   `gen_switchbox.py`) -> `frame_cable.py` (the dangling cord and plug come out: `assets/plug.webp`, `cable.json`) ->
+   `frame_spark.py` (the painted spark star comes off the frayed wire: `spark.json`), then `make_mobile_art.py`
+   (phone copies + `mobile_fit.json`).
+   - `frontend/cable.js` swings the cord (a Verlet rope; capped speed, a solid frame bar, layout jumps ignored),
+     `frontend/spark.js` throws the wire's sparks (flash, jagged filaments, cooling streaks that bounce on the bar),
+     `frontend/hudfit.js` keeps the bar's three figures in their fixed columns (shrinking a long one) and moves the
+     bonus emblem off the bar on narrow windows. `node tools/outage/qa_pass4.js` checks all of it at six sizes.
 7. **Front end**: `reskin_outage.py` applies every edit to `frontend/index.html`, `rules.js` and `boardgl.js` from the
    pristine orleans copies in `tools/outage/base/` as exact replacements (a changed base fails loudly).
 8. **Music**: `tools/music/lyria.py <cue> --takes 2`, `tools/music/keys.py` to pick takes by key, copy to
