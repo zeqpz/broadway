@@ -19,11 +19,11 @@ def contain(im, size):
     return out
 
 
-sign = upscale4k.up4(Image.open(os.path.join(RAW, "logo_sign3.png")).convert("RGBA"), long_edge=2400)
-contain(sign, (1200, 900)).save(os.path.join(A, "logo_sign.webp"), "WEBP", quality=90, alpha_quality=100, method=6)
+# (owner pass 5) the title sign is no longer fitted here: assets/logo_sign.webp and its glow / lit-GE layers are all cut
+# from one picture (ui/logo_sign_led.png) by tools/outage/sign_layers.py, so they line up to the pixel
 icon = upscale4k.up4(Image.open(os.path.join(RAW, "bonus_icon.png")).convert("RGBA"), long_edge=1600)
 contain(icon, (640, 640)).save(os.path.join(A, "bonus_icon.webp"), "WEBP", quality=90, alpha_quality=100, method=6)
 for n in ("banner_fs", "banner_xfs", "banner_boost"):
     Image.open(os.path.join(RAW, n + "2.png")).convert("RGB").resize((1440, 810), Image.LANCZOS).save(
         os.path.join(A, "bonus", n + ".webp"), "WEBP", quality=88, method=6)
-print("fit: logo_sign, bonus_icon, 3 banners")
+print("fit: bonus_icon, 3 banners")

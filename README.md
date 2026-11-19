@@ -17,7 +17,7 @@ and uploaded to engine.io from disk (`tools/stake_upload.py`).
 | Wins | Winners don't burn away: they swell, buzz white-hot like a bulb about to blow, and short out in a yellow-and-cyan flash with sparks (`drawHex` / `drawHexLight` in index.html). The Multi crackles and flashes before it blows. The win line is a live electric arc (`drawWinLine`, from `tools/outage/pass5.py`): a jagged white-and-cyan bolt strikes through the cluster symbol to symbol, then keeps crackling with forks, a second strand and sparks |
 | Background | The oval office in a blackout, flat cartoon (`assets/bonus_wall.webp`), kept alive by `frontend/bgscene.js`: live flat candle flames and their light pools, lightning in the windows (twice, with a bolt), clouds drifting past the moon behind the dead skyline, a lit window now and then, the power sputtering back on in fits and dying again, and a bodyguard's flashlight sweeping the room |
 | Frame | A riveted breaker-panel frame with hazard stripes, a red breaker lever, cables over one corner, a frayed sparking wire and a dangling plug; the board backing is cut to its opening (`tools/outage/board_back.py`) |
-| Layout | No character: a riveted steel POWER OUTAGE sign at the board's left. Its lit letters throw light on the plate, and the dead G and E stutter and now and then come on (`tools/outage/sign_layers.py` makes the layers) |
+| Layout | No character: a riveted steel POWER OUTAGE sign at the board's left, lit like an OLED / LED sign: luminous letters (one image-model redraw, `tools/outage/gen_pass5.py`) that throw a humming glow on the plate, while the dead G and E stutter and now and then light up (`tools/outage/sign_layers.py` cuts every layer from that one picture) |
 | Multis | The values sit behind the symbols, coloured by value (green to red to purple), with a bright keyline round the figure, slightly see-through |
 | Xtreme Bonus | Its own red emergency room: an alarm lamp bolted to the wall (`tools/outage/beacon_mount.py` draws the bracket and conduit) whose beam turns about the lamp, and an alarm that sounds when an XFS lands and when the bonus triggers |
 | UI | Candle-yellow chunky lettering (BIG / MEGA / XTREME / TOTAL WIN, BONUS), cream cards, steel and hazard-stripe plates, cyan Multi numerals in a hazard-stripe ring, lightning-bolt volatility pips, a solid navy HUD with a thick black outline |
@@ -47,6 +47,8 @@ The OpenRouter key is read from `%USERPROFILE%\Documents\gamdevkey.txt`; scripts
    `frame_spark.py` (the painted spark star comes off the frayed wire: `spark.json`), then `make_mobile_art.py`
    (phone copies + `mobile_fit.json`). `sign_layers.py` makes the title sign's glow and lit-GE layers;
    `beacon_mount.py` mounts the Xtreme room's alarm lamp on the wall and re-exports that room.
+   `desk_flat.py` paints the desk's fronts flat in both desktop rooms (its recessed panels read as a black box round
+   the bonus emblem sitting in front of them); run it before `upscale4k.py bg` and `beacon_mount.py`.
    - `frontend/cable.js` swings the cord (a Verlet rope; capped speed, a solid frame bar, layout jumps ignored),
      `frontend/spark.js` throws the wire's sparks (flash, jagged filaments, cooling streaks that bounce on the bar),
      `frontend/hudfit.js` keeps the bar's three figures in their fixed columns (shrinking a long one) and moves the
