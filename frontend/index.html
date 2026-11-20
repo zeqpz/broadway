@@ -3780,6 +3780,18 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   html.mob .cell.booster .multface .mv .vg { animation: none !important; }
   /* the win line throws no sparks on a phone (drawWinLine makes none there) */
   html.mob .lineLayer b { display: none !important; }
+  /* (bonus crashes, Engine 2026-11-20 second test) the board itself never animates on a phone. WebKit does not zoom
+     viewport units, so the phone's zoom fit falls back to transform: scale(~.33) there and any animating element is a
+     GPU layer at its LAYOUT size x DPR^2 - the board is 980 x 810 layout px = 29 MB, and everything drawn over it
+     (the frame's bars, the values, the bar) is pushed onto layers of its own. The board leaned in (scale) as a bonus
+     was about to trigger and was knocked on every landing: no lean-in and no transition here; the knock is off in
+     script (Knock.kick) */
+  html.mob #board, html.mob .board, html.mob .board.zoomin { scale: 1 !important; transition: none !important; animation: none !important; }
+  /* the other screen-sized fades a bonus brings: the bonus intro's own fade (9 MB as a layer), the win line's sheet
+     fading out (10 MB), the emblem's drift - cut, not faded, on a phone */
+  html.mob .bonusintro { transition: none !important; }
+  html.mob .lineLayer .lsheet.out { transition: none !important; }
+  html.mob .bonusbtn { animation: none !important; }
 </style>
 <script>
 // (phone art) the stylesheet's pictures with a phone copy point at it before anything has asked for them
@@ -5937,7 +5949,7 @@ const Knock = (() => {
   const speed = (peak, [f, z]) => { const q = Math.sqrt(1 - z * z); return peak * 2 * Math.PI * f * Math.exp(z * Math.atan2(q, z) / q); };
   function kick(name, k) {
     const B = BODY[name], el = $(B.id);
-    if (!el || REDUCED_MOTION) return;
+    if (!el || REDUCED_MOTION || window.MOBILE) return;   // (phones: nothing as big as the board animates - bonus crashes, 2026-11-20)
     const b = body(name), now = performance.now(), dt = Math.min(5, (now - b.t) / 1000);
     let life = 0;
     for (const c of CH) if (B[c]) {
@@ -7863,7 +7875,7 @@ function drawWinLine(positions) {
   let total = 0;
   for (let i = 1; i < path.length; i++) total += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
   // the sheet: the path's box with room for the bolt's kinks, its forks and its corona
-  const xs = path.map(p => p.x), ys = path.map(p => p.y), PAD = 60;
+  const xs = path.map(p => p.x), ys = path.map(p => p.y), PAD = window.MOBILE ? 40 : 60;   // (a phone's sheet is a GPU surface: no bigger than the bolt needs)
   const bx = Math.min(...xs) - PAD, by = Math.min(...ys) - PAD;
   const bw = Math.max(...xs) + PAD - bx, bh = Math.max(...ys) + PAD - by;
   const sh = lineSheet();

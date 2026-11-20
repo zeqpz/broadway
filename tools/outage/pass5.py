@@ -72,7 +72,7 @@ WINLINE = '''function drawWinLine(positions) {
   let total = 0;
   for (let i = 1; i < path.length; i++) total += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y);
   // the sheet: the path's box with room for the bolt's kinks, its forks and its corona
-  const xs = path.map(p => p.x), ys = path.map(p => p.y), PAD = 60;
+  const xs = path.map(p => p.x), ys = path.map(p => p.y), PAD = window.MOBILE ? 40 : 60;   // (a phone's sheet is a GPU surface: no bigger than the bolt needs)
   const bx = Math.min(...xs) - PAD, by = Math.min(...ys) - PAD;
   const bw = Math.max(...xs) + PAD - bx, bh = Math.max(...ys) + PAD - by;
   const sh = lineSheet();

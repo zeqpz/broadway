@@ -49,8 +49,8 @@ const say = (ok, msg) => { if (!ok) fails++; console.log((ok ? "PASS " : "FAIL "
     say(!idle.filt.length, `${name}: no CSS filters at idle (${idle.filt.slice(0, 4).join(", ") || "none"})`);
     say(!idle.blend.length, `${name}: no blend modes at idle (${idle.blend.slice(0, 4).join(", ") || "none"})`);
     say(!idle.t3d.length, `${name}: no 3D transforms / will-change at idle (${idle.t3d.slice(0, 4).join(", ") || "none"})`);
-    const idleAn = idle.an.filter(a => !/bonusFloat/.test(a));
-    say(!idleAn.length, `${name}: nothing animating at idle but the emblem's drift (${idleAn.slice(0, 4).join(", ") || "none"})`);
+    const idleAn = idle.an;
+    say(!idleAn.length, `${name}: nothing animating at idle (${idleAn.slice(0, 4).join(", ") || "none"})`);
     say(await p.evaluate(() => !!document.querySelector("#cablebox img.cablecv")), `${name}: the cord is a still picture`);
     await p.evaluate(() => { const s = document.getElementById("spinBtn"); if (s) s.click(); });
     await p.waitForTimeout(2200);

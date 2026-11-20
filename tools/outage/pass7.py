@@ -38,11 +38,27 @@ CSS = '''  /* ---- iOS crash at load (Engine live test, 2026-11-20): the phone t
   html.mob .cell.booster .multface .mv .vg { animation: none !important; }
   /* the win line throws no sparks on a phone (drawWinLine makes none there) */
   html.mob .lineLayer b { display: none !important; }
+  /* (bonus crashes, Engine 2026-11-20 second test) the board itself never animates on a phone. WebKit does not zoom
+     viewport units, so the phone's zoom fit falls back to transform: scale(~.33) there and any animating element is a
+     GPU layer at its LAYOUT size x DPR^2 - the board is 980 x 810 layout px = 29 MB, and everything drawn over it
+     (the frame's bars, the values, the bar) is pushed onto layers of its own. The board leaned in (scale) as a bonus
+     was about to trigger and was knocked on every landing: no lean-in and no transition here; the knock is off in
+     script (Knock.kick) */
+  html.mob #board, html.mob .board, html.mob .board.zoomin { scale: 1 !important; transition: none !important; animation: none !important; }
+  /* the other screen-sized fades a bonus brings: the bonus intro's own fade (9 MB as a layer), the win line's sheet
+     fading out (10 MB), the emblem's drift - cut, not faded, on a phone */
+  html.mob .bonusintro { transition: none !important; }
+  html.mob .lineLayer .lsheet.out { transition: none !important; }
+  html.mob .bonusbtn { animation: none !important; }
 '''
 
 
 def apply(d):
     """The page edits (index.html), after every earlier pass."""
+    # no knock on a phone: the board (and the wall) hold still - see the CSS note above
+    d.rep("""    const B = BODY[name], el = $(B.id);
+    if (!el || REDUCED_MOTION) return;""", """    const B = BODY[name], el = $(B.id);
+    if (!el || REDUCED_MOTION || window.MOBILE) return;   // (phones: nothing as big as the board animates - bonus crashes, 2026-11-20)""")
     # a phone never fetches the desktop's Xtreme room or the title sign (the preloader reads every url() in the
     # stylesheets and holds what it fetched; the rule that kept other tiers' art out named only the base room)
     d.rep(r'''  const OTHER_TIER = window.MOBILE ? /assets\/(bonus_wall\.webp|bg\/|chars\/)/ : /assets\/mobile\//;''',
