@@ -14,8 +14,12 @@
 // power sputtering back (bgscene's "bgpower") and thunder each set it off too.
 // One additive canvas in #sparkbox (the frame's own box, above the frame); it only runs while something is alive.
 // Reduced motion: no sparks. Seeded per burst from Math.random: ambient decoration, never part of a round's result.
+// Phones (window.MOBILE; iOS crash at load, Engine live test 2026-11-20): no sparks either - the canvas was a
+// 1121 x 1208 px GPU surface laid over the frame's corner, and on iOS everything it overlaps is pushed onto layers of
+// its own. The sister games' phone tier has no particle effects for the same reason.
 (function () {
   "use strict";
+  if (window.MOBILE) return;
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const box = document.getElementById("sparkbox");
   if (!box) return;

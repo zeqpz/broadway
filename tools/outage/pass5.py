@@ -167,12 +167,15 @@ WINLINE = '''function drawWinLine(positions) {
   const D = Math.min(LINE_DRAW_MAX, 260 + total * .55);   // ms at tempo 1
   let B = bolt(), F = [], T = null;
   if (REDUCED_MOTION || document.hidden) { paint(B, F, Infinity, 1); return 0; }
-  const dur = D * tempo(), t0 = performance.now(), STRIKE = Math.max(110, dur * .5), LIVE = 3600, JIT = 55;
+  // (phones: the bolt re-jags half as often and for a shorter while, and throws no sparks - fewer canvas uploads)
+  const PH = !!window.MOBILE;
+  const dur = D * tempo(), t0 = performance.now(), STRIKE = Math.max(110, dur * .5), LIVE = PH ? 1600 : 3600, JIT = PH ? 110 : 55;
   // the current's whoosh rides the strike: the short take for a short line (a touch quicker when the strike is),
   // the long one for a long line, faded out once it has landed
   if (dur <= 620) sfx("sprayLineShort", Math.min(1.5, Math.max(.92, 550 / dur)));
   else { const hiss = sfx("sprayLineLong"); if (hiss) setTimeout(() => sfxFade(hiss, 140), dur); }
   const spark = q => {
+    if (PH) return;
     const b = document.createElement("b"), a = rnd() * Math.PI * 2, r = 16 + rnd() * 30;
     b.style.left = (q.x - bx).toFixed(1) + "px"; b.style.top = (q.y - by).toFixed(1) + "px";
     b.style.setProperty("--dx", (Math.cos(a) * r).toFixed(1) + "px");
@@ -217,9 +220,12 @@ WINLINE = '''function drawWinLine(positions) {
 SIGN_NEW = '''    { const pf = document.getElementById("paintframe"), sign = document.createElement("div");   // Power Outage: the title board
       sign.id = "logosign"; sign.setAttribute("aria-hidden", "true");
       // (owner pass 5) the plate, the light its lit letters throw, and G and E switched on with theirs (sign_layers.py)
-      sign.innerHTML = '<img class="base" src="assets/logo_sign.webp" alt="" draggable="false"><img class="glow" src="assets/logo_sign_glow.webp" alt="" draggable="false">'
-        + '<img class="ge" src="assets/logo_sign_ge.webp" alt="" draggable="false"><img class="geglow" src="assets/logo_sign_ge_glow.webp" alt="" draggable="false">';
-      if (pf && pf.parentNode && !window.MOBILE) pf.parentNode.appendChild(sign);
+      // (phones never show the sign: its four pictures are not even made there, so they are never fetched)
+      if (pf && pf.parentNode && !window.MOBILE) {
+        sign.innerHTML = '<img class="base" src="assets/logo_sign.webp" alt="" draggable="false"><img class="glow" src="assets/logo_sign_glow.webp" alt="" draggable="false">'
+          + '<img class="ge" src="assets/logo_sign_ge.webp" alt="" draggable="false"><img class="geglow" src="assets/logo_sign_ge_glow.webp" alt="" draggable="false">';
+        pf.parentNode.appendChild(sign);
+      }
       // G and E are dead: every few seconds they stutter, and now and then they catch and burn for a moment (with the
       // odd dip of a bad contact) before dying again; when the room's power sputters back (bgscene.js "bgpower") they
       // come on with it. --ge is how lit they are, 0..1

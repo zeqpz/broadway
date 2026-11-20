@@ -62,6 +62,22 @@ The OpenRouter key is read from `%USERPROFILE%\Documents\gamdevkey.txt`; scripts
 QA: `node tools/outage/qa_screens.js` (ident, features, board, shop), `node tools/outage/qa_win.js <event> [step] [s]`
 (films a Bet Replay; `MODE=bonus` for bonus books). Screenshots go to `%TEMP%/outage_qa`.
 
+### Phones (run this after every visual pass)
+
+An iPhone runs the game inside the casino's iframe, and Safari kills a page that outgrows its memory ("A problem
+repeatedly occurred" - Engine's live test, iPhone 12, 2026-11-20). The phone tier (`window.MOBILE`, `html.mob`,
+inherited from zeqpz/orleans) keeps a phone to the board's own canvases, no CSS filters or blend modes, no 3D
+transforms, nothing animating at idle, and only its own tier's art. On iOS every 2D canvas and every animating or
+3D-transformed element is a GPU layer at its layout size x DPR^2, and whatever is drawn over one gets a layer too.
+Anything new that is live (a canvas, a glow, a bob, a filter) must be switched off or made a still picture behind
+`window.MOBILE` / `html.mob` (`tools/outage/pass7.py`, `frontend/cable.js`, `frontend/spark.js` show how).
+
+- `node tools/outage/qa_phone.js` - the gate: those rules checked on an iPhone profile, both ways up.
+- `python tools/review/memprobe/iosprobe3.py out.json --boot --base http://localhost:8788` - the WebKit memory model
+  (boot should stay at or under orleans' ~67 MB; `--mode bonus --event 3` for a round).
+- `node tools/review/memprobe/wkboot.js http://localhost:8788 out.json` - the live game in a real WebKit engine
+  (`npx playwright install webkit` once): crash, page errors, the web process's memory.
+
 ## Run it locally
 
 ```

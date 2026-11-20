@@ -19,6 +19,12 @@
 // It still swings with the board's knocks, the breaker and thunder, and the plug can be grabbed and thrown.
 // Drawn on a canvas in #cablebox (the frame's box, under the frame: the cord comes out from under the clamp); asleep
 // once it has settled. Reduced motion: drawn once, hanging still.
+//
+// Phones (window.MOBILE; iOS crash at load, Engine live test 2026-11-20): no live canvas. On iOS every 2D canvas is
+// a GPU surface and a layer of its own, and whatever is drawn over it (the frame, the board, the bar) is pushed onto
+// layers too, each at its layout size x DPR^2; this one was 1120 x 1558 px (7 MB), redrawn every frame, under the
+// whole frame. A phone gets the cord hanging at rest as one small still picture: drawn once off the page, handed to an
+// <img>, the canvas let go. No physics loop, no observers, no handle.
 (function () {
   "use strict";
   const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -35,11 +41,13 @@
     cv.className = "cablecv";
     Object.assign(cv.style, { left: (R.x / FW * 100) + "%", top: (R.y / FH * 100) + "%",
       width: (R.w / FW * 100) + "%", height: (R.h / FH * 100) + "%" });
-    box.appendChild(cv);
+    const MOB = !!window.MOBILE;
+    if (!MOB) box.appendChild(cv);
     const grab = document.createElement("i");                              // the plug's handle: grab it and throw it
     grab.className = "cablegrab";
-    box.appendChild(grab);
+    if (!MOB) box.appendChild(grab);
     const ctx = cv.getContext("2d");
+    if (!ctx) return;                                                      // a refused canvas: no cord, the frame still reads
 
     // the rope's starting shape: the drawn centreline from the clamp to where it goes into the plug, resampled
     const line = C.line.filter(p => p[1] <= C.neck[1]).concat([C.neck]);
@@ -147,6 +155,21 @@
     // the rest it is put back to if it ever needs to be
     for (let i = 0; i < 900; i++) step();
     P.forEach((p, i) => { p.px = p.x; p.py = p.y; REST[i] = [p.x, p.y]; });
+    if (MOB) {
+      // the still: 480 px across is more than a phone shows this patch at (the frame is at most ~1170 device px wide,
+      // the patch 42% of it), so it is sharp in both orientations and never needs redrawing
+      cv.width = 480; cv.height = Math.round(480 * R.h / R.w);
+      draw();
+      const pic = new Image();
+      pic.className = "cablecv"; pic.alt = ""; pic.draggable = false;
+      pic.style.cssText = cv.style.cssText;
+      const show = url => { pic.src = url; box.appendChild(pic); cv.width = cv.height = 0; };   // width 0: the surface is freed at once
+      try {
+        if (cv.toBlob) cv.toBlob(b => { if (b) show(URL.createObjectURL(b)); else cv.width = cv.height = 0; });
+        else show(cv.toDataURL());
+      } catch (e) { cv.width = cv.height = 0; }
+      return;
+    }
     new ResizeObserver(fit).observe(cv);
     addEventListener("resize", () => { lastRect = null; });
     fit();

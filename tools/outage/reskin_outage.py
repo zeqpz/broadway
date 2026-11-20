@@ -7,6 +7,7 @@ Frame fractions (the frame's opening, measured by tools/outage/frame_fit.py) are
 import json, os, re
 import pass5
 import pass6
+import pass7
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -441,7 +442,7 @@ function drawHexLight(ctx, b, now) {
             x, y, w, h = M[k]
             css += (f"  html.mobart .fbar.fb-{k} {{ left: calc({L_} + {W_} * {x:.5f}); top: calc({T_} + {H_} * {y:.5f}); "
                     f"width: calc({W_} * {w:.5f}); height: calc({H_} * {h:.5f}); }}\n")
-        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_) + pass4_css(W_, H_, L_, T_) + pass5.CSS + pass6.CSS)
+        d.between("  html.mobart #paintback {\n", "</style>\n<script>\n// (phone art)", css + REVIEW_CSS + pass2_css(W_, H_, L_, T_) + pass4_css(W_, H_, L_, T_) + pass5.CSS + pass6.CSS + pass7.CSS)
     # the symbols fill their cells like the reference's (the voodoo build drew them at 88% of the cell)
     d.rep("  const w = c.clientWidth * .88, h = c.clientHeight * .88;",
           "  const w = c.clientWidth * 1.2, h = c.clientHeight * 1.2;   // Power Outage: chunky symbols that fill the cell")
@@ -550,6 +551,7 @@ def main():
     boardgl().save()
     d = index()
     pass5.apply(d)   # owner pass 5: the alarm, the electric win line
+    pass7.apply(d)   # iOS crash at load: the phone tier's preloader
     recolour(d)
     # the logo sign is added next to the frame (it shares the frame's parent, so it moves with the board)
     anchor = 'document.getElementById("paintframe").src = mobArt("assets/frame.webp");'
