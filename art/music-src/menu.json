@@ -1,0 +1,29 @@
+{
+ "cue": "menu",
+ "model": "google/lyria-3-pro-preview",
+ "prompt": "Instrumental only. Key: G major. Tempo: 88 BPM. Strictly instrumental: no vocals, no singing, no humming, no yodeling, no shouts, no whoops, no chants, no spoken words. A relaxed, laid-back country groove, like a late-night jam on a porch after the show: 88 BPM, G major, 4/4. Soft brushed drums on 2 and 4, a mellow upright bass, gentle clean Telecaster licks, slow lazy pedal steel swells and quiet honky-tonk piano chords. Calm and low energy at a rock-steady tempo, the same easy groove from start to finish: no build-ups, no rubato, no solo, no big ending, no fade-out.",
+ "text": "[[A0]]\n[[B1]]\n[[C2]]\n[[D3]]\n[[E4]]",
+ "usage": {
+  "prompt_tokens": 144,
+  "completion_tokens": 10,
+  "total_tokens": 154,
+  "cost": 0.08,
+  "is_byok": false,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "cache_write_tokens": 0,
+   "audio_tokens": 0,
+   "video_tokens": 0
+  },
+  "cost_details": {
+   "upstream_inference_cost": 0.08,
+   "upstream_inference_prompt_cost": 0,
+   "upstream_inference_completions_cost": 0.08
+  },
+  "completion_tokens_details": {
+   "reasoning_tokens": 0,
+   "image_tokens": 0,
+   "audio_tokens": 10
+  }
+ }
+}

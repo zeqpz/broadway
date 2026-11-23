@@ -1,5 +1,26 @@
 # Music
 
+## Broadway on Nashville pass (2026-11-22)
+
+Five instrumental honky-tonk / modern-country cues (Telecaster twang, pedal steel, fiddle, banjo, honky-tonk piano,
+upright bass, shuffle / train-beat drums), prompts in `cues.py`, Lyria 3 Pro, two takes asked per cue. Kept takes are in
+`art/music-src/` (each with its `.json`: model, prompt, cost). The MUSIC table is in `tools/broadway/music_table.txt`
+(to be wired in through `tools/outage/reskin_outage.py`, which regenerates `index.html`).
+
+| cue   | key     | tempo | in the game                                                     |
+|-------|---------|-------|-----------------------------------------------------------------|
+| base  | D major | 110   | upbeat honky-tonk shuffle, 32-bar loop (69.8 s)                 |
+| menu  | A major | 79    | laid-back groove, 16-bar loop (48.6 s)                          |
+| intro | A major | 155   | hit + quick build head (4.96 s, once), then an 8-bar vamp       |
+| bonus | A major | 152   | country-rock / bluegrass burner, 32-bar loop (50.5 s)           |
+| total | D major | 120   | celebration-hit head (4.06 s, once), then an 8-bar stomp groove |
+
+- Asked for G major / D major; Lyria came back in D, A and F. Picked by key so everything is D major or its dominant
+  A: the second base take (F major, the cleanest loop) was passed over for the D-major one.
+- 5 of 15 requests came back with section markers and no audio ("no audio came back"); asking again worked.
+- The intro and total takes open on ~0.25 s of near-silence: `start` .2 / .25 trims it so the head hits at once.
+- The bonus loop holds a one-bar stop-time break (~41 s into the loop); it is part of the arrangement, not a dropout.
+
 ## Fall pass (2026-11-03)
 
 The five cues were redone for the Thanksgiving harvest-farm reskin: instrumental cartoon jug-band Americana

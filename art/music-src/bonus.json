@@ -1,0 +1,29 @@
+{
+ "cue": "bonus",
+ "model": "google/lyria-3-pro-preview",
+ "prompt": "Instrumental only. Key: D major. Tempo: 150 BPM. Strictly instrumental: no vocals, no singing, no humming, no yodeling, no shouts, no whoops, no chants, no spoken words. A fast, high-energy country-rock and bluegrass burner for a slot game's free spins: 150 BPM, D major, 4/4: a tight Nashville honky-tonk band: a twangy Telecaster electric guitar, a crying pedal steel guitar, a fiddle, a banjo, a rolling honky-tonk upright piano, a walking upright bass and a shuffle drum kit at full tilt. A driving train beat on the snare, a fast thumping bass, blazing chicken-picking Telecaster licks, a racing banjo roll, a hot fiddle hook and pounding honky-tonk piano. Energetic and fun from the first bar: [Main section] -> [Main section, fiddle and Telecaster trading hot licks] -> [Main section, banjo and piano breaks] -> [Main section]. No intro, no breakdown, no ending, no fade-out.",
+ "text": "[[A0]]\n[[A1]]\n[[A2]]\n[[A3]]",
+ "usage": {
+  "prompt_tokens": 221,
+  "completion_tokens": 8,
+  "total_tokens": 229,
+  "cost": 0.08,
+  "is_byok": false,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "cache_write_tokens": 0,
+   "audio_tokens": 0,
+   "video_tokens": 0
+  },
+  "cost_details": {
+   "upstream_inference_cost": 0.08,
+   "upstream_inference_prompt_cost": 0,
+   "upstream_inference_completions_cost": 0.08
+  },
+  "completion_tokens_details": {
+   "reasoning_tokens": 0,
+   "image_tokens": 0,
+   "audio_tokens": 8
+  }
+ }
+}

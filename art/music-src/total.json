@@ -1,0 +1,29 @@
+{
+ "cue": "total",
+ "model": "google/lyria-3-pro-preview",
+ "prompt": "Instrumental only. Key: G major. Tempo: 124 BPM. Strictly instrumental: no vocals, no singing, no humming, no yodeling, no shouts, no whoops, no chants, no spoken words. A triumphant, big country finish celebrating a huge win on a big stage: 124 BPM, G major, 4/4. It opens with a big celebratory hit - a drum roll, a crash cymbal and the whole band ringing out one bright major chord with a soaring pedal steel and a twangy guitar flourish on top - then a joyful, stomping victory groove: a tight Nashville honky-tonk band: a twangy Telecaster electric guitar, a crying pedal steel guitar, a fiddle, a banjo, a rolling honky-tonk upright piano, a walking upright bass and a shuffle drum kit, playing a big happy hook over G - C - D - G. Uplifting, proud and fun. Structure: [Celebration hit] -> [Joyful stomping groove, steady and repeating]. No breakdown, no ending, no fade-out.",
+ "text": "[[A0]]\n[[B1]]",
+ "usage": {
+  "prompt_tokens": 221,
+  "completion_tokens": 4,
+  "total_tokens": 225,
+  "cost": 0.08,
+  "is_byok": false,
+  "prompt_tokens_details": {
+   "cached_tokens": 0,
+   "cache_write_tokens": 0,
+   "audio_tokens": 0,
+   "video_tokens": 0
+  },
+  "cost_details": {
+   "upstream_inference_cost": 0.08,
+   "upstream_inference_prompt_cost": 0,
+   "upstream_inference_completions_cost": 0.08
+  },
+  "completion_tokens_details": {
+   "reasoning_tokens": 0,
+   "image_tokens": 0,
+   "audio_tokens": 4
+  }
+ }
+}

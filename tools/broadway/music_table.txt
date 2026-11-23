@@ -1,0 +1,19 @@
+Broadway on Nashville - the MUSIC table for frontend/index.html (printed by tools/music/build.py, 2026-11-22).
+Wire it in through tools/outage/reskin_outage.py (its d.between("const MUSIC = {   // Voodoo on Bourbon", ...)
+replacement), not by editing index.html: paste the block below as that replacement's text.
+The files it points at are already in frontend/assets (music_<cue>.ogg / .aac), cut from art/music-src/<cue>.mp3.
+
+const MUSIC = {   // Broadway on Nashville: instrumental honky-tonk / country (Telecaster, pedal steel, fiddle, banjo, honky-tonk piano, upright bass, shuffle drums) - tools/music
+  base:  { ogg: "assets/music_base.ogg", aac: "assets/music_base.aac", frames: 3351395, aacStart: 5824, aacFrames: 3357696, bpm: 109.988, bars: 32, level: 0.299 },
+  menu:  { ogg: "assets/music_menu.ogg", aac: "assets/music_menu.aac", frames: 2332656, aacStart: 5824, aacFrames: 2338816, bpm: 79.043, bars: 16, level: 0.224 },
+  intro: { ogg: "assets/music_intro.ogg", aac: "assets/music_intro.aac", frames: 594634, head: 238175, headLen: 266975, aacStart: 5824, aacFrames: 868352, bpm: 154.995, bars: 8, level: 0.335 },
+  bonus: { ogg: "assets/music_bonus.ogg", aac: "assets/music_bonus.aac", frames: 2425357, aacStart: 5824, aacFrames: 2432000, bpm: 151.993, bars: 32, level: 0.398 },
+  total: { ogg: "assets/music_total.ogg", aac: "assets/music_total.aac", frames: 768605, head: 194795, headLen: 252395, aacStart: 5824, aacFrames: 1027072, bpm: 119.98, bars: 8, level: 0.376 },
+};
+
+What the cues are (keys as Lyria delivered them, read with tools/music/keys.py):
+  base   D major, 110 BPM shuffle, 32-bar loop (69.8 s)
+  menu   A major,  79 BPM laid-back groove, 16-bar loop (48.6 s)
+  intro  A major, 155 BPM: hit + build head (4.96 s, once), then an 8-bar driving vamp (12.4 s)
+  bonus  A major, 152 BPM country-rock / bluegrass burner, 32-bar loop (50.5 s)
+  total  D major, 120 BPM: celebration-hit head (4.06 s, once), then an 8-bar stomping groove (16.0 s)
