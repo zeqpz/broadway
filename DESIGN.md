@@ -127,6 +127,57 @@ shares the old name (section 3).
   `line_drop_values`) on its own cells, one per five symbols it held (`line_drop_per`). Each
   adds to its cell like a Multi's value and lasts as long. There are none once the cap is hit.
 
+### Encore (Broadway on Nashville, `broadway_5x5`, 2026-11-22)
+
+Broadway on Nashville is Power Outage's 5x5 math (`math-sdk/games/broadway_5x5`, a copy of
+`outage_5x5`: same modes, prices, strips, paytable, RTP 0.967, 10,000x) plus one mechanic, the
+Encore (spec: `docs/BROADWAY.md`). Names there: Multi = Gold Record, Wall Line = Hit Parade, Full
+Wall = Sold-Out Show, line drops = Tips.
+
+* **When.** A spin's cascade has ended on a board that pays nothing more and holds no Multi
+  (`settle_boosters` done, no wincap, the tumble budget not spent). Then one roll:
+  `encore_chance_base` 1/18 (base and Bonus Boost spins), `encore_chance_free` 1/6 (standard free
+  spins), `encore_chance_extreme` 1/5 (Xtreme free spins). At most one per spin / per free spin.
+* **What.** Source: one of L1/L3/L4 with at least 3 copies on the board, picked in proportion to its
+  count (the board qualifies ~97% of the time). Target: a premium by `encore_target_weights` (H1 4,
+  H2 8, H3 12, H4 14, H5 18, H6 20, H7 24). Every source cell becomes the target; scatters and Multis
+  are never converted. Then the cascade runs again - wins, line drops, Multis, tumbles - with its own
+  budget (`encore_max_tumbles` 6, a leftover Multi gets 6 + 4 to settle).
+* **Bookkeeping.** The spin's win runs on across both cascades: the follow-up's `updateTumbleWin`
+  and `setWin` carry the spin's whole win, its `setTotalWin` the round's; the wincap stops it like any
+  cascade. Force-record key `{"symbol": "encore", "kind": <cells>}`.
+* **The bonus Multi tables lean smaller.** The Encore pays through the cell values a bonus has laid
+  down, so on Power Outage's tables it was worth ~0.4 of a buy's price on top of everything else (buy
+  pools ~1.3 / ~1.4 of the price). `booster_mults_free` / `_extreme` are Power Outage's weights times
+  `min(v, 20)^-a` (a = 0.4 / 0.5): means ~3.4x -> ~2.5x and ~5.7x -> ~4.0x a Multi, the small values'
+  odds and the order of all values unchanged, a 1000x one standard Multi in ~17,800 (was ~7,000). The
+  buy pools come back to 0.95 / 1.0 of the price, where Power Outage's were, so every optimiser target
+  stays as it was. The base table is unchanged.
+
+What a player sees, by the finished 2026-11-22 tables (every book weighted by its LUT weight,
+`math-sdk/games/broadway_5x5/analyze_books.py`; 1M base / 100k / 100k / 500k boost books):
+
+| mode | per base spin | per standard free spin | per Xtreme free spin | rounds with one | pays | sets off a Multi | direct RTP (share) |
+|---|---|---|---|---|---|---|---|
+| base | 1 in 19.1 | 1 in 5.9 | 1 in 5.2 | 1 in 17.9 | 11.0% | 1.8% | 0.134 (13.9%) |
+| bonus (100x) | 1 in 17.6 | 1 in 6.0 | - | 87% (1.89 a buy) | 14.9% | 2.6% | 0.322 (33.3%) |
+| extremebonus (400x) | 1 in 18.2 | - | 1 in 5.0 | 96% (3.01 a buy) | 16.0% | 3.1% | 0.251 (26.0%) |
+| boost (1.25x) | 1 in 19.6 | 1 in 5.9 | 1 in 5.0 | 1 in 17.7 | 8.5% | 1.5% | 0.162 (16.7%) |
+
+The direct share is what the follow-up cascades pay (`winInfo` between an `encore` and the
+`setTotalWin` that closes it); in a bonus the line drops and Multi values they leave also lift the
+spins after them. Most Encores pay nothing (the converted cells do not join up); a paying one
+averages ~20x in a base spin, ~115x in a standard free spin, ~210x in an Xtreme one. Everything else
+stays Power Outage's: base hit rate 1 in 2.47, a bonus of either kind 1 in 238 (standard 1 in 274), Full Wall 1 in 40,000, cap 1 in 5M
+base spins; every mode 0.967 (1e-10 under), etl10k 0.40 bonus / 0.72 Xtreme.
+
+The event, as it stands in a published (shrunk) book - base book 1552, after the first cascade's
+`setTotalWin` and before the follow-up's `winInfo`:
+
+```
+{"index": 4, "type": "encore", "from": "L3", "to": "H4", "positions": [{"reel": 0, "row": 2}, {"reel": 1, "row": 2}, {"reel": 1, "row": 3}, {"reel": 2, "row": 1}, {"reel": 2, "row": 3}, {"reel": 3, "row": 4}, {"reel": 4, "row": 1}]}
+```
+
 ## 4. Bonus rounds
 
 **Standard Bonus** - 3/4/5 Crew Leaders -> 10/12/15 free spins. Multi density 3 per
@@ -226,6 +277,7 @@ Custom events (positions padded +1):
 | `wallDrop` | `kind` (`line` \| `cover`), `positions[]` | a Wall Line or the Full Wall, right after the `reveal` that carries those Multis (their values come in the `booster` event when they blow out) |
 | `lineMults` | `drops: [{reel,row,mult}]`, `gridMults` (AFTER the add) | the small multipliers a board's paid clusters leave, after that board's `winInfo` |
 | `extremeTrigger` | `positions[], reason` | Phantom cells on the trigger spin |
+| `encore` | `from`, `to`, `positions[]` | Broadway on Nashville: every `from` cell (a low, L1/L3/L4) has just become `to` (a premium, H1-H7). Written after a cascade's closing `setWin`/`setTotalWin`, before the follow-up cascade's `winInfo`/`lineMults`/`booster`/`tumbleBoard`..., which close with a `setWin`/`setTotalWin` of their own. At most one per spin / free spin |
 
 Books are compacted for publish by `tools/shrink_books.py`: each `winInfo` win becomes
 `[symbol, size, win, [[reel,row]...], null, multiplier]` (the fifth slot was the payline

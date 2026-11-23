@@ -5,7 +5,7 @@ bet/event) over the game's real optimized books, and serves the frontend from th
 origin so no CORS is involved.
 
     .venv/Scripts/python.exe frontend/mock_rgs.py
-    ->  http://localhost:8755/index.html?sessionID=test&rgs_url=http://localhost:8755&lang=en&device=desktop
+    ->  http://localhost:8822/index.html?sessionID=test&rgs_url=http://localhost:8822&lang=en&device=desktop
 
 Money follows the spec: integers with six decimal places, 1_000_000 == 1.00.
 This is a test harness, not a wallet — balances live in memory and reset on restart.
@@ -24,11 +24,11 @@ import zstandard
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-GAME = os.path.join(ROOT, "math-sdk", "games", "outage_5x5")   # the 5x5 board (same math as Voodoo on Bourbon's voodoo_5x5)
+GAME = os.path.join(ROOT, "math-sdk", "games", "broadway_5x5")   # Broadway on Nashville: Power Outage's 5x5 math + the Encore
 PUBLISH = os.path.join(GAME, "library", "publish_files")
 CACHE = os.path.join(GAME, "library", "beta_cache")
 
-PORT = 8788                     # its own port (fall 8744, orleans 8755, juice dojo 8766, miami 8777)
+PORT = 8822                     # its own port (fall 8744, orleans 8755, juice dojo 8766, miami 8777, power outage 8788)
 CACHE_STATIC = "--cache" in sys.argv
 UNIT = 1_000_000
 ID_RE = re.compile(rb'"id":\s*(\d+)')
