@@ -1,0 +1,1068 @@
+"""Rosie, the cowgirl beside the board: her layered cut-out rig in Blender, every clip keyed there, exported as a LIVE
+rig the game poses on every screen refresh (frontend/charrig.js - no baked frames), plus QA renders of every clip.
+
+Parts (art/broadway-src/rosie_parts/, tools/broadway/rosie_parts.py: each piece redrawn on its own canvas, so the
+shirt behind the guitar, the hair under the hat and the thighs under the skirt are real drawing) are separate meshes,
+each a grid fitted to its own pixels and bent by the bones it belongs to (weights below). Back to front:
+hair_back, leg_l, leg_r, fret_arm, torso, skirt, guitar, strum_arm, fret_hand, head (+ the reaction faces, each a
+whole head of its own), hat.
+
+The rig (art px; the figure is 1024 x 1536, 100 px = 1 Blender unit):
+  root > hips (the weight: slides, dips, tilts) > spine1 > spine2 > chest (breathes) > neck > head > face, hat
+  head > hair_l1/2, hair_r1/2: the curls, springs that trail the head (never keyed)
+  chest > clav_s > upper_s > fore_s > hand_s : the strumming arm (viewer's left), IK to ik_strum
+  chest > clav_f > upper_f > fore_f > hand_f : the fretting arm (viewer's right), IK to ik_fret
+  spine1 > guitar : it hangs on its strap and follows the hips and the trunk; it can be raised and pointed
+  guitar > ik_strum, ik_fret : the hands' targets ride the guitar - the strum hand moves ACROSS the strings, the fret
+    hand slides ALONG the neck - and both hands turn with the guitar (so they never let go of it)
+  hips > skirt_l, skirt_c, skirt_r : cloth springs that flare on a hop and swing with the hips
+  hips > thigh > shin (IK to ankle targets on the root: the boots stay planted) > foot (taps)
+Clips are keyed pose to pose with flowing keys (kf: PCHIP), overlap down every chain, and an idle that never holds
+still: she sways, nods and strums on a 96 bpm beat, taps her boot and changes chords, and blinks.
+
+  blender.exe -b --factory-startup --python tools/broadway/blender/rosie_rig.py -- [build,export,render] [clip,..] [step]
+-> art/blender/chars/rosie_rig/rosie_rig.blend, rig/ (rig.json, geo.bin, <clip>.bin: the live rig), renders/<clip>/ (QA)."""
+import json, math, os, random, struct, sys
+
+import bpy
+from mathutils import Vector
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+PARTS = os.path.join(ROOT, "art", "broadway-src", "rosie_parts")
+FX = os.path.join(ROOT, "art", "broadway-src", "fx")
+OUT = os.path.join(ROOT, "art", "blender", "chars", "rosie_rig")
+META = json.load(open(os.path.join(PARTS, "parts.json")))
+K = META["scale"]                                 # plate px per art px
+W_PX, H_PX = META["art"]
+FPS = 30
+RES = (760, 1080)                                 # QA renders
+ORTHO = 16.4
+CAM_Z = -0.2
+GROUND = 1508                                     # art px: the soles' line
+BEAT = 18.75                                      # frames per beat at 96 bpm (the idle's tempo)
+
+CLIPS = {          # frames, loop
+    "idle": (225, True), "strum": (30, False), "anticipation": (54, False), "win": (60, False),
+    "big_win": (132, False), "lose": (72, False), "multi": (48, False), "trigger": (96, False),
+    "solo": (120, False), "wink": (60, False), "stomp": (60, False), "hat_tip": (72, False),
+}
+QA_CLIPS = {"rom": (240, False)}
+ALL_CLIPS = dict(CLIPS, **QA_CLIPS)
+FACES = ["neutral"] + list(META["faces"])
+
+
+def u(x, y):
+    return ((x - W_PX / 2) / 100.0, (H_PX / 2 - y) / 100.0)
+
+
+# name, head, tail, parent, options (art px)
+BONES = [
+    ("root", (480, GROUND), (480, GROUND - 60), None, {}),
+    ("hips", (500, 880), (500, 820), "root", {}),
+    ("spine1", (500, 820), (482, 720), "hips", {"connect": True}),
+    ("spine2", (482, 720), (452, 620), "spine1", {"connect": True}),
+    ("chest", (452, 620), (410, 492), "spine2", {"connect": True}),
+    ("neck", (410, 492), (402, 412), "chest", {"connect": True, "noscale": True}),
+    ("head", (402, 412), (400, 190), "neck", {"connect": True}),
+    ("face", (418, 330), (418, 270), "head", {}),
+    ("hat", (400, 190), (400, 20), "head", {}),
+    ("hair_l1", (285, 330), (205, 440), "head", {}),
+    ("hair_l2", (205, 440), (150, 560), "hair_l1", {"connect": True}),
+    ("hair_r1", (560, 330), (610, 420), "head", {}),
+    ("hair_r2", (610, 420), (604, 505), "hair_r1", {"connect": True}),
+    ("clav_s", (400, 505), (235, 532), "chest", {"noscale": True}),
+    ("upper_s", (235, 532), (165, 690), "clav_s", {"connect": True}),
+    ("fore_s", (165, 690), (335, 765), "upper_s", {"connect": True}),
+    ("hand_s", (335, 765), (390, 795), "fore_s", {"connect": True, "norot": True, "noscale": True}),
+    ("clav_f", (440, 508), (600, 546), "chest", {"noscale": True}),
+    ("upper_f", (600, 546), (700, 700), "clav_f", {"connect": True}),
+    ("fore_f", (700, 700), (795, 598), "upper_f", {"connect": True}),
+    ("hand_f", (795, 598), (815, 492), "fore_f", {"connect": True, "norot": True, "noscale": True}),
+    ("guitar", (420, 822), (842, 452), "spine1", {}),
+    ("skirt_l", (470, 848), (420, 972), "hips", {}),
+    ("skirt_c", (560, 838), (560, 992), "hips", {}),
+    ("skirt_r", (642, 848), (722, 930), "hips", {}),
+    ("thigh_l", (432, 900), (310, 1140), "hips", {}),
+    ("shin_l", (310, 1140), (245, 1420), "thigh_l", {"connect": True}),
+    ("foot_l", (245, 1420), (318, 1500), "shin_l", {"connect": True, "norot": True, "noscale": True}),
+    ("thigh_r", (572, 900), (592, 1120), "hips", {}),
+    ("shin_r", (592, 1120), (592, 1420), "thigh_r", {"connect": True}),
+    ("foot_r", (592, 1420), (720, 1500), "shin_r", {"connect": True, "norot": True, "noscale": True}),
+    ("ik_l", (245, 1420), (245, 1360), "root", {}),
+    ("ik_r", (592, 1420), (592, 1360), "root", {}),
+    ("ik_strum", (335, 765), (335, 705), "guitar", {}),
+    ("ik_fret", (795, 598), (795, 538), "guitar", {}),
+]
+BONE = {b[0]: b for b in BONES}
+DEFORM = [b[0] for b in BONES if not b[0].startswith("ik_")]
+CELL = {"hair_back": 12, "leg_l": 9, "leg_r": 9, "fret_arm": 7, "torso": 10, "skirt": 8, "guitar": 12,
+        "strum_arm": 7, "fret_hand": 6, "head": 8, "hat": 10, "face": 8}
+STRING_DIR = (0.822, -0.570)                      # along the strings, bridge -> nut (art px, y down)
+
+
+# ---------------------------------------------------------------- weights
+
+def seg(p, a, b):
+    ax, ay = a
+    bx, by = b
+    dx, dy = bx - ax, by - ay
+    t = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / max(1e-9, dx * dx + dy * dy)))
+    return math.hypot(p[0] - ax - t * dx, p[1] - ay - t * dy), t
+
+
+def soft(p, names, sigma):
+    w = {}
+    for n in names:
+        d, _ = seg(p, BONE[n][1], BONE[n][2])
+        w[n] = math.exp(-(d / sigma) ** 2)
+    s = sum(w.values()) or 1.0
+    return {k: v / s for k, v in w.items()}
+
+
+def smooth(e0, e1, v):
+    t = max(0.0, min(1.0, (v - e0) / (e1 - e0)))
+    return t * t * (3 - 2 * t)
+
+
+def norm(w):
+    w = {k: v for k, v in w.items() if v > 1e-4}
+    s = sum(w.values()) or 1.0
+    return {k: v / s for k, v in w.items()}
+
+
+def weights(part, x, y):
+    """Bone weights for a vertex of a part (art px)."""
+    p = (x, y)
+    if part == "guitar":
+        return {"guitar": 1.0}
+    if part == "hat":
+        return {"hat": 1.0}
+    if part in ("head", "face"):
+        if y > 470:                                        # the neck down inside the collar rides the chest
+            return {"chest": 1.0}
+        k = smooth(470, 440, y)
+        h = smooth(425, 395, y)
+        wf = .9 * math.exp(-((x - 420) / 70.0) ** 2 - ((y - 300) / 66.0) ** 2)   # eyes, nose, mouth
+        return norm({"chest": 1 - k, "neck": k * (1 - h), "head": k * h * (1 - wf), "face": k * h * wf})
+    if part == "hair_back":
+        if y < 330:
+            return {"head": 1.0}
+        k = smooth(330, 420, y)
+        side = "l" if x < 420 else "r"
+        lo = smooth(420, 500, y) if side == "l" else smooth(400, 460, y)
+        mid = 1 - smooth(360, 440, abs(x - 420) + 300)    # the middle (behind the neck) stays on the head
+        w = {"head": 1 - k * (1 - mid * .7), f"hair_{side}1": k * (1 - lo) * (1 - mid * .7), f"hair_{side}2": k * lo * (1 - mid * .7)}
+        return norm(w)
+    if part == "torso":
+        kc, ks2, ks1 = smooth(560, 620, y), smooth(660, 720, y), smooth(770, 820, y)
+        w = {"chest": 1 - kc, "spine2": kc * (1 - ks2), "spine1": kc * ks2 * (1 - ks1), "hips": kc * ks2 * ks1}
+        cs = (1 - smooth(270, 330, x)) * (1 - smooth(560, 610, y)) * .85      # the shoulders ride their clavicles
+        cf = smooth(540, 590, x) * (1 - smooth(570, 620, y)) * .85
+        if cs > .004 or cf > .004:
+            w = {k: v * (1 - cs - cf) for k, v in w.items()}
+            w["clav_s"], w["clav_f"] = cs, cf
+        return norm(w)
+    if part == "skirt":
+        top = smooth(842, 900, y)
+        d = {n: math.exp(-(seg(p, BONE[n][1], BONE[n][2])[0] / 60.0) ** 2) for n in ("skirt_l", "skirt_c", "skirt_r")}
+        s = sum(d.values()) or 1.0
+        w = {"hips": 1 - top}
+        for n, v in d.items():
+            w[n] = top * v / s
+        return norm(w)
+    if part in ("leg_l", "leg_r"):
+        s = part[-1]
+        if y > 1428:
+            k = smooth(1415, 1440, y)
+            return norm({f"shin_{s}": 1 - k, f"foot_{s}": k})
+        top = smooth(880, 950, y)
+        kn = smooth(1080, 1180, y) if s == "l" else smooth(1070, 1170, y)
+        return norm({"hips": 1 - top, f"thigh_{s}": top * (1 - kn), f"shin_{s}": top * kn})
+    if part == "fret_arm":
+        d = math.hypot(x - 600, y - 546)
+        if d < 40:
+            k = smooth(40, 10, d)
+            return norm({"upper_f": 1 - .7 * k, "clav_f": .7 * k})
+        return soft(p, ["upper_f", "fore_f"], 32)
+    if part == "fret_hand":
+        d = math.hypot(x - 795, y - 598)
+        if y > 590 and d < 70:                             # the wrist stub blends into the forearm
+            k = smooth(20, 70, d) * smooth(590, 640, y)
+            return norm({"hand_f": 1 - k, "fore_f": k})
+        return {"hand_f": 1.0}
+    if part == "strum_arm":
+        d = math.hypot(x - 235, y - 532)
+        if d < 40:
+            k = smooth(40, 10, d)
+            return norm({"upper_s": 1 - .7 * k, "clav_s": .7 * k})
+        if x > 325 and y > 735:                            # the fist and its pick
+            k = smooth(325, 352, x)
+            return norm({"fore_s": 1 - k, "hand_s": k})
+        return soft(p, ["upper_s", "fore_s"], 32)
+    raise KeyError(part)
+
+
+# ---------------------------------------------------------------- scene
+
+def clear():
+    if bpy.app.background:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+    for ob in list(bpy.data.objects):
+        bpy.data.objects.remove(ob, do_unlink=True)
+    for coll in (bpy.data.meshes, bpy.data.materials, bpy.data.images, bpy.data.armatures, bpy.data.actions):
+        for b in list(coll):
+            coll.remove(b)
+
+
+def setup():
+    sc = bpy.context.scene
+    try:
+        sc.render.engine = "BLENDER_EEVEE"
+    except TypeError:
+        sc.render.engine = "BLENDER_EEVEE_NEXT"
+    sc.render.resolution_x, sc.render.resolution_y = RES
+    sc.render.resolution_percentage = 100
+    sc.render.film_transparent = True
+    sc.render.fps = FPS
+    sc.render.image_settings.file_format = "PNG"
+    sc.render.image_settings.color_mode = "RGBA"
+    sc.view_settings.view_transform = "Standard"
+    sc.view_settings.look = "None"
+    try:
+        sc.eevee.taa_render_samples = 8
+    except AttributeError:
+        pass
+    cam = bpy.data.objects.get("cam")
+    if cam is None:
+        cd = bpy.data.cameras.new("cam")
+        cd.type = "ORTHO"
+        cam = bpy.data.objects.new("cam", cd)
+        sc.collection.objects.link(cam)
+    cam.data.ortho_scale = ORTHO
+    cam.location = (0, -30, CAM_Z)
+    cam.rotation_euler = (math.radians(90), 0, 0)
+    sc.camera = cam
+    if sc.world is None:
+        sc.world = bpy.data.worlds.new("world")
+
+
+def load(path):
+    im = bpy.data.images.get(os.path.basename(path))
+    if im is None or im.filepath != path:
+        im = bpy.data.images.load(path)
+    im.alpha_mode = "STRAIGHT"
+    return im
+
+
+def material(name, path, strength=1.0):
+    """Emission (the art is flat-lit) with the texture's alpha, times a keyable 'fade'."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    try:
+        m.surface_render_method = "BLENDED"
+    except AttributeError:
+        m.blend_method = "BLEND"
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = load(path)
+    tex.interpolation = "Cubic"
+    tex.extension = "CLIP"
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Strength"].default_value = strength
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    fade = nt.nodes.new("ShaderNodeValue")
+    fade.name = "fade"
+    fade.outputs[0].default_value = 1.0
+    am = nt.nodes.new("ShaderNodeMath")
+    am.operation = "MULTIPLY"
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+    nt.links.new(tex.outputs["Alpha"], am.inputs[0])
+    nt.links.new(fade.outputs[0], am.inputs[1])
+    nt.links.new(am.outputs[0], mix.inputs[0])
+    nt.links.new(tr.outputs[0], mix.inputs[1])
+    nt.links.new(em.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs["Surface"])
+    return m
+
+
+def set_fade(ob, f, v):
+    s = ob.active_material.node_tree.nodes["fade"].outputs[0]
+    s.default_value = v
+    s.keyframe_insert("default_value", frame=f)
+
+
+def build_rig():
+    ad = bpy.data.armatures.new("rig")
+    arm = bpy.data.objects.new("rig", ad)
+    bpy.context.scene.collection.objects.link(arm)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    for name, h, t, par, opt in BONES:
+        b = ad.edit_bones.new(name)
+        hx, hz = u(*h)
+        tx, tz = u(*t)
+        b.head, b.tail = (hx, 0, hz), (tx, 0, tz)
+        b.align_roll((0, -1, 0))          # local Z faces the camera: a turn about Z stays in the picture plane
+        b.use_deform = name in DEFORM
+    for name, h, t, par, opt in BONES:
+        if par:
+            eb = ad.edit_bones[name]
+            eb.parent = ad.edit_bones[par]
+            eb.use_connect = bool(opt.get("connect"))
+            if opt.get("norot"):
+                eb.use_inherit_rotation = False
+            if opt.get("noscale"):
+                eb.inherit_scale = "NONE"
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for pb in arm.pose.bones:
+        pb.rotation_mode = "XYZ"
+    for chain, target, n, st in ((("thigh_l", "shin_l"), "ik_l", "shin_l", .06), (("thigh_r", "shin_r"), "ik_r", "shin_r", .06),
+                                 (("upper_s", "fore_s"), "ik_strum", "fore_s", .05), (("upper_f", "fore_f"), "ik_fret", "fore_f", .05)):
+        for nm in chain:
+            pb = arm.pose.bones[nm]
+            pb.lock_ik_x = pb.lock_ik_y = True
+            pb.ik_stretch = st
+        c = arm.pose.bones[n].constraints.new("IK")
+        c.target, c.subtarget = arm, target
+        c.chain_count = 2
+        c.use_tail = True
+        c.use_stretch = True
+    return arm
+
+
+def grid_mesh(name, path, box4k, cell, wfn, depth, arm, mat):
+    """A mesh fitted to a part's pixels: a grid of `cell` art px over its box, only the cells with ink in them (and a
+    ring round those), UVs onto the part's texture, weights from wfn."""
+    import numpy as np
+    img = load(path)
+    tw, th = img.size
+    arr = np.empty(tw * th * 4, np.float32)
+    img.pixels.foreach_get(arr)
+    alpha = arr[3::4].reshape(th, tw)[::-1]
+    x0, y0, w, h = [v / K for v in box4k]
+    nx, ny = max(1, math.ceil(w / cell)), max(1, math.ceil(h / cell))
+    used = set()
+    for j in range(ny):
+        r0, r1 = int(j * cell * K), min(th, int(math.ceil((j + 1) * cell * K)))
+        row = alpha[r0:r1]
+        if not row.size:
+            continue
+        for i in range(nx):
+            c0, c1 = int(i * cell * K), min(tw, int(math.ceil((i + 1) * cell * K)))
+            blk = row[:, c0:c1]
+            if blk.size and blk.max() > .01:
+                used.add((i, j))
+    ring = {(i + di, j + dj) for (i, j) in used for di in (-1, 0, 1) for dj in (-1, 0, 1)}
+    used = {(i, j) for (i, j) in ring if 0 <= i < nx and 0 <= j < ny}
+    vid, verts, uvs, faces = {}, [], [], []
+
+    def v(i, j):
+        if (i, j) not in vid:
+            ax = x0 + min(i * cell, w)
+            ay = y0 + min(j * cell, h)
+            vid[(i, j)] = len(verts)
+            X, Z = u(ax, ay)
+            verts.append((X, 0.0, Z))
+            uvs.append(((ax - x0) / w, 1 - (ay - y0) / h))
+        return vid[(i, j)]
+
+    for (i, j) in sorted(used):
+        faces.append((v(i, j + 1), v(i + 1, j + 1), v(i + 1, j), v(i, j)))
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(verts, [], faces)
+    uvl = me.uv_layers.new(name="UVMap")
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            uvl.data[li].uv = uvs[me.loops[li].vertex_index]
+    me.materials.append(mat)
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    ob.location = (0, depth, 0)
+    groups = {}
+    for vi, (X, _, Z) in enumerate(verts):
+        ax, ay = X * 100 + W_PX / 2, H_PX / 2 - Z * 100
+        for bn, wt in wfn(ax, ay).items():
+            if wt < .004:
+                continue
+            g = groups.get(bn) or ob.vertex_groups.new(name=bn)
+            groups[bn] = g
+            g.add([vi], wt, "REPLACE")
+    mod = ob.modifiers.new("rig", "ARMATURE")
+    mod.object = arm
+    ob.parent = arm
+    return ob
+
+
+FX_KINDS = (("sparkle", 10, 90), ("star", 6, 80), ("straw", 8, 90), ("feather", 6, 100), ("ring", 2, 220))
+
+
+def build():
+    clear()
+    setup()
+    arm = build_rig()
+    parts = {}
+    for i, nm in enumerate(META["order"]):
+        path = os.path.join(PARTS, nm + ".png")
+        depth = .3 - i * .05
+        parts[nm] = grid_mesh(nm, path, META["parts"][nm]["box"], CELL[nm], lambda x, y, n=nm: weights(n, x, y),
+                              depth, arm, material(nm, path))
+    faces = {}
+    hd = .3 - META["order"].index("head") * .05 - .02
+    for f, info in META["faces"].items():
+        path = os.path.join(PARTS, f"face_{f}.png")
+        ob = grid_mesh("face_" + f, path, info["box"], CELL["face"], lambda x, y: weights("face", x, y), hd, arm,
+                       material("face_" + f, path))
+        set_fade(ob, 0, 0.0)
+        faces[f] = ob
+    faces["neutral"] = parts["head"]
+    fx = {}
+    for kind, n, size in FX_KINDS:
+        fx[kind] = []
+        for i in range(n):
+            me = bpy.data.meshes.new(f"{kind}_{i}")
+            s = size / 200.0
+            me.from_pydata([(-s, 0, -s), (s, 0, -s), (s, 0, s), (-s, 0, s)], [], [(0, 1, 2, 3)])
+            uvl = me.uv_layers.new(name="UVMap")
+            for li, uv in zip(me.polygons[0].loop_indices, ((0, 0), (1, 0), (1, 1), (0, 1))):
+                uvl.data[li].uv = uv
+            me.materials.append(material(f"{kind}_{i}", os.path.join(FX, kind + ".png")))
+            ob = bpy.data.objects.new(f"{kind}_{i}", me)
+            bpy.context.scene.collection.objects.link(ob)
+            ob.location = (0, -1.0 - .01 * i, 0)
+            ob["fx"] = kind
+            ob["fx_size"] = size
+            set_fade(ob, 0, 0.0)
+            fx[kind].append(ob)
+    os.makedirs(OUT, exist_ok=True)
+    return arm, parts, faces, fx
+
+
+# ---------------------------------------------------------------- keys
+
+class Spring:
+    """A damped spring on a value: follows its target with lag and overshoot."""
+
+    def __init__(self, freq, zeta):
+        self.w, self.z = 2 * math.pi * freq, zeta
+        self.x = self.v = 0.0
+
+    def snap(self, target):
+        self.x, self.v = target, 0.0
+        return target
+
+    def step(self, target, dt=1 / FPS, sub=8):
+        for _ in range(sub):
+            h = dt / sub
+            a = self.w * self.w * (target - self.x) - 2 * self.z * self.w * self.v
+            self.v += a * h
+            self.x += self.v * h
+        return self.x
+
+
+def ease(t):
+    t = max(0.0, min(1.0, t))
+    return t * t * (3 - 2 * t)
+
+
+def kf(x, *keys):
+    """Pose to pose, flowing: a shape-preserving cubic (PCHIP) through keys (frame, value[, "i"]); it runs THROUGH a
+    key on the way and turns round smoothly on an extreme; held before the first key and after the last. A key tagged
+    "i" is an impact: the value falls onto it gathering speed and stops dead. kf(i - lag, ...) plays it later: overlap."""
+    n = len(keys)
+    if x <= keys[0][0]:
+        return keys[0][1]
+    if x >= keys[-1][0]:
+        return keys[-1][1]
+    k = 0
+    while x > keys[k + 1][0]:
+        k += 1
+    x0, y0 = keys[k][0], keys[k][1]
+    x1, y1 = keys[k + 1][0], keys[k + 1][1]
+    h = max(1e-9, x1 - x0)
+    t = (x - x0) / h
+    if len(keys[k + 1]) > 2 and keys[k + 1][2] == "i":
+        return y0 + (y1 - y0) * t ** 2.4
+
+    def slope(j):
+        if j <= 0 or j >= n - 1:
+            return 0.0
+        if (len(keys[j]) > 2 and keys[j][2] == "i") or (len(keys[j + 1]) > 2 and keys[j + 1][2] == "i"):
+            return 0.0
+        ha, hb = keys[j][0] - keys[j - 1][0], keys[j + 1][0] - keys[j][0]
+        da, db = (keys[j][1] - keys[j - 1][1]) / max(1e-9, ha), (keys[j + 1][1] - keys[j][1]) / max(1e-9, hb)
+        if da * db <= 0:
+            return 0.0
+        w1, w2 = 2 * hb + ha, hb + 2 * ha
+        return (w1 + w2) / (w1 / da + w2 / db)
+    m0, m1 = slope(k) * h, slope(k + 1) * h
+    t2, t3 = t * t, t * t * t
+    return (2 * t3 - 3 * t2 + 1) * y0 + (t3 - 2 * t2 + t) * m0 + (-2 * t3 + 3 * t2) * y1 + (t3 - t2) * m1
+
+
+def ring(x, f0, amp, freq, decay):
+    """What is left after an accent at frame f0: a decaying wobble."""
+    t = (x - f0) / FPS
+    return amp * math.exp(-decay * t) * math.sin(2 * math.pi * freq * t) if t > 0 else 0.0
+
+
+def bump(t, a, b):
+    if t <= a or t >= b:
+        return 0.0
+    return ease(math.sin(math.pi * (t - a) / (b - a)))
+
+
+def env(i, n, a=6, b=8):
+    """1 in the middle of a clip, easing in over its first a frames and out over its last b (clips start and end on
+    the rest pose)."""
+    return ease(i / a) * ease((n - i) / b)
+
+
+def strum_wave(i, period, amp, phase=0.0):
+    """A strumming hand: down fast, up a little slower (a skewed wave), amp px across the strings."""
+    th = 2 * math.pi * (i / period) + phase
+    return amp * math.sin(th - .35 * math.sin(th))
+
+
+CHANNELS = ("sx bob pelvis s1 s2 ch breath clav_s clav_f head nod face_x face_y hat hat_lift hat_x "
+            "guitar g_x g_y strum strum_y flick fret fret_y lift_l lift_r step_l step_r foot_l foot_r").split()
+REST = {c: 0.0 for c in CHANNELS}
+
+
+def drive(name, i, n):
+    """The animator's channels for frame i of clip `name` (degrees for turns, art px for moves; y down). A positive
+    turn of a bone pointing up leans it to screen LEFT; bob > 0 dips her down; strum > 0 moves the strum hand down
+    across the strings, fret > 0 slides the fret hand up the neck toward the headstock."""
+    c = dict(REST)
+    if name == "idle":
+        ph = 2 * math.pi * i / BEAT                        # one beat
+        half = ph / 2                                      # a sway every two beats
+        c["strum"] = strum_wave(i, BEAT / 2, 11) + strum_wave(i, BEAT, 4, .6)    # down-up on the eighths
+        c["flick"] = 4 * math.sin(2 * math.pi * i / (BEAT / 2) - .8)
+        c["bob"] = 3.2 * (1 - math.cos(ph)) / 2
+        c["sx"] = 9 * math.sin(half)
+        c["pelvis"] = 2.6 * math.sin(half)
+        c["s1"] = -1.0 * math.sin(half - .4)
+        c["s2"] = -1.2 * math.sin(half - .7)
+        c["ch"] = -1.0 * math.sin(half - 1.0)
+        c["head"] = 1.6 * math.sin(half - 1.3)
+        c["nod"] = 2.2 * math.sin(ph - .9)
+        c["breath"] = .5 - .5 * math.cos(2 * math.pi * i / 112.5)
+        c["foot_r"] = 7 * max(0.0, math.sin(ph)) ** 1.5          # the toe taps on the beat
+        c["guitar"] = .8 * math.sin(half - .5)
+        # a chord change every four beats (back where it started after twelve)
+        c["fret"] = kf(i % (4 * BEAT), (0, 0), (4 * BEAT - 5, 0), (4 * BEAT, 0))
+        bar = int(i // (4 * BEAT))
+        target = (0, 34, -22)[bar % 3]
+        prev = (0, 34, -22)[(bar - 1) % 3]
+        c["fret"] = kf(i % (4 * BEAT), (0, prev), (5, target), (4 * BEAT, target))
+        if i < 5:                                          # the loop's first frames slide into the first chord
+            c["fret"] = kf(i, (0, 0), (5, 0))
+        c["face_x"] = 2 * math.sin(half - 1.6)
+        c["hat"] = 1.2 * math.sin(half - 2.0)
+    elif name == "strum":                                  # the spin: one big power strum
+        c["strum"] = kf(i, (0, 0), (7, -46), (11, 52, "i"), (16, 40), (24, 6), (30, 0))
+        c["flick"] = kf(i, (0, 0), (7, -14), (11, 12, "i"), (20, 2), (30, 0))
+        c["bob"] = kf(i, (0, 0), (7, -7), (12, 11, "i"), (20, 3), (30, 0)) + ring(i, 12, 3, 3, 6)
+        c["ch"] = kf(i, (0, 0), (7, 3), (12, -4), (30, 0))
+        c["s2"] = kf(i - 1, (0, 0), (7, 2), (12, -3), (30, 0))
+        c["nod"] = kf(i - 2, (0, 0), (7, -5), (13, 8), (22, 1), (30, 0))
+        c["guitar"] = kf(i, (0, 0), (7, 3), (12, -3), (30, 0))
+        c["hat_lift"] = kf(i - 3, (0, 0), (12, -10), (18, 0, "i"), (30, 0))
+        c["foot_r"] = kf(i, (0, 0), (5, 10), (11, 0, "i"), (30, 0))
+    elif name == "anticipation":                           # leans in toward the board, eyes wide, a tremolo
+        e = env(i, n, 10, 10)
+        c["sx"] = 16 * e
+        c["pelvis"] = -2 * e
+        c["s1"], c["s2"], c["ch"] = -2.5 * e, -3 * e, -3.5 * e
+        c["head"] = -4 * e + 1.5 * math.sin(i * .5) * e
+        c["face_x"] = 5 * e
+        c["strum"] = 7 * math.sin(2 * math.pi * i / 3.5) * e
+        c["fret"] = kf(i, (0, 0), (10, 28), (44, 34), (54, 0))
+        c["bob"] = 4 * e
+        c["guitar"] = -2 * e
+    elif name == "win":                                    # a happy hop and a flourish
+        c["bob"] = kf(i, (0, 0), (8, 10), (16, -22), (24, 4, "i"), (34, 0), (60, 0)) + ring(i, 24, 4, 3, 5)
+        c["strum"] = kf(i, (0, 0), (10, -30), (14, 40, "i"), (20, -26), (25, 38, "i"), (36, 4), (60, 0))
+        c["flick"] = kf(i, (0, 0), (10, -10), (14, 10), (20, -8), (25, 10), (40, 0))
+        c["guitar"] = kf(i, (0, 0), (16, 7), (30, 4), (60, 0))
+        c["nod"] = kf(i - 2, (0, 0), (10, 4), (17, -6), (26, 5), (40, 0))
+        c["ch"] = kf(i, (0, 0), (16, -3), (30, 1), (60, 0))
+        c["hat_lift"] = kf(i - 3, (0, 0), (17, -14), (25, 0, "i"), (60, 0))
+        c["sx"] = kf(i, (0, 0), (16, 6), (40, 2), (60, 0))
+    elif name == "big_win":                                # crouch, jump, land, and rock out
+        c["bob"] = (kf(i, (0, 0), (10, 16), (22, -46), (30, 8, "i"), (40, 2), (120, 2), (132, 0))
+                    + ring(i, 30, 6, 2.6, 4) + 4 * bump(i, 40, 120) * (1 - math.cos(2 * math.pi * (i - 40) / BEAT)) / 2)
+        g = kf(i, (0, 0), (10, -4), (22, 18), (34, 26), (100, 24), (120, 6), (132, 0))
+        c["guitar"] = g
+        c["strum"] = bump(i, 30, 118) * strum_wave(i, 5, 16) + kf(i, (0, 0), (20, -30), (30, 30, "i"), (40, 0))
+        c["nod"] = (kf(i - 2, (0, 0), (10, 6), (22, -8), (32, 6), (40, 0)) +
+                    9 * bump(i, 40, 110) * math.sin(2 * math.pi * (i - 40) / BEAT))          # she head-bangs on the beat
+        c["head"] = kf(i, (0, 0), (30, -6), (100, -4), (132, 0))
+        c["ch"] = kf(i, (0, 0), (10, 4), (22, -6), (40, -4), (110, -3), (132, 0))
+        c["s2"] = kf(i - 1, (0, 0), (10, 3), (22, -4), (110, -2), (132, 0))
+        c["sx"] = kf(i, (0, 0), (22, 8), (60, -6), (90, 8), (132, 0))
+        c["fret"] = 30 * bump(i, 36, 116) * math.sin(2 * math.pi * (i - 36) / (2 * BEAT))
+        c["hat_lift"] = kf(i - 3, (0, 0), (24, -26), (32, 0, "i"), (132, 0))
+        c["lift_r"] = kf(i, (0, 0), (60, 0), (66, -34), (72, 0, "i"), (80, 0), (86, -34), (92, 0, "i"), (132, 0))
+        c["foot_r"] = kf(i, (0, 0), (60, 0), (66, 14), (72, 0, "i"), (80, 0), (86, 14), (92, 0, "i"), (132, 0))
+    elif name == "lose":                                   # an aw-shucks shrug
+        e = env(i, n, 12, 16)
+        sh = bump(i, 8, 48)
+        c["clav_s"] = -9 * sh
+        c["clav_f"] = 9 * sh
+        c["bob"] = kf(i, (0, 0), (10, -4), (30, -6), (50, 2), (72, 0))
+        c["head"] = 6 * sh
+        c["nod"] = kf(i, (0, 0), (14, -4), (40, 3), (72, 0))
+        c["guitar"] = -4 * e
+        c["strum"] = kf(i, (0, 0), (50, 0), (56, -12), (60, 14, "i"), (72, 0))
+        c["sx"] = -5 * e
+    elif name == "multi":                                  # points the guitar's neck at the board
+        c["guitar"] = kf(i, (0, 0), (6, 4), (14, -14, "i"), (36, -12), (48, 0)) + ring(i, 14, 2, 3, 5)
+        c["g_x"] = kf(i, (0, 0), (6, -6), (14, 18, "i"), (36, 14), (48, 0))
+        c["g_y"] = kf(i, (0, 0), (14, -6), (36, -4), (48, 0))
+        c["sx"] = kf(i, (0, 0), (14, 12), (36, 10), (48, 0))
+        c["ch"] = kf(i, (0, 0), (14, -4), (36, -3), (48, 0))
+        c["head"] = kf(i, (0, 0), (14, -5), (36, -4), (48, 0))
+        c["strum"] = kf(i, (0, 0), (8, -20), (14, 24, "i"), (30, 8), (48, 0))
+        c["bob"] = kf(i, (0, 0), (14, 6), (36, 3), (48, 0))
+    elif name == "trigger":                                # the bonus: a leap, the guitar thrown up high, the hat flies
+        c["bob"] = kf(i, (0, 0), (10, 18), (24, -60), (36, 10, "i"), (50, 2), (96, 0)) + ring(i, 36, 7, 2.4, 4)
+        c["guitar"] = kf(i, (0, 0), (10, -6), (26, 34), (70, 32), (88, 6), (96, 0))
+        c["g_y"] = kf(i, (0, 0), (26, -40), (70, -36), (88, -6), (96, 0))
+        c["strum"] = bump(i, 30, 84) * strum_wave(i, 4.5, 14)
+        c["nod"] = kf(i - 2, (0, 0), (10, 8), (24, -12), (38, 6), (60, -4), (96, 0))
+        c["head"] = kf(i, (0, 0), (24, -10), (70, -6), (96, 0))
+        c["ch"] = kf(i, (0, 0), (10, 5), (24, -7), (70, -4), (96, 0))
+        c["hat_lift"] = kf(i, (0, 0), (22, 0), (38, -150), (54, -40), (62, 0, "i"), (96, 0))
+        c["hat"] = kf(i, (0, 0), (22, 0), (38, -28), (54, 12), (62, 0, "i"), (96, 0))
+        c["lift_l"] = kf(i, (0, 0), (20, 0), (26, -30), (36, 0, "i"), (96, 0))
+        c["lift_r"] = kf(i, (0, 0), (22, 0), (28, -26), (37, 0, "i"), (96, 0))
+        c["sx"] = kf(i, (0, 0), (24, 6), (60, -4), (96, 0))
+    elif name == "solo":                                   # Encore: she shreds; the fret hand runs up and down the neck
+        e = env(i, n, 10, 12)
+        c["fret"] = e * (40 * math.sin(2 * math.pi * i / 40) + 16 * math.sin(2 * math.pi * i / 13))
+        c["fret_y"] = 3 * e * math.sin(2 * math.pi * i / 6)
+        c["strum"] = e * strum_wave(i, 3, 9)
+        c["flick"] = e * 6 * math.sin(2 * math.pi * i / 3)
+        c["guitar"] = kf(i, (0, 0), (12, 14), (60, 18), (100, 12), (120, 0))
+        c["head"] = kf(i, (0, 0), (12, 8), (60, 10), (108, 6), (120, 0))
+        c["nod"] = e * 4 * math.sin(2 * math.pi * i / (BEAT / 2))
+        c["bob"] = e * (12 + 3 * math.sin(2 * math.pi * i / BEAT))
+        c["s2"], c["ch"] = 2.5 * e, 3.5 * e
+        c["sx"] = e * 8 * math.sin(2 * math.pi * i / (2 * BEAT))
+        c["pelvis"] = e * 3 * math.sin(2 * math.pi * i / (2 * BEAT))
+        c["foot_r"] = e * 6 * max(0.0, math.sin(2 * math.pi * i / BEAT)) ** 1.5
+    elif name == "wink":                                   # (an idle break) a wink and a little flourish
+        c["strum"] = kf(i, (0, 0), (12, -18), (16, 22, "i"), (22, -12), (26, 18, "i"), (40, 0))
+        c["hat"] = kf(i, (0, 0), (14, -6), (40, -5), (60, 0))
+        c["head"] = kf(i, (0, 0), (14, -4), (44, -3), (60, 0))
+        c["nod"] = kf(i - 2, (0, 0), (14, 4), (24, -2), (40, 0))
+        c["sx"] = kf(i, (0, 0), (14, 5), (44, 4), (60, 0))
+    elif name == "stomp":                                  # (an idle break) two boot stomps on the beat
+        c["lift_r"] = kf(i, (0, 0), (8, -30), (14, 0, "i"), (22, -30), (28, 0, "i"), (60, 0))
+        c["foot_r"] = kf(i, (0, 0), (8, 16), (14, 0, "i"), (22, 16), (28, 0, "i"), (60, 0))
+        c["bob"] = kf(i, (0, 0), (8, -4), (14, 6, "i"), (22, -4), (28, 6, "i"), (40, 0)) + ring(i, 28, 2, 3, 6)
+        c["strum"] = kf(i, (0, 0), (10, -22), (14, 26, "i"), (24, -22), (28, 26, "i"), (40, 0))
+        c["nod"] = kf(i - 2, (0, 0), (14, 5), (20, 0), (28, 5), (40, 0))
+        c["sx"] = kf(i, (0, 0), (10, -4), (30, -3), (60, 0))
+    elif name == "hat_tip":                                # (an idle break) tips her hat with a nod
+        c["hat"] = kf(i, (0, 0), (16, -14), (40, -12), (58, 2), (72, 0))
+        c["hat_lift"] = kf(i, (0, 0), (16, -22), (40, -18), (58, 0, "i"), (72, 0))
+        c["hat_x"] = kf(i, (0, 0), (16, 8), (40, 6), (58, 0), (72, 0))
+        c["nod"] = kf(i - 3, (0, 0), (18, 8), (40, 6), (60, 0))
+        c["head"] = kf(i, (0, 0), (18, -3), (50, -2), (72, 0))
+        c["strum"] = kf(i, (0, 0), (52, 0), (56, -16), (60, 18, "i"), (72, 0))
+    elif name == "rom":                                    # range of motion: every channel to its extremes (QA only)
+        t = i / n
+        c["guitar"] = 30 * math.sin(2 * math.pi * t)
+        c["strum"] = 50 * math.sin(4 * math.pi * t)
+        c["fret"] = 60 * math.sin(6 * math.pi * t)
+        c["bob"] = 30 * math.sin(2 * math.pi * t * 3) - 10
+        c["sx"] = 20 * math.sin(2 * math.pi * t * 2)
+        c["head"] = 10 * math.sin(2 * math.pi * t * 5)
+        c["clav_s"], c["clav_f"] = -10 * math.sin(2 * math.pi * t * 4), 10 * math.sin(2 * math.pi * t * 4)
+        c["lift_r"] = -30 * max(0.0, math.sin(2 * math.pi * t * 2))
+        c["hat_lift"] = -60 * max(0.0, math.sin(2 * math.pi * t))
+    return c
+
+
+FACE_TRACK = {     # clip -> [(from frame, face)], the neutral head before the first entry
+    "idle": [(0, "neutral"), (64, "blink"), (68, "neutral"), (152, "blink"), (156, "neutral"), (196, "smile"), (214, "neutral")],
+    "strum": [(0, "neutral"), (9, "smile"), (26, "neutral")],
+    "anticipation": [(0, "neutral"), (4, "wow"), (50, "neutral")],
+    "win": [(0, "neutral"), (6, "smile"), (52, "neutral")],
+    "big_win": [(0, "neutral"), (8, "whoo"), (70, "smile"), (90, "whoo"), (118, "smile"), (128, "neutral")],
+    "lose": [(0, "neutral"), (6, "pout"), (62, "neutral")],
+    "multi": [(0, "neutral"), (8, "wink"), (38, "neutral")],
+    "trigger": [(0, "neutral"), (6, "whoo"), (66, "smile"), (90, "neutral")],
+    "solo": [(0, "neutral"), (6, "solo"), (112, "smile"), (118, "neutral")],
+    "wink": [(0, "neutral"), (10, "wink"), (44, "neutral")],
+    "stomp": [(0, "neutral"), (8, "smile"), (44, "neutral")],
+    "hat_tip": [(0, "neutral"), (14, "wink"), (52, "smile"), (66, "neutral")],
+    "rom": [(0, "neutral")],
+}
+
+
+def face_at(clip, i):
+    cur = "neutral"
+    for f0, nm in FACE_TRACK[clip]:
+        if i >= f0:
+            cur = nm
+    return cur
+
+
+def effects(name, i, n, c, rng, emit):
+    """The clip's sprites: notes off the guitar on the big strums and the solo, stars on the big moments."""
+    gx, gy = 330 + c["g_x"], 820 + c["g_y"] - c["bob"] * 0
+    if name == "strum" and i == 11:
+        for k in range(3):
+            emit("straw" if k % 2 == 0 else "feather", i, 22, (300 + 40 * k, 760), (rng.uniform(-60, 60), -220 - 40 * k), rng)
+    if name in ("win", "trigger", "big_win") and i in (14, 25, 40, 60, 80):
+        for k in range(2):
+            emit(rng.choice(("straw", "feather")), i, 24, (320 + rng.uniform(-40, 60), 780), (rng.uniform(-90, 90), -240), rng)
+    if name in ("big_win", "trigger") and i in (30, 36):
+        for k in range(5):
+            a = -math.pi / 2 + rng.uniform(-1.3, 1.3)
+            emit("star" if k % 2 else "sparkle", i, 20, (420, 600), (math.cos(a) * 320, math.sin(a) * 320), rng)
+    if name == "solo" and i % 8 == 4 and 8 < i < 110:
+        emit(rng.choice(("straw", "feather", "sparkle")), i, 22, (330 + rng.uniform(-30, 40), 790),
+             (rng.uniform(-120, 60), -230), rng)
+    if name == "multi" and i == 14:
+        emit("ring", i, 14, (820, 470), (0, 0), rng, grow=(.3, 1.4))
+        for k in range(4):
+            emit("sparkle", i, 16, (840, 450), (rng.uniform(40, 200), rng.uniform(-120, 120)), rng)
+    if name == "anticipation" and i in (8, 30):
+        emit("sparkle", i, 16, (800 + rng.uniform(-30, 30), 500), (rng.uniform(-40, 40), -80), rng)
+
+
+# ---------------------------------------------------------------- posing
+
+def run_clip(arm, faces, fx, name, f0, rng):
+    n, loop = ALL_CLIPS[name]
+    springs = {"hair_l": Spring(1.6, .32), "hair_r": Spring(1.7, .32), "skirt_l": Spring(2.4, .28),
+               "skirt_c": Spring(2.6, .3), "skirt_r": Spring(2.3, .28), "hat": Spring(3.0, .4)}
+    # prime the springs on the clip's own motion (a loop runs once first so it closes on itself)
+    hist = {"sx": 0.0, "bob": 0.0, "head": 0.0, "vx": 0.0, "vy": 0.0}
+    passes = (0, 1) if loop else (1,)
+    pool = {k: list(v) for k, v in fx.items()}
+    busy = {}
+
+    def emit(kind, at, life, p0, vel, rng_, grow=(.7, .5)):
+        for ob in pool[kind]:
+            if busy.get(ob.name, -1) < at:
+                busy[ob.name] = at + life + 1
+                spin = rng_.uniform(-25, 25)
+                set_fade(ob, f0 + at - 1, 0.0)
+                for k in range(0, life + 1, 2):
+                    t = k / life
+                    x = p0[0] + vel[0] * t * life / FPS
+                    y = p0[1] + vel[1] * t * life / FPS + (60 * (t * life / FPS) ** 2 if kind in ("sparkle", "star") else 0)
+                    X, Z = u(x, y)
+                    ob.location = (X, ob.location.y, Z)
+                    ob.keyframe_insert("location", frame=f0 + at + k)
+                    s = grow[0] + (grow[1] - grow[0]) * t
+                    ob.scale = (s, 1, s)
+                    ob.keyframe_insert("scale", frame=f0 + at + k)
+                    ob.rotation_euler = (0, math.radians(spin * t * 4), 0)
+                    ob.keyframe_insert("rotation_euler", frame=f0 + at + k)
+                    set_fade(ob, f0 + at + k, 1.0 if t < .6 else max(0.0, 1 - (t - .6) / .4))
+                set_fade(ob, f0 + at + life + 1, 0.0)
+                return
+
+    for pss in passes:
+        for i in range(n if loop else n + 1):
+            c = drive(name, i, n)
+            vx = (c["sx"] - hist["sx"]) * FPS
+            vy = (c["bob"] - hist["bob"]) * FPS
+            ax, ay = (vx - hist["vx"]) * FPS, (vy - hist["vy"]) * FPS
+            hist.update(sx=c["sx"], bob=c["bob"], vx=vx, vy=vy)
+            head_turn = c["head"] + c["nod"] + c["ch"] + c["s2"] + c["s1"] + c["pelvis"]
+            sec = {
+                "hair_l": springs["hair_l"].step(-.010 * ax + .018 * ay + .22 * head_turn),
+                "hair_r": springs["hair_r"].step(-.010 * ax - .016 * ay + .22 * head_turn),
+                "skirt_l": springs["skirt_l"].step(-.012 * ax - .02 * ay - 1.2 * c["pelvis"]),
+                "skirt_c": springs["skirt_c"].step(-.010 * ax - 1.0 * c["pelvis"]),
+                "skirt_r": springs["skirt_r"].step(-.012 * ax + .02 * ay - 1.2 * c["pelvis"]),
+                "hat": springs["hat"].step(-.4 * c["nod"]),
+            }
+            if pss == 0:
+                continue
+            f = f0 + i
+            pose(arm, f, c, sec)
+            cur = face_at(name, i)
+            for fn, ob in faces.items():
+                if fn != "neutral":
+                    set_fade(ob, f, 1.0 if fn == cur else 0.0)
+            set_fade(faces["neutral"], f, 1.0 if cur == "neutral" else 0.0)
+            effects(name, i, n, c, rng, emit)
+    return n
+
+
+def key_bone(arm, name, f, rot=None, loc=None, scale=None):
+    pb = arm.pose.bones[name]
+    if rot is not None:
+        pb.rotation_euler = (0.0, 0.0, math.radians(rot))
+        pb.keyframe_insert("rotation_euler", frame=f)
+    if loc is not None:
+        pb.location = loc
+        pb.keyframe_insert("location", frame=f)
+    if scale is not None:
+        pb.scale = scale
+        pb.keyframe_insert("scale", frame=f)
+
+
+def local_move(name, dx, dy):
+    """An art-px move (y down) as the bone's own local location (bone y runs along it, x across, in units)."""
+    h, t = BONE[name][1], BONE[name][2]
+    ax, ay = t[0] - h[0], -(t[1] - h[1])                   # the bone's direction, y up
+    L = math.hypot(ax, ay) or 1.0
+    yx, yy = ax / L, ay / L                                # local +Y
+    xx, xy = yy, -yx                                       # local +X (90 deg clockwise from +Y, with local Z to the camera)
+    mx, my = dx / 100.0, -dy / 100.0
+    return (mx * xx + my * xy, mx * yx + my * yy, 0.0)
+
+
+def pose(arm, f, c, sec):
+    # the trunk: hips slide/dip/tilt, the spine bends in three, the chest breathes
+    key_bone(arm, "hips", f, rot=c["pelvis"], loc=local_move("hips", c["sx"], c["bob"]))
+    key_bone(arm, "spine1", f, rot=c["s1"])
+    key_bone(arm, "spine2", f, rot=c["s2"])
+    b = 1 + .012 * c["breath"]
+    key_bone(arm, "chest", f, rot=c["ch"], scale=(b, b, 1))
+    key_bone(arm, "neck", f, rot=.4 * (c["head"] + c["nod"]))
+    key_bone(arm, "head", f, rot=.6 * c["head"] + c["nod"])
+    key_bone(arm, "face", f, loc=local_move("face", c["face_x"], c["face_y"]))
+    key_bone(arm, "hat", f, rot=c["hat"] + sec["hat"], loc=local_move("hat", c["hat_x"], c["hat_lift"]))
+    for nm in ("hair_l1", "hair_r1"):
+        key_bone(arm, nm, f, rot=sec[nm[:-1]] * .6)
+    for nm in ("hair_l2", "hair_r2"):
+        key_bone(arm, nm, f, rot=sec[nm[:-1]] * .8)
+    key_bone(arm, "clav_s", f, rot=c["clav_s"])
+    key_bone(arm, "clav_f", f, rot=c["clav_f"])
+    # the guitar on its strap: turned about its body, moved with g_x/g_y
+    key_bone(arm, "guitar", f, rot=c["guitar"], loc=local_move("guitar", c["g_x"], c["g_y"]))
+    # the hands ride the guitar: strum ACROSS the strings, fret ALONG the neck (both in the guitar's frame)
+    sx_, sy_ = STRING_DIR
+    across = (-sy_, sx_)                                   # perpendicular to the strings, pointing down-right... (y down)
+    ds = (across[0] * c["strum"] + sx_ * c["strum_y"], across[1] * c["strum"] + sy_ * c["strum_y"])
+    df = (sx_ * c["fret"] + across[0] * c["fret_y"], sy_ * c["fret"] + across[1] * c["fret_y"])
+    key_bone(arm, "ik_strum", f, loc=guitar_local(ds))
+    key_bone(arm, "ik_fret", f, loc=guitar_local(df))
+    # the hands turn with the guitar (they are not children of their forearms' rotation)
+    g_total = c["pelvis"] + c["s1"] + c["guitar"]
+    key_bone(arm, "hand_s", f, rot=g_total + c["flick"])
+    key_bone(arm, "hand_f", f, rot=g_total)
+    for nm in ("skirt_l", "skirt_c", "skirt_r"):
+        key_bone(arm, nm, f, rot=sec[nm])
+    # legs: ankle targets on the root (planted); a lift raises a boot; the foot taps about its heel
+    air = min(0.0, c["bob"] + 10.0)                         # in a jump (she rises past 10 px) the boots leave the floor with her
+    for s in "lr":
+        key_bone(arm, f"ik_{s}", f, loc=local_move(f"ik_{s}", c[f"step_{s}"], c[f"lift_{s}"] + air))
+        key_bone(arm, f"foot_{s}", f, rot=c[f"foot_{s}"] * (1 if s == "r" else -1))
+
+
+def guitar_local(d):
+    """An art-px offset (y down) in the guitar's REST frame, as a local location of a bone parented to the guitar
+    (the ik targets: their own rest orientation is straight up, so their local axes are the armature's turned by the
+    guitar's turn - Blender applies the guitar's pose on top)."""
+    gx, gy = BONE["guitar"][2][0] - BONE["guitar"][1][0], -(BONE["guitar"][2][1] - BONE["guitar"][1][1])
+    ga = math.atan2(gx, gy)                                # the guitar bone's angle from straight up (y up)
+    mx, my = d[0] / 100.0, -d[1] / 100.0                   # y up
+    # the ik bones point straight up at rest: local x = armature x, local y = armature z
+    return (mx, my, 0.0)
+
+
+def fcurves(act):
+    try:
+        return list(act.fcurves)
+    except AttributeError:
+        return [fc for L in act.layers for s in L.strips for cb in s.channelbags for fc in cb.fcurves]
+
+
+def finish_curves():
+    for idb in list(bpy.data.objects) + [m.node_tree for m in bpy.data.materials if m.node_tree]:
+        ad = idb.animation_data
+        if not (ad and ad.action):
+            continue
+        for fc in fcurves(ad.action):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "LINEAR"
+
+
+STARTS = {}
+
+
+def animate(arm, faces, fx, clips):
+    rng = random.Random(4471)
+    f = 1
+    for c in ALL_CLIPS:
+        STARTS[c] = f
+        n = run_clip(arm, faces, fx, c, f, rng) if c in clips else ALL_CLIPS[c][0]
+        f += n + 20
+    bpy.context.scene.frame_start, bpy.context.scene.frame_end = 1, f
+    finish_curves()
+
+
+# ---------------------------------------------------------------- export: the live rig
+
+def to_art(m):
+    """A Blender matrix (acting on the XZ plane) -> the 2D affine on art px: x' = a x + c y + tx, y' = b x + d y + ty."""
+    m00, m02, m03 = m[0][0], m[0][2], m[0][3]
+    m20, m22, m23 = m[2][0], m[2][2], m[2][3]
+    cx, cy = W_PX / 2, H_PX / 2
+    a, cc = m00, -m02
+    b, d = -m20, m22
+    tx = 100 * m03 + cx - a * cx - cc * cy
+    ty = cy - 100 * m23 - b * cx - d * cy
+    return a, b, cc, d, tx, ty
+
+
+def fx_affine(m, size):
+    k = 100 * size
+    return (k * m[0][0], -k * m[2][0], -k * m[0][2], k * m[2][2], 100 * m[0][3] + W_PX / 2, H_PX / 2 - 100 * m[2][3])
+
+
+def export(arm, parts, faces, fx):
+    """rig/rig.json + rig/geo.bin (every part's mesh: rest positions in art px, UVs, triangles, 4 bone weights per
+    vertex) + rig/<clip>.bin (per frame, per deforming bone, its 2D affine in art px, float32)."""
+    sc = bpy.context.scene
+    dg = bpy.context.evaluated_depsgraph_get()
+    fade = lambda ob: ob.active_material.evaluated_get(dg).node_tree.nodes["fade"].outputs[0].default_value
+    dst = os.path.join(OUT, "rig")
+    os.makedirs(dst, exist_ok=True)
+    for old in os.listdir(dst):
+        os.remove(os.path.join(dst, old))
+    bones = DEFORM
+    bidx = {b: i for i, b in enumerate(bones)}
+    geo = bytearray()
+    out_parts = []
+
+    def mesh_out(ob, tex, box, extra):
+        me = ob.data
+        names = {g.index: g.name for g in ob.vertex_groups}
+        vs, uvs = [], [None] * len(me.vertices)
+        uvl = me.uv_layers[0].data
+        for poly in me.polygons:
+            for li in poly.loop_indices:
+                uvs[me.loops[li].vertex_index] = tuple(uvl[li].uv)
+        bi, bw = [], []
+        for v in me.vertices:
+            X, Z = v.co.x, v.co.z
+            vs += [100 * X + W_PX / 2, H_PX / 2 - 100 * Z]
+            ws = sorted(((g.weight, names[g.group]) for g in v.groups if g.weight > .004), reverse=True)[:4]
+            tot = sum(w for w, _ in ws) or 1.0
+            q = [int(round(255 * w / tot)) for w, _ in ws]
+            if q:
+                q[0] += 255 - sum(q)
+            ids = [bidx[nm] for _, nm in ws]
+            while len(q) < 4:
+                q.append(0)
+                ids.append(0)
+            bi += ids
+            bw += q
+        tris = []
+        for poly in me.polygons:
+            vv = list(poly.vertices)
+            tris += [vv[0], vv[1], vv[2], vv[0], vv[2], vv[3]]
+        rec = dict(extra, name=ob.name, tex=tex, box=box, verts=len(me.vertices), tris=len(tris) // 3)
+        rec["o_pos"] = len(geo); geo.extend(struct.pack(f"<{len(vs)}f", *vs))
+        rec["o_uv"] = len(geo); geo.extend(struct.pack(f"<{2 * len(uvs)}f", *[c for uv in uvs for c in (uv[0], 1 - uv[1])]))
+        rec["o_idx"] = len(geo); geo.extend(struct.pack(f"<{len(tris)}H", *tris))
+        while len(geo) % 4:
+            geo.append(0)
+        rec["o_bi"] = len(geo); geo.extend(bytes(bi))
+        rec["o_bw"] = len(geo); geo.extend(bytes(bw))
+        while len(geo) % 4:
+            geo.append(0)
+        return rec
+
+    for nm in META["order"]:
+        box = [v / K for v in META["parts"][nm]["box"]]
+        out_parts.append(mesh_out(parts[nm], nm, box, {"face": "neutral"} if nm == "head" else {}))
+        if nm == "head":
+            for f, ob in faces.items():
+                if f != "neutral":
+                    out_parts.append(mesh_out(ob, "face_" + f, [v / K for v in META["faces"][f]["box"]], {"face": f}))
+    open(os.path.join(dst, "geo.bin"), "wb").write(bytes(geo))
+    clips = {}
+    fx_names = [k for k, _, _ in FX_KINDS]
+    for c, (n, loop) in CLIPS.items():
+        nf = n if loop else n + 1
+        buf = bytearray()
+        face_track, fx_draws = [], []
+        stretch = 1.0
+        for k in range(nf):
+            sc.frame_set(STARTS[c] + k)
+            dg = bpy.context.evaluated_depsgraph_get()
+            ae = arm.evaluated_get(dg)
+            for bn in bones:
+                pb = ae.pose.bones[bn]
+                m = ae.matrix_world @ pb.matrix @ pb.bone.matrix_local.inverted()
+                buf.extend(struct.pack("<6f", *to_art(m)))
+            for bn in ("thigh_l", "shin_l", "thigh_r", "shin_r", "upper_s", "fore_s", "upper_f", "fore_f"):
+                stretch = max(stretch, ae.pose.bones[bn].matrix.to_scale().y)
+            cur = 0
+            for fi, f in enumerate(FACES[1:], 1):
+                ob = faces.get(f)
+                if ob and fade(ob) > .5:
+                    cur = fi
+            face_track.append(cur)
+            draws = []
+            oid = 0
+            for kind, obs in fx.items():
+                for ob in obs:
+                    oid += 1
+                    a = fade(ob)
+                    if a <= .003:
+                        continue
+                    mw = ob.evaluated_get(dg).matrix_world
+                    s = ob["fx_size"] / 200.0
+                    aa = fx_affine(mw, 2 * s)
+                    draws.append([fx_names.index(kind), oid] + [round(v, 3) for v in aa] + [round(a, 3)])
+            fx_draws.append(draws)
+        open(os.path.join(dst, f"{c}.bin"), "wb").write(bytes(buf))
+        clips[c] = {"frames": nf, "loop": loop, "face": face_track, "fx": fx_draws}
+        print(f"CLIP {c:13s} frames {nf:3d}  most an IK limb stretches x{stretch:.4f}", flush=True)
+    meta = {"version": 2, "fps": FPS, "art": [W_PX, H_PX], "cx": 480, "ground_y": GROUND, "top_y": 8,
+            "rest_height": GROUND - 8, "bones": bones, "parts": out_parts, "faces": FACES,
+            "fx": fx_names, "shoes": {"foot_l": [176, 322, GROUND], "foot_r": [556, 742, GROUND]},
+            "idle": {"rate": 1.0, "rest": [0, 0], "cut": 8},
+            "clips": clips}
+    json.dump(meta, open(os.path.join(dst, "rig.json"), "w"), separators=(",", ":"))
+    print("EXPORT", dst, "bones", len(bones), "parts", len(out_parts), "geo", len(geo))
+
+
+# ---------------------------------------------------------------- QA renders
+
+def render(clips, step=1):
+    sc = bpy.context.scene
+    ren = os.path.join(OUT, "renders")
+    for c in clips:
+        n, loop = ALL_CLIPS[c]
+        d = os.path.join(ren, c)
+        os.makedirs(d, exist_ok=True)
+        for old in os.listdir(d):
+            os.remove(os.path.join(d, old))
+        for k in range(0, n if loop else n + 1, step):
+            sc.frame_set(STARTS[c] + k)
+            sc.render.filepath = os.path.join(d, f"{k:04d}.png")
+            bpy.ops.render.render(write_still=True)
+
+
+if __name__ == "__main__" and "--" in sys.argv:
+    args = sys.argv[sys.argv.index("--") + 1:]
+    steps = (args[0] if args else "build,export,render").split(",")
+    clips = args[1].split(",") if len(args) > 1 and args[1] else list(CLIPS)
+    step = int(args[2]) if len(args) > 2 else 1
+    arm, parts, faces, fx = build()
+    animate(arm, faces, fx, list(CLIPS) + [c for c in clips if c in QA_CLIPS])
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, "rosie_rig.blend"))
+    if "export" in steps:
+        export(arm, parts, faces, fx)
+    if "render" in steps:
+        render(clips, step)
+    print("DONE rosie_rig", steps, clips)

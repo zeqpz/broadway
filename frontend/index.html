@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Power Outage</title>
+<title>Broadway on Nashville</title>
 <script>
 // The MOBILE tier (owner, 2026-11-16: "the mobile version is very laggy ... on the iPhone, Apple WebKit"). Every phone
 // and tablet: WebKit on iOS (Safari, CriOS, FxiOS, EdgiOS, iPadOS asking for the desktop site) and touch Android /
@@ -3217,7 +3217,7 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   .bshop #bonusBetDown::before, .bshop #bonusBetUp::before { content: none; }
   :root {
     /* the volatility pips: lightning bolts (Power Outage) - were voodoo skulls */
-    --drip: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 24'><path d='M12.5 1 3 14h6.2L7 23l10-13.2h-6.3L12.5 1z'/></svg>");
+    --drip: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.2L12 17.7l-6.4 3.5L7 14l-5.3-5 7.2-.9z'/></svg>");
     --chev: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 9l7 7 7-7'/></svg>");
   }
   /* Bonus Boost (bet mode "boost"): a switch, not a buy. Its banner is the "1.6x" mark itself, sprayed
@@ -3282,7 +3282,7 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   #bgscene .bgchand { z-index: 3; opacity: 0; border-radius: 50%; mix-blend-mode: screen;
     background: radial-gradient(circle, rgba(255, 246, 200, .9) 0 14%, rgba(255, 213, 74, .42) 14% 34%, rgba(255, 213, 74, .16) 34% 60%, rgba(255, 213, 74, 0) 60%); }
   #bgscene .bgsky { z-index: 1; overflow: hidden;
-    -webkit-mask: url("assets/bg/sky.webp") center / 100% 100% no-repeat; mask: url("assets/bg/sky.webp") center / 100% 100% no-repeat; }
+     }
   #bgscene .bgcloud { left: -35%; opacity: .92; animation: bgcloud var(--dur) linear var(--delay) infinite; }
   #bgscene .bgcloud svg { display: block; width: 100%; height: auto; }
   @keyframes bgcloud { from { left: -35%; } to { left: 110%; } }
@@ -3362,8 +3362,8 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   /* the iron-lace frame (assets/frame.webp): its opening sized round the board (tools/nola: frame fracs) */
   /* (literal fractions: --fx/--fy are the frame's idle drift in px, set by frameIdle) */
   #paintframe, #paintback {
-    width: calc((100% - 36px) / 0.7164); height: calc((100% - 36px) / 0.5979);
-    left: calc(18px - (100% - 36px) * 0.17766); top: calc(18px - (100% - 36px) * 0.32489);
+    width: calc((100% - 36px) / 0.8114); height: calc((100% - 36px) / 0.7639);
+    left: calc(18px - (100% - 36px) * 0.11597); top: calc(18px - (100% - 36px) * 0.15522);
   }
   /* the skull candle's live flame (candleflame.js) on its wick: 95.23% across and 6.2% down the frame's box; the
      canvas is 13% x 13% of the frame (wide enough for the glow to fade inside it), its wick drawn at 50% across and 86% down it */
@@ -3385,7 +3385,7 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
      the sides (the fractions above). fitToScreen() sizes the page by the board's box, so the board carries that
      overhang as margin: the fit then shrinks the board until the whole frame, and the HUD under it, are on screen
      (owner, 2026-11-08: the frame ran off the top and over the bar). */
-  .board { margin: calc(0.262 * var(--bh, 781px)) calc(0.185 * var(--bw, 963px)) calc(0.120 * var(--bh, 781px)) calc(0.155 * var(--bw, 963px)); }
+  .board { margin: calc(0.170 * var(--bh, 781px)) calc(0.125 * var(--bw, 963px)) calc(0.165 * var(--bh, 781px)) calc(0.125 * var(--bw, 963px)); }
   @media (max-width: 1100px) and (orientation: portrait) { .board { margin-left: calc(0.080 * var(--bw, 963px)); } }
   #candleflame { display: none !important; }
   /* the spirit wisps that conjure a Multi's value (voodooReveal) */
@@ -3432,18 +3432,18 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   }
   .fbox .fmult { text-shadow: none; }
   /* the voodoo numerals, one class a glyph (tools/nola/vnum.py writes the aspect ratios) */
-  .vg.g-x { --vgm: url("assets/vnum/x.webp"); aspect-ratio: 206 / 256; background-image: url("assets/vnum/ink_x.webp"), var(--vg-fill); }
-  .vg.g-0 { --vgm: url("assets/vnum/0.webp"); aspect-ratio: 227 / 256; background-image: url("assets/vnum/ink_0.webp"), var(--vg-fill); }
-  .vg.g-1 { --vgm: url("assets/vnum/1.webp"); aspect-ratio: 198 / 256; background-image: url("assets/vnum/ink_1.webp"), var(--vg-fill); }
-  .vg.g-2 { --vgm: url("assets/vnum/2.webp"); aspect-ratio: 218 / 256; background-image: url("assets/vnum/ink_2.webp"), var(--vg-fill); }
-  .vg.g-3 { --vgm: url("assets/vnum/3.webp"); aspect-ratio: 203 / 256; background-image: url("assets/vnum/ink_3.webp"), var(--vg-fill); }
-  .vg.g-4 { --vgm: url("assets/vnum/4.webp"); aspect-ratio: 224 / 256; background-image: url("assets/vnum/ink_4.webp"), var(--vg-fill); }
-  .vg.g-5 { --vgm: url("assets/vnum/5.webp"); aspect-ratio: 204 / 256; background-image: url("assets/vnum/ink_5.webp"), var(--vg-fill); }
-  .vg.g-6 { --vgm: url("assets/vnum/6.webp"); aspect-ratio: 213 / 256; background-image: url("assets/vnum/ink_6.webp"), var(--vg-fill); }
-  .vg.g-7 { --vgm: url("assets/vnum/7.webp"); aspect-ratio: 209 / 256; background-image: url("assets/vnum/ink_7.webp"), var(--vg-fill); }
-  .vg.g-8 { --vgm: url("assets/vnum/8.webp"); aspect-ratio: 224 / 256; background-image: url("assets/vnum/ink_8.webp"), var(--vg-fill); }
-  .vg.g-9 { --vgm: url("assets/vnum/9.webp"); aspect-ratio: 218 / 256; background-image: url("assets/vnum/ink_9.webp"), var(--vg-fill); }
-  .vg.g-dot { --vgm: url("assets/vnum/dot.webp"); aspect-ratio: 95 / 256; background-image: url("assets/vnum/ink_dot.webp"), var(--vg-fill); }
+  .vg.g-x { --vgm: url("assets/vnum/x.webp"); aspect-ratio: 195 / 256; background-image: url("assets/vnum/ink_x.webp"), var(--vg-fill); }
+  .vg.g-0 { --vgm: url("assets/vnum/0.webp"); aspect-ratio: 207 / 256; background-image: url("assets/vnum/ink_0.webp"), var(--vg-fill); }
+  .vg.g-1 { --vgm: url("assets/vnum/1.webp"); aspect-ratio: 155 / 256; background-image: url("assets/vnum/ink_1.webp"), var(--vg-fill); }
+  .vg.g-2 { --vgm: url("assets/vnum/2.webp"); aspect-ratio: 202 / 256; background-image: url("assets/vnum/ink_2.webp"), var(--vg-fill); }
+  .vg.g-3 { --vgm: url("assets/vnum/3.webp"); aspect-ratio: 202 / 256; background-image: url("assets/vnum/ink_3.webp"), var(--vg-fill); }
+  .vg.g-4 { --vgm: url("assets/vnum/4.webp"); aspect-ratio: 215 / 256; background-image: url("assets/vnum/ink_4.webp"), var(--vg-fill); }
+  .vg.g-5 { --vgm: url("assets/vnum/5.webp"); aspect-ratio: 200 / 256; background-image: url("assets/vnum/ink_5.webp"), var(--vg-fill); }
+  .vg.g-6 { --vgm: url("assets/vnum/6.webp"); aspect-ratio: 211 / 256; background-image: url("assets/vnum/ink_6.webp"), var(--vg-fill); }
+  .vg.g-7 { --vgm: url("assets/vnum/7.webp"); aspect-ratio: 197 / 256; background-image: url("assets/vnum/ink_7.webp"), var(--vg-fill); }
+  .vg.g-8 { --vgm: url("assets/vnum/8.webp"); aspect-ratio: 210 / 256; background-image: url("assets/vnum/ink_8.webp"), var(--vg-fill); }
+  .vg.g-9 { --vgm: url("assets/vnum/9.webp"); aspect-ratio: 200 / 256; background-image: url("assets/vnum/ink_9.webp"), var(--vg-fill); }
+  .vg.g-dot { --vgm: url("assets/vnum/dot.webp"); aspect-ratio: 90 / 256; background-image: url("assets/vnum/ink_dot.webp"), var(--vg-fill); }
   /* the glyphs are separate pictures: one centred row, not a grid row each */
   .multlayer .gmult { display: flex !important; align-items: center; justify-content: center; }
   .cell.booster .multface .mv { display: inline-flex !important; align-items: center; font-size: 30px; }
@@ -3561,16 +3561,16 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
      sits in the frame's box (#paintframe, #paintback: W = (100% - 36px) / .8273 wide, H = (100% - 36px) / .6816 tall,
      at 18px - (100% - 36px) * .10330, 18px - (100% - 36px) * .22724) - the fractions tools/nola/make_mobile_art.py prints */
   html.mobart #paintback {
-    width: calc((100% - 36px) / 0.7164 * 0.73500); height: calc((100% - 36px) / 0.5979 * 0.60825);
-    left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.12286);
-    top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.18953);
+    width: calc((100% - 36px) / 0.8114 * 0.81929); height: calc((100% - 36px) / 0.7639 * 0.77320);
+    left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.09000);
+    top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.11340);
   }
   html.mobart #paintframe { visibility: hidden; }
   html.mobart .fbar { position: absolute; z-index: 3; pointer-events: none; user-select: none; display: block; }
-  html.mobart .fbar.fb-top { left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.00000); width: calc((100% - 36px) / 0.7164 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.19588); }
-  html.mobart .fbar.fb-bottom { left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.79064); width: calc((100% - 36px) / 0.7164 * 1.00000); height: calc((100% - 36px) / 0.5979 * 0.20936); }
-  html.mobart .fbar.fb-left { left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.00000); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19588); width: calc((100% - 36px) / 0.7164 * 0.13857); height: calc((100% - 36px) / 0.5979 * 0.59477); }
-  html.mobart .fbar.fb-right { left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.84214); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.19588); width: calc((100% - 36px) / 0.7164 * 0.15786); height: calc((100% - 36px) / 0.5979 * 0.59477); }
+  html.mobart .fbar.fb-top { left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.00000); top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.00000); width: calc((100% - 36px) / 0.8114 * 1.00000); height: calc((100% - 36px) / 0.7639 * 0.12213); }
+  html.mobart .fbar.fb-bottom { left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.00000); top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.87867); width: calc((100% - 36px) / 0.8114 * 1.00000); height: calc((100% - 36px) / 0.7639 * 0.12133); }
+  html.mobart .fbar.fb-left { left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.00000); top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.12213); width: calc((100% - 36px) / 0.8114 * 0.09929); height: calc((100% - 36px) / 0.7639 * 0.75654); }
+  html.mobart .fbar.fb-right { left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.90000); top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.12213); width: calc((100% - 36px) / 0.8114 * 0.10000); height: calc((100% - 36px) / 0.7639 * 0.75654); }
   /* ---- Power Outage review fixes (2026-11-18) ---- */
   /* the feature cards are cream: navy lettering without the black outline, the title in the card's yellow band
      (feature_box.webp: the band runs 3.4%-14.5% down the card) */
@@ -3600,8 +3600,8 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   /* ---- owner pass 2 (2026-11-18) ---- */
   /* the breaker on the frame: click it to spin; it is thrown up (ON) while a round plays and drops back after */
   #leverbox { position: absolute; z-index: 4; cursor: pointer; pointer-events: auto; user-select: none;
-    left: calc(18px - (100% - 36px) * 0.17766 + (100% - 36px) / 0.7164 * 0.90441); top: calc(18px - (100% - 36px) * 0.32489 + (100% - 36px) / 0.5979 * 0.53294);
-    width: calc((100% - 36px) / 0.7164 * 0.05409); height: calc((100% - 36px) / 0.5979 * 0.09788); }
+    left: calc(18px - (100% - 36px) * 0.11597 + (100% - 36px) / 0.8114 * 0.90441); top: calc(18px - (100% - 36px) * 0.15522 + (100% - 36px) / 0.7639 * 0.53294);
+    width: calc((100% - 36px) / 0.8114 * 0.05409); height: calc((100% - 36px) / 0.7639 * 0.09788); }
   #leverbox img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
     transform-origin: 27.99% 3.46%; transform: perspective(260px) rotateX(0deg);
     transition: transform .32s cubic-bezier(.45, 1.45, .5, 1), filter .15s; }
@@ -3609,7 +3609,7 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   body.poweron #leverbox img { transform: perspective(260px) rotateX(180deg); }
   /* the power cord: its own box the size of the frame, under the frame (it comes out from under the clamp) */
   #cablebox { position: absolute; z-index: 2; pointer-events: none;
-    left: calc(18px - (100% - 36px) * 0.17766); top: calc(18px - (100% - 36px) * 0.32489); width: calc((100% - 36px) / 0.7164); height: calc((100% - 36px) / 0.5979); }
+    left: calc(18px - (100% - 36px) * 0.11597); top: calc(18px - (100% - 36px) * 0.15522); width: calc((100% - 36px) / 0.8114); height: calc((100% - 36px) / 0.7639); }
   #cablebox .cablecv { position: absolute; pointer-events: none; }
   #cablebox .cablegrab { position: absolute; width: 8%; height: 9%; margin: -4.5% 0 0 -4%; border-radius: 50%;
     pointer-events: auto; cursor: grab; touch-action: none; }
@@ -3662,7 +3662,7 @@ addEventListener("webglcontextlost", () => gfxLow("a WebGL context was lost"), t
   /* ---- owner pass 4 (2026-11-18) ---- */
   /* the frayed wire's sparks: the frame's own box, over the frame (frontend/spark.js draws in it) */
   #sparkbox { position: absolute; z-index: 6; pointer-events: none;
-    left: calc(18px - (100% - 36px) * 0.17766); top: calc(18px - (100% - 36px) * 0.32489); width: calc((100% - 36px) / 0.7164); height: calc((100% - 36px) / 0.5979); }
+    left: calc(18px - (100% - 36px) * 0.11597); top: calc(18px - (100% - 36px) * 0.15522); width: calc((100% - 36px) / 0.8114); height: calc((100% - 36px) / 0.7639); }
   #sparkbox .sparkcv { position: absolute; pointer-events: none; }
   /* a bigger board: the page gives the frame only the room it needs (the margins above), not the 64 px of air over
      it, the 44 under it and the 22 under that */
@@ -3810,6 +3810,119 @@ if (window.MOBART) (() => {
   for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) { /* not ours */ } }
 })();
 </script>
+<style>
+  /* ==== Broadway on Nashville (2026-11-22) ============================================================ */
+  /* the neon title sign stands to the RIGHT of the board (the bar's stage shows on the left); a slight tilt, no swing */
+  #logosign { right: auto; left: calc(100% + .05 * var(--bw, 963px)); top: 6%; rotate: 2.5deg; width: calc(.44 * var(--bw, 963px)); }
+  #logosign .ge, #logosign .geglow { opacity: var(--ge, 1); }
+  /* the street: neon "off" patches and the bulbs' chase groups over the lit painting (bgscene.js) */
+  #bgscene .bgstreet, #bgscene .bgroof { position: absolute; inset: 0; pointer-events: none; }
+  #bgscene .bgoff { position: absolute; display: block; opacity: 0; pointer-events: none; user-select: none; }
+  #bgscene .bgstar { position: absolute; width: .32%; aspect-ratio: 1; margin: -.16%; border-radius: 50%; background: #FFF6D8;
+    box-shadow: 0 0 6px 2px rgba(255, 246, 216, .6); scale: var(--s, 1); animation: bgtwinkle var(--d, 3s) ease-in-out var(--o, 0s) infinite; }
+  @keyframes bgtwinkle { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+  #bgscene .bgroof { display: none; }
+  #bgscene.xtreme .bgroof { display: block; }
+  #bgscene.xtreme .bgstreet { display: none; }
+  #bgscene .bgfw { position: absolute; display: block; pointer-events: none; animation: bgfw 1.6s cubic-bezier(.2, .8, .3, 1) forwards; }
+  #bgscene .bgfw svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  @keyframes bgfw { 0% { transform: scale(.1); opacity: 1; } 55% { opacity: 1; } 100% { transform: scale(1.15) translateY(6%); opacity: 0; } }
+  #bgscene .bgbeam2 { position: absolute; bottom: 30%; width: 22%; height: 95%; transform-origin: 50% 100%; mix-blend-mode: screen;
+    background: linear-gradient(to top, rgba(255, 246, 220, .5), rgba(255, 240, 200, .16) 60%, rgba(255, 240, 200, 0));
+    clip-path: polygon(44% 100%, 56% 100%, 100% 0, 0 0); pointer-events: none; }
+  #bgscene .bgbeam2.l { left: 8%; }
+  #bgscene .bgbeam2.r { right: 8%; }
+  @media (prefers-reduced-motion: reduce) { #bgscene .bgstar { animation: none; } }
+  /* ---- inside the bar (2026-11-23): the small things that move (bgscene.js places them from scene.json "props") ---- */
+  #bgscene { container-type: size; }
+  #bgscene .bgstreet > i, #bgscene .bgstreet > i b { position: absolute; display: block; pointer-events: none; }
+  /* a ceiling fan: a top view of its blades turning, flattened to how it looks from the floor; rod, housing and lamp over it */
+  #bgscene .bgfan .bgf-disc { inset: 0; transform: scaleY(.2); }
+  #bgscene .bgfan .bgf-spin { inset: 0; animation: bgfan var(--d, 3.4s) linear var(--o, 0s) infinite; }
+  #bgscene .bgfan .bgf-spin svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  @keyframes bgfan { to { transform: rotate(360deg); } }
+  #bgscene .bgfan .bgf-rod { left: 48.6%; width: 2.8%; top: 28%; height: 22%; background: #2a1a12; box-shadow: 0 0 0 2px #111; }
+  #bgscene .bgfan .bgf-hub { left: 41%; width: 18%; top: 46.5%; height: 8%; border-radius: 50%; background: #C9A040; box-shadow: 0 0 0 2.5px #111, inset 0 -3px 0 #9a7426; }
+  #bgscene .bgfan .bgf-lamp { left: 46.2%; width: 7.6%; top: 53.4%; height: 5%; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: #FFF2C0;
+    box-shadow: 0 0 0 2px #111, 0 6px 14px 4px rgba(255, 226, 150, .45); }
+  /* the jukebox's lit tubes, cut from the painting: they run through the colours */
+  #bgscene .bgjuke { position: absolute; display: block; pointer-events: none; user-select: none; animation: bgjuke 11s linear infinite; }
+  @keyframes bgjuke { to { filter: hue-rotate(360deg); } }
+  /* a shine across each gold record, one after another, every nine seconds */
+  #bgscene .bgrec { border-radius: 50%; overflow: hidden; }
+  #bgscene .bgrec b { top: -20%; bottom: -20%; left: 0; width: 34%; transform: translateX(-160%) skewX(-22deg);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 252, 232, .75), rgba(255, 255, 255, 0));
+    animation: bgrec 9s ease-in-out var(--o, 0s) infinite; }
+  @keyframes bgrec { 0%, 82% { transform: translateX(-160%) skewX(-22deg); } 96%, 100% { transform: translateX(420%) skewX(-22deg); } }
+  /* the stage lights' beams: a soft cone of the lens's colour hung from the lamp; it sways and swells (dust drifts in it) */
+  #bgscene .bgbeam { transform-origin: 50% 0; rotate: var(--r, 0deg); mix-blend-mode: screen; opacity: .2;
+    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+    background: linear-gradient(to bottom, var(--c, #fff), color-mix(in srgb, var(--c, #fff) 55%, transparent) 55%, transparent);
+    animation: bgbeam var(--d, 8s) ease-in-out var(--o, 0s) infinite alternate; }
+  @keyframes bgbeam { from { transform: rotate(-5deg); opacity: .14; } to { transform: rotate(6deg); opacity: .36; } }
+  #bgscene .bgmote { width: .2cqw; height: .2cqw; margin: -.1cqw; border-radius: 50%; background: #FFF3CF; opacity: 0; scale: var(--s, 1);
+    animation: bgmote var(--d, 10s) linear var(--o, 0s) infinite; }
+  @keyframes bgmote { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: var(--a, .5); } 80% { opacity: var(--a, .5); }
+    100% { transform: translate(var(--dx, 0), var(--dy, -4cqh)); opacity: 0; } }
+  /* a glint on a bottle */
+  #bgscene .bgglint { width: 1.1cqw; height: 1.1cqw; margin: -.55cqw; opacity: 0; animation: bgglint var(--d, 5s) ease-in-out var(--o, 0s) infinite; }
+  #bgscene .bgglint svg { display: block; width: 100%; height: 100%; }
+  @keyframes bgglint { 0%, 68% { transform: scale(0) rotate(0deg); opacity: 0; } 80% { transform: scale(1) rotate(30deg); opacity: 1; }
+    92%, 100% { transform: scale(0) rotate(60deg); opacity: 0; } }
+  /* steam off the coffee pot: three wavy lines rising, one after another */
+  #bgscene .bgsteam { width: .9cqw; height: 4.4cqh; margin: -4.4cqh 0 0 -.45cqw; opacity: 0; transform-origin: 50% 100%;
+    animation: bgsteam var(--d, 3s) ease-out var(--o, 0s) infinite; }
+  #bgscene .bgsteam svg { display: block; width: 100%; height: 100%; }
+  @keyframes bgsteam { 0% { transform: translateY(18%) scale(calc(.6 * var(--k, 1)), .5); opacity: 0; } 25% { opacity: .62; }
+    100% { transform: translateY(-62%) scale(calc(1.25 * var(--k, 1)), 1.15); opacity: 0; } }
+  #bgscene.still .bgfan .bgf-spin, #bgscene.still .bgjuke, #bgscene.still .bgrec b { animation: none; }
+  /* Encore: the neon ENCORE! over the board and the stage spotlight that sweeps it (desktop only) */
+  .encoretitle { position: absolute; left: 50%; top: -9.5%; z-index: 40; translate: -50% 0; pointer-events: none;
+    font: 900 calc(.11 * var(--bw, 963px)) / 1 "Fredoka", system-ui, sans-serif; letter-spacing: .02em; color: #FFF0FA;
+    -webkit-text-stroke: calc(.006 * var(--bw, 963px)) #FF3FA4;
+    text-shadow: 0 0 calc(.01 * var(--bw, 963px)) #FF3FA4, 0 0 calc(.03 * var(--bw, 963px)) #FF3FA4, 0 calc(.008 * var(--bw, 963px)) 0 #2a0820;
+    animation: encorein .5s cubic-bezier(.2, 1.6, .4, 1) both; }
+  .encoretitle.off { animation: encoreout .45s ease-in forwards; }
+  @keyframes encorein { 0% { transform: scale(.3) rotate(-8deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  @keyframes encoreout { to { transform: scale(1.2); opacity: 0; } }
+  html.mob .encoretitle { text-shadow: 0 calc(.008 * var(--bw, 963px)) 0 #2a0820; }
+  .encorespot { position: absolute; inset: -12% -6% -2%; z-index: 35; pointer-events: none; opacity: 0; overflow: hidden;
+    transition: opacity .3s ease; }
+  .encorespot.on { opacity: 1; }
+  .encorespot.off { opacity: 0; transition: opacity .5s ease; }
+  .encorespot i { position: absolute; top: -30%; left: 50%; width: 52%; height: 140%; translate: -50% 0; mix-blend-mode: screen;
+    transform-origin: 50% 0; rotate: -26deg;
+    background: radial-gradient(60% 18% at 50% 92%, rgba(255, 250, 230, .55), rgba(255, 244, 210, 0) 70%),
+                linear-gradient(to bottom, rgba(255, 248, 220, .05), rgba(255, 244, 210, .32) 70%, rgba(255, 244, 210, .12));
+    clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); }
+  .encorespot.on i { animation: encoresweep .9s ease-in-out forwards; }
+  .encorespot.land i { animation: none; rotate: 0deg; }
+  @keyframes encoresweep { 0% { rotate: -26deg; } 60% { rotate: 18deg; } 100% { rotate: 0deg; } }
+  .cell.eflipout { animation: eflipout .17s ease-in forwards; }
+  .cell.eflipin { animation: eflipin .34s cubic-bezier(.2, 1.5, .4, 1) both; }
+  @keyframes eflipout { from { transform: none; } to { transform: scale(.06, 1.1); } }
+  @keyframes eflipin { from { transform: scale(.06, 1.1); } to { transform: none; } }
+  html.reduced .cell.eflipout, html.reduced .cell.eflipin { animation: none; }
+  /* the title sign on a phone (phoneSign): one still picture (assets/mobile/logo_sign_phone.webp, ON lit), no glow
+     layers, centred over the board */
+  /* the info screen's Game Modes table: names and amounts never broken mid-word (review) */
+  html .infopanel table.modes td:nth-child(-n+2), html .infopanel table.modes th:nth-child(-n+2) { overflow-wrap: normal; white-space: nowrap; }
+  /* an unfinished round's Continue / Skip card */
+  .resumeask { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; background: rgba(8, 8, 20, .62); }
+  .resumeask .rabox { width: min(420px, 88vw); padding: 22px 24px 20px; border-radius: 18px; background: #151a3e; color: #f7f4ff;
+    border: 3px solid #111; box-shadow: 0 0 0 3px #FFC23A inset, 0 12px 30px rgba(0, 0, 0, .5); text-align: center; font-family: "Fredoka", system-ui, sans-serif; }
+  .resumeask h3 { margin: 0 0 8px; font-size: 22px; color: #FFC23A; letter-spacing: .03em; }
+  .resumeask p { margin: 0 0 16px; font-size: 15px; line-height: 1.4; }
+  .resumeask .rabtns { display: flex; gap: 12px; justify-content: center; }
+  .resumeask button { min-width: 120px; padding: 10px 16px; border-radius: 12px; border: 3px solid #111; font: 700 16px "Fredoka", system-ui, sans-serif; cursor: pointer; }
+  .resumeask .racont { background: #FFC23A; color: #241505; }
+  .resumeask .raskip { background: #2a3168; color: #f7f4ff; }
+  #phonesign { display: none; }
+  @media (orientation: portrait) {
+    html.mob #phonesign { display: block; position: absolute; z-index: 2; left: 50%; translate: -50% 0; bottom: 103%; width: 62%; height: auto;
+      pointer-events: none; user-select: none; rotate: -1.5deg; }
+  }
+</style>
 </head>
 <body>
 <div id="camfar" class="camlayer"><div id="bgwall"><div id="wallpaint" aria-hidden="true"></div><div id="tagspill" class="tagfx" aria-hidden="true"><i></i></div><img id="walltag" alt="" width="3303" height="1674" alt="" draggable="false"><div id="tagglow" class="tagfx" aria-hidden="true"><i></i><b class="sheen"><b><i></i></b></b></div></div>
@@ -3835,68 +3948,45 @@ if (window.MOBART) (() => {
         d.before(i);
       }
     } else document.getElementById("paintframe").src = mobArt("assets/frame.webp");
-    { const pf = document.getElementById("paintframe"), sign = document.createElement("div");   // Power Outage: the title board
+    { const pf = document.getElementById("paintframe"), sign = document.createElement("div");   // Broadway: the neon title sign
       sign.id = "logosign"; sign.setAttribute("aria-hidden", "true");
-      // (owner pass 5) the plate, the light its lit letters throw, and G and E switched on with theirs (sign_layers.py)
-      // (phones never show the sign: its four pictures are not even made there, so they are never fetched)
+      // the sign as drawn with ON dark, the light its lit tubes throw, and ON switched on with its own light
+      // (tools/broadway/sign_layers_bw.py; phones never show the sign: its pictures are not even fetched there)
       if (pf && pf.parentNode && !window.MOBILE) {
         sign.innerHTML = '<img class="base" src="assets/logo_sign.webp" alt="" draggable="false"><img class="glow" src="assets/logo_sign_glow.webp" alt="" draggable="false">'
           + '<img class="ge" src="assets/logo_sign_ge.webp" alt="" draggable="false"><img class="geglow" src="assets/logo_sign_ge_glow.webp" alt="" draggable="false">';
         pf.parentNode.appendChild(sign);
       }
-      // G and E are dead: every few seconds they stutter, and now and then they catch and burn for a moment (with the
-      // odd dip of a bad contact) before dying again; when the room's power sputters back (bgscene.js "bgpower") they
-      // come on with it. --ge is how lit they are, 0..1
+      // ON has a loose contact: it is lit most of the time, and every few seconds it stutters, drops out and catches
+      // again; on a big moment (bgscene.js "bgpower") it blinks with the street. --ge is how lit it is, 0..1
       if (sign.parentNode && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const ge = v => sign.style.setProperty("--ge", v);
+        ge(1);
         let busy = false;
         const play = (steps, then) => {
           busy = true;
           let t = 0;
           for (const [ms, v] of steps) { setTimeout(() => ge(v), t); t += ms; }
-          setTimeout(() => { ge(0); busy = false; if (then) then(); }, t);
+          setTimeout(() => { ge(1); busy = false; if (then) then(); }, t);
         };
         const stutter = n => {
           const s = [];
-          for (let i = 0; i < n; i++) { s.push([28 + Math.random() * 70, (.4 + Math.random() * .6).toFixed(2)]); s.push([45 + Math.random() * 170, Math.random() < .25 ? .1 : 0]); }
-          return s;
-        };
-        const hold = ms => {
-          const s = [];
-          for (let rest = ms; rest > 0;) { const run = Math.min(rest, 260 + Math.random() * 700); s.push([run, 1]); rest -= run; if (rest > 0) s.push([30 + Math.random() * 40, .55]); }
+          for (let i = 0; i < n; i++) { s.push([28 + Math.random() * 70, Math.random() < .3 ? .15 : 0]); s.push([45 + Math.random() * 170, (.7 + Math.random() * .3).toFixed(2)]); }
           return s;
         };
         const idle = () => setTimeout(() => {
           if (document.hidden || busy) return idle();
           const steps = stutter(2 + Math.floor(Math.random() * 4));
-          if (Math.random() < .4) steps.push(...hold(1100 + Math.random() * 2400), ...stutter(1 + Math.floor(Math.random() * 3)));
+          if (Math.random() < .3) steps.push([600 + Math.random() * 1400, 0], ...stutter(1 + Math.floor(Math.random() * 2)));
           play(steps, idle);
-        }, 1700 + Math.random() * 4300);
+        }, 2200 + Math.random() * 5200);
         idle();
-        addEventListener("bgpower", () => { if (!busy) play([[110, 1], [80, 0], [110, .8], [80, 0], [520, 1], [60, .9], [80, 0], [70, .5]]); });
-      }
-      // the breaker switch on the frame (owner pass 2): its handle is its own picture (tools/outage/frame_lever.py),
-      // thrown with the round (body.poweron); clicking it is the same as pressing Spin
-      const lb = document.createElement("div");
-      lb.id = "leverbox"; lb.setAttribute("role", "button"); lb.setAttribute("aria-label", "Spin"); lb.title = "Spin";
-      lb.innerHTML = '<img src="assets/lever.webp" alt="" draggable="false">';
-      lb.addEventListener("click", e => {
-        e.stopPropagation();
-        if (typeof REPLAY !== "undefined" && REPLAY) return;
-        const s = document.getElementById("spinBtn");
-        if (s && !s.disabled) s.click();
-      });
-      if (pf && pf.parentNode) pf.parentNode.appendChild(lb);
-      // the dangling power cord's box (frontend/cable.js swings the cord in it with physics)
-      const cb = document.createElement("div"); cb.id = "cablebox"; cb.setAttribute("aria-hidden", "true");
-      if (pf && pf.parentNode) pf.parentNode.appendChild(cb);
-      // the frayed wire's live sparks (frontend/spark.js), over the frame
-      const sb = document.createElement("div"); sb.id = "sparkbox"; sb.setAttribute("aria-hidden", "true");
-      if (pf && pf.parentNode) pf.parentNode.appendChild(sb);
-      // the Xtreme Bonus's room is fetched while the base game plays, so it is there the moment the bonus lands
+        addEventListener("bgpower", () => { if (!busy) play([[110, 0], [80, 1], [110, 0], [80, 1], [90, 0], [60, 1]]); });
+      } else if (sign.parentNode) sign.style.setProperty("--ge", 1);
+      // the Xtreme Bonus's rooftop is fetched while the base game plays, so it is there the moment the bonus lands
       if (!window.MOBILE) setTimeout(() => { new Image().src = "assets/bonus_wall_xtreme.webp"; }, 8000); }
     </script>
-    <div class="ticker" id="ticker">Draws come from the optimized 96.7% RTP lookup tables — the real math.</div>
+    <div class="ticker" id="ticker"></div>
     <div class="banner" id="banner"><div class="big" id="bannerBig"></div><div class="sub2" id="bannerSub"></div><img id="bannerMural" class="muralimg" alt=""></div>
     <div class="tally" id="tally">0.00</div>
   </div>
@@ -4063,8 +4153,6 @@ if (window.MOBART) (() => {
 <script>if (!window.MOBILE) document.write('<script src="sprayrim.js"><\/script><script src="bgscene.js"><\/script>');</script>
 <script src="candleflame.js"></script>
 <script src="boardgl.js"></script>
-<script src="cable.js"></script>
-<script src="spark.js"></script>
 <script src="hudfit.js"></script>
 <script>
 "use strict";
@@ -4072,19 +4160,19 @@ if (window.MOBART) (() => {
 // a multiplier as the player should read it: 1.25, 5, 1000 - never 5.00
 const fmtMult = v => String(+(+v).toFixed(2));
 const SYM = {
-  M:  { label: "SURGE", sub: "MULTI",      cls: "booster", img: "assets/flat/M.webp" },   // the power surge, its value over it
+  M:  { label: "GOLD RECORD", sub: "MULTI", cls: "booster", img: "assets/flat/M.webp" },   // the Gold Record, its value over it
   BS: { label: "FS",    sub: "BONUS",      cls: "scat",  img: "assets/flat/BS.webp" },
   ES: { label: "XFS",   sub: "EXTREME",    cls: "escat", img: "assets/flat/ES.webp" },
-  H1: { label: "PREZ",  sub: "PRESIDENT",  cls: "high", img: "assets/flat/H1.webp" },
-  H2: { label: "AGENT", sub: "BODYGUARD",  cls: "high", img: "assets/flat/H2.webp" },
-  H3: { label: "CEO",   sub: "BANKRUPT",   cls: "high", img: "assets/flat/H3.webp" },
-  H4: { label: "CRASH", sub: "STOCKS",     cls: "high", img: "assets/flat/H4.webp" },
-  H5: { label: "PHONE", sub: "HOTLINE",    cls: "high", img: "assets/flat/H5.webp" },
-  L1: { label: "CANDLE",sub: "",           cls: "low",  img: "assets/flat/L1.webp" },
-  L3: { label: "BATT",  sub: "BATTERY",    cls: "low",  img: "assets/flat/L3.webp" },
-  L4: { label: "BULB",  sub: "BLOWN",      cls: "low",  img: "assets/flat/L4.webp" },
-  H6: { label: "SERVER",sub: "AI",         cls: "high", img: "assets/flat/H6.webp" },
-  H7: { label: "PIGGY", sub: "BROKE",      cls: "high", img: "assets/flat/H7.webp" },
+  H1: { label: "CROONER", sub: "THE CROONER", cls: "high", img: "assets/flat/H1.webp" },
+  H2: { label: "BRIDE", sub: "BACHELORETTE", cls: "high", img: "assets/flat/H2.webp" },
+  H3: { label: "FIDDLER", sub: "THE FIDDLER", cls: "high", img: "assets/flat/H3.webp" },
+  H4: { label: "BULL",  sub: "MECHANICAL", cls: "high", img: "assets/flat/H4.webp" },
+  H5: { label: "CHICKEN", sub: "HOT",      cls: "high", img: "assets/flat/H5.webp" },
+  L1: { label: "HORSESHOE", sub: "",       cls: "low",  img: "assets/flat/L1.webp" },
+  L3: { label: "PICK",  sub: "GUITAR",     cls: "low",  img: "assets/flat/L3.webp" },
+  L4: { label: "HARMONICA", sub: "",       cls: "low",  img: "assets/flat/L4.webp" },
+  H6: { label: "BOOT",  sub: "RHINESTONE", cls: "high", img: "assets/flat/H6.webp" },
+  H7: { label: "BANJO", sub: "",           cls: "high", img: "assets/flat/H7.webp" },
 };
 // The 5x5 game (math voodoo_5x5, 2026-11-09) keeps three lows - fleur-de-lis, crawfish, king cake: the others never
 // land, so they are not loaded, not drawn in a celebration's shower and not offered anywhere (their art stays in assets/)
@@ -5318,8 +5406,8 @@ const BURST_SWELL = 1.3;  // how big the tile has swollen by then: its pieces st
 const BURST_PX = 240;     // the pieces are cut with the icon this many px across (a tile is ~100 css px, at 2x DPR)
 // the light each symbol bursts in: its own colour; the grey ones take their tier's neon, or white
 const BURST_COLOUR = {
-  H1: "#FFD54A", H2: "#FFF2B0", H3: "#FF9A3C", H4: "#FF5A5A", H5: "#FF5A5A", H6: "#3FE0FF", H7: "#FF9EC0",   // blackout: each symbol's own colour
-  L1: "#FFD54A", L3: "#FF6A5A", L4: "#BFD9FF", M: "#3FE0FF", BS: "#FFD54A", ES: "#3FE0FF",
+  H1: "#FFC23A", H2: "#FF3FA4", H3: "#FFB04A", H4: "#FF6A3A", H5: "#FF5A2A", H6: "#FF3B3B", H7: "#FFF0C8",   // Broadway: each symbol's own neon
+  L1: "#FFC23A", L3: "#FF4A5A", L4: "#7FC8FF", M: "#FFD45A", BS: "#FF3FA4", ES: "#2FA8FF",
 };
 const burstKits = {}, glowSprites = {};
 let smokeSprite = null, bursts = [], burstRaf = 0, burstLast = 0;
@@ -5624,8 +5712,8 @@ function hexIcon(m) {
   const W = c.w, rnd = (a, b) => a + Math.random() * (b - a);
   // its spirit: the potion gives up the voodoo skull's ghost; every other icon its own
   const spirit = kit, col = BURST_COLOUR[m.name] || "#FFD54A";
-  bursts.push({ hex: true, from: now, born: now, t, x: c.x, y: c.y, W, kit, drawW, ghost: spirit.ghost, glow: glowSprite("#FFD54A"),
-    vglow: glowSprite("#3FE0FF"), own: glowSprite(col), turn: rnd(-1, 1),
+  bursts.push({ hex: true, from: now, born: now, t, x: c.x, y: c.y, W, kit, drawW, ghost: spirit.ghost, glow: glowSprite("#FFC23A"),
+    vglow: glowSprite("#FF3FA4"), own: glowSprite(col), turn: rnd(-1, 1),
     wisps: [0, 1, 2, 3].map(i => ({ a: i / 4 * 6.28 + rnd(0, 1), r: W * rnd(.12, .26), sp: rnd(.004, .007) * (i % 2 ? 1 : -1), s: rnd(.5, .8) })),
     motes: Array.from({ length: bursts.length > 8 ? 6 : 14 }, () => ({ a: rnd(0, 6.28), r: W * rnd(.1, .4), up: W * rnd(.5, 1.1),
       spin: rnd(-.006, .006), s: W * rnd(.03, .06), at: rnd(80, 380), violet: Math.random() < .35 })) });
@@ -6764,6 +6852,9 @@ const SFX = {
   dripLand: "assets/sfx_drip_b.wav",             // an icon landing on the pile during the reveal
   // (owner pass 5) the alarm: one klaxon whoop as an XFS lands, the full alarm as the Xtreme Bonus triggers
   xfsAlarm: "assets/sfx_xfs_alarm.wav", xtremeAlarm: "assets/sfx_xtreme_alarm.wav",
+  // Encore (Broadway): the guitar riff, the spotlight landing, a symbol flipping, the crowd
+  encoreRiff: "assets/sfx_encore_riff.wav", spotlight: "assets/sfx_spotlight.wav", flip: "assets/sfx_flip.wav",
+  crowdCheer: "assets/sfx_crowd_cheer.wav",
 };
 const DRIP_SFX = ["dripA", "dripB", "dripC", "dripD", "dripE", "dripF"];
 // avoids repeating the last pick, so back-to-back drips in one round never double up
@@ -6780,7 +6871,7 @@ const SFX_VOL = {
   dripA: .5, dripB: .5, dripC: .5, dripD: .5, dripE: .5, dripF: .5,
   scatterLand: .55, pop: .42, multiHit: .55, alertA: .55, alertB: .55, bustA: .5, bustB: .5,
   winText: .5, hoverLoop: .28, autoStart: .45, autoStop: .45, menuOpen: .4, menuClose: .4, toggle: .4,
-  dripLand: .3, xfsAlarm: .5, xtremeAlarm: .55,
+  dripLand: .3, xfsAlarm: .5, xtremeAlarm: .55, encoreRiff: .6, spotlight: .5, flip: .32, crowdCheer: .5,
   moneyTick: .4, mediumWin: .55, trophy: .6, coinsRain: .45,
 };
 // Each symbol's own win sound, played as its cluster lights up, on top of the shared cluster note.
@@ -6887,17 +6978,17 @@ let actx = null, sfxBus = null, musicBus = null;
 // Player's mix, 0-100 each, remembered per browser. The music bar is musicBus's gain, over
 // every cue (see the music section below).
 const vol = { music: 70, sfx: 80 };
-try { Object.assign(vol, JSON.parse(localStorage.getItem("poweroutage.vol") || "{}")); } catch (e) { /* storage blocked */ }
+try { Object.assign(vol, JSON.parse(localStorage.getItem("broadway.vol") || "{}")); } catch (e) { /* storage blocked */ }
 // The old build carried a separate "mute everything" switch. Dragging a bar to zero is the
 // mute now, so anyone who had that switch on comes back silenced instead of losing the
 // setting. Write the migrated mix before dropping the old key, or the next load would read
 // a mix that was never saved and come back loud.
 try {
-  if (localStorage.getItem("poweroutage.muted") === "1") {
+  if (localStorage.getItem("broadway.muted") === "1") {
     vol.music = 0; vol.sfx = 0;
-    localStorage.setItem("poweroutage.vol", JSON.stringify(vol));
+    localStorage.setItem("broadway.vol", JSON.stringify(vol));
   }
-  localStorage.removeItem("poweroutage.muted");
+  localStorage.removeItem("broadway.muted");
 } catch (e) { /* storage blocked */ }
 function applyVolumes() {
   if (sfxBus) sfxBus.gain.value = vol.sfx / 100;
@@ -6918,12 +7009,12 @@ function applyVolumes() {
 // level: each cue's gain under the music bar. Every master reads -14 LUFS; the levels sit the base
 // game where the old loop sat, the menu under it and the bonus and its screens a little over it,
 // all well under the effects. bpm and bars give the cue's beat, so the free spins can start on one.
-const MUSIC = {   // Power Outage: a dark-comedy cartoon score (pizzicato, bassoon, tuba, glockenspiel, muted trumpet, mains hum) - tools/music
-  base:  { ogg: "assets/music_base.ogg", aac: "assets/music_base.aac", frames: 3592748, aacStart: 5824, aacFrames: 3599360, bpm: 103.003, bars: 32, level: 0.299 },
-  menu:  { ogg: "assets/music_menu.ogg", aac: "assets/music_menu.aac", frames: 2003110, aacStart: 5824, aacFrames: 2009088, bpm: 92.006, bars: 16, level: 0.224 },
-  intro: { ogg: "assets/music_intro.ogg", aac: "assets/music_intro.aac", frames: 708709, head: 273683, headLen: 302483, aacStart: 5824, aacFrames: 1017856, bpm: 130.002, bars: 8, level: 0.335 },
-  bonus: { ogg: "assets/music_bonus.ogg", aac: "assets/music_bonus.aac", frames: 2878536, aacStart: 5824, aacFrames: 2884608, bpm: 128.026, bars: 32, level: 0.398 },
-  total: { ogg: "assets/music_total.ogg", aac: "assets/music_total.aac", frames: 768134, head: 204567, headLen: 262167, aacStart: 5824, aacFrames: 1036288, bpm: 119.968, bars: 8, level: 0.376 },
+const MUSIC = {   // Broadway on Nashville: instrumental honky-tonk / country (Telecaster, pedal steel, fiddle, banjo, honky-tonk piano, upright bass, shuffle drums) - tools/music
+  base:  { ogg: "assets/music_base.ogg", aac: "assets/music_base.aac", frames: 3351395, aacStart: 5824, aacFrames: 3357696, bpm: 109.988, bars: 32, level: 0.299 },
+  menu:  { ogg: "assets/music_menu.ogg", aac: "assets/music_menu.aac", frames: 2332656, aacStart: 5824, aacFrames: 2338816, bpm: 79.043, bars: 16, level: 0.224 },
+  intro: { ogg: "assets/music_intro.ogg", aac: "assets/music_intro.aac", frames: 594634, head: 238175, headLen: 266975, aacStart: 5824, aacFrames: 868352, bpm: 154.995, bars: 8, level: 0.335 },
+  bonus: { ogg: "assets/music_bonus.ogg", aac: "assets/music_bonus.aac", frames: 2425357, aacStart: 5824, aacFrames: 2432000, bpm: 151.993, bars: 32, level: 0.398 },
+  total: { ogg: "assets/music_total.ogg", aac: "assets/music_total.aac", frames: 768605, head: 194795, headLen: 252395, aacStart: 5824, aacFrames: 1027072, bpm: 119.98, bars: 8, level: 0.376 },
 };
 const MUSIC_RATE = 48000;
 // The mobile tier's sound (iOS memory, 2026-11-16, after Tipsy Harvest's): every decoded sample is a 32-bit float at
@@ -7628,7 +7719,7 @@ const handlers = {
       sfx("multiHit", Math.min(1.9, 1 + .07 * (state.multiCount - 1)));
       boardFlash("multi", b.mult || 1);
       if (state.multiCount >= 3 && state.multiCount % 3 === 0) sfx((state.multiCount / 3) % 2 ? "alertA" : "alertB");
-      tick(`<b>MULTI x${fmtMult(b.mult)}</b> hits ${(b.cells || []).length} cells`);
+      tick(`<b>GOLD RECORD x${fmtMult(b.mult)}</b> hits ${(b.cells || []).length} cells`);
       const lead = 360 / MULTI_RATE;   // the Multi's pop leads; its neighbours follow
       await hold(lead);
       for (const c of hits) { c.classList.add("hit", "winhit"); rigPlay(c, "multi", { speed: MULTI_RATE }); }
@@ -7670,11 +7761,11 @@ const handlers = {
       // no banner over the board (owner, 2026-10-25): the board turning to walls is the announcement
       charReact("big_win");
       sfx("alertA");
-      tick(`<b>GRID OVERLOAD</b> \u2014 every cell is a Multi`);
+      tick(`<b>SOLD-OUT SHOW</b> \u2014 every cell is a Gold Record`);
       await hold(700 / MULTI_RATE);
     } else {
       sfx("alertB");
-      tick(`<b>SURGE LINE</b> \u2014 ${cells.length} Multis in a row`);
+      tick(`<b>HIT PARADE</b> \u2014 ${cells.length} Gold Records in a row`);
       await hold(420 / MULTI_RATE);
     }
     for (const c of cells) c.classList.remove("pulse");
@@ -7691,6 +7782,11 @@ const handlers = {
     }
     await hold(160 / MULTI_RATE);
   },
+
+  // Encore (Broadway on Nashville): the board had stopped paying; a guitar riff strikes up, a stage spotlight sweeps
+  // the board and lands, and every copy of one regular symbol (ev.from) turns into the Headliner (ev.to), one after
+  // another; the clusters the new board makes are paid by the events that follow (winInfo, tumbleBoard, booster...)
+  async encore(ev) { await encoreShow(ev); },
 
   async setWin() { await delay(120); },
   async setTotalWin(ev) {
@@ -7887,7 +7983,7 @@ function drawWinLine(positions) {
   const gp = gfxCtx(cv);
   if (!gp) return 0;   // (the safety net) no canvas for the line: the cluster still pays and pops
   gp.setTransform(k, 0, 0, k, -bx * k, -by * k);
-  gp.lineJoin = "miter"; gp.miterLimit = 4; gp.lineCap = "round";   // sharp kinks, like a bolt
+  gp.lineJoin = "round"; gp.lineCap = "round";   // a bent glass tube: no kinks
   sh.el.classList.add("on");
   const rnd = Math.random;
   // a jagged run through every cell of the path: each leg split three times, its midpoints knocked sideways (the
@@ -7896,7 +7992,7 @@ function drawWinLine(positions) {
     const out = [{ x: path[0].x, y: path[0].y, node: true, s: 0 }];
     for (let i = 0; i < path.length - 1; i++) {
       let seg = [path[i], path[i + 1]];
-      let amp = Math.min(26, Math.hypot(seg[1].x - seg[0].x, seg[1].y - seg[0].y) * .2);
+      let amp = Math.min(5, Math.hypot(seg[1].x - seg[0].x, seg[1].y - seg[0].y) * .035);
       for (let lvl = 0; lvl < 3; lvl++) {
         const next = [seg[0]];
         for (let j = 0; j < seg.length - 1; j++) {
@@ -7912,7 +8008,7 @@ function drawWinLine(positions) {
   };
   // small forks spitting off the run, no further along than the strike has reached
   const forks = (B, upto) => {
-    const f = [], n = Math.min(7, 2 + Math.floor(path.length / 2));
+    const f = [], n = 0;   // (no forks off a neon tube)
     for (let i = 0; i < n; i++) {
       const j = 1 + Math.floor(rnd() * (B.length - 1)), p = B[j], q = B[j - 1];
       if (p.s > upto) continue;
@@ -7940,29 +8036,29 @@ function drawWinLine(positions) {
   };
   const flare = (x, y, r, a) => {
     const g = gp.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, `rgba(250, 254, 255, ${a.toFixed(3)})`); g.addColorStop(.35, `rgba(120, 232, 255, ${(a * .6).toFixed(3)})`);
-    g.addColorStop(1, "rgba(63, 224, 255, 0)");
+    g.addColorStop(0, `rgba(255, 250, 252, ${a.toFixed(3)})`); g.addColorStop(.35, `rgba(255, 140, 200, ${(a * .6).toFixed(3)})`);
+    g.addColorStop(1, "rgba(255, 63, 164, 0)");
     gp.fillStyle = g; gp.fillRect(x - r, y - r, r * 2, r * 2);
   };
   const paint = (B, F, upto, hot, T) => {
-    const i = hot > 1 ? 1 : .68 + rnd() * .32;   // the arc's own flicker
+    const i = hot > 1 ? 1 : .9 + rnd() * .1;   // the tube's hum
     gp.globalCompositeOperation = "source-over";
     gp.clearRect(bx, by, bw, bh);
     stroke(B, upto, 15 * hot, "rgba(6, 16, 48, .3)");   // a dark edge, so it reads over the bright symbols
     gp.globalCompositeOperation = "lighter";
-    stroke(B, upto, 28 * hot, `rgba(63, 224, 255, ${(.1 * i).toFixed(3)})`);   // the corona, wide to tight
-    stroke(B, upto, 14 * hot, `rgba(63, 224, 255, ${(.28 * i).toFixed(3)})`);
+    stroke(B, upto, 28 * hot, `rgba(255, 63, 164, ${(.1 * i).toFixed(3)})`);   // the corona, wide to tight
+    stroke(B, upto, 14 * hot, `rgba(255, 63, 164, ${(.28 * i).toFixed(3)})`);
     if (T) {   // a second, thinner strand arcing beside the main one
-      stroke(T, upto, 6, `rgba(63, 224, 255, ${(.2 * i).toFixed(3)})`);
-      stroke(T, upto, 1.5, `rgba(225, 250, 255, ${(.7 * i).toFixed(3)})`);
+      stroke(T, upto, 6, `rgba(255, 63, 164, ${(.2 * i).toFixed(3)})`);
+      stroke(T, upto, 1.5, `rgba(255, 228, 244, ${(.7 * i).toFixed(3)})`);
     }
     for (const leg of F) {
-      stroke(leg, null, 5.5, `rgba(63, 224, 255, ${(.22 * i).toFixed(3)})`);
-      stroke(leg, null, 1.7, `rgba(225, 250, 255, ${(.85 * i).toFixed(3)})`);
+      stroke(leg, null, 5.5, `rgba(255, 63, 164, ${(.22 * i).toFixed(3)})`);
+      stroke(leg, null, 1.7, `rgba(255, 228, 244, ${(.85 * i).toFixed(3)})`);
     }
-    stroke(B, upto, 7 * hot, `rgba(150, 238, 255, ${(.75 * i).toFixed(3)})`);
+    stroke(B, upto, 7 * hot, `rgba(255, 150, 210, ${(.75 * i).toFixed(3)})`);
     gp.globalCompositeOperation = "source-over";
-    const head = stroke(B, upto, 3.2 * hot, "rgba(248, 253, 255, 1)");   // the white-hot core
+    const head = stroke(B, upto, 3.2 * hot, "rgba(255, 250, 253, 1)");   // the white-hot core
     gp.globalCompositeOperation = "lighter";
     for (const p of B) if (p.node && p.s <= upto) flare(p.x, p.y, (20 + rnd() * 10) * hot, .78 * i);   // each symbol it earths through
     return head;
@@ -7972,13 +8068,13 @@ function drawWinLine(positions) {
   if (REDUCED_MOTION || document.hidden) { paint(B, F, Infinity, 1); return 0; }
   // (phones: the bolt re-jags half as often and for a shorter while, and throws no sparks - fewer canvas uploads)
   const PH = !!window.MOBILE;
-  const dur = D * tempo(), t0 = performance.now(), STRIKE = Math.max(110, dur * .5), LIVE = PH ? 1600 : 3600, JIT = PH ? 110 : 55;
+  const dur = D * tempo(), t0 = performance.now(), STRIKE = Math.max(110, dur * .5), LIVE = PH ? 1600 : 3600, JIT = PH ? 1400 : 900;
   // the current's whoosh rides the strike: the short take for a short line (a touch quicker when the strike is),
   // the long one for a long line, faded out once it has landed
   if (dur <= 620) sfx("sprayLineShort", Math.min(1.5, Math.max(.92, 550 / dur)));
   else { const hiss = sfx("sprayLineLong"); if (hiss) setTimeout(() => sfxFade(hiss, 140), dur); }
   const spark = q => {
-    if (PH) return;
+    if (PH || true) return;   // (a neon tube throws no sparks)
     const b = document.createElement("b"), a = rnd() * Math.PI * 2, r = 16 + rnd() * 30;
     b.style.left = (q.x - bx).toFixed(1) + "px"; b.style.top = (q.y - by).toFixed(1) + "px";
     b.style.setProperty("--dx", (Math.cos(a) * r).toFixed(1) + "px");
@@ -7993,7 +8089,7 @@ function drawWinLine(positions) {
     const e = now - t0, u = Math.min(1, Math.max(0, e / STRIKE));
     const re = now - jitAt >= JIT;
     if (u >= 1 && landed && !re) { sh.raf = requestAnimationFrame(frame); return; }   // landed: only redrawn as it re-jags
-    if (re) { jitAt = now; B = bolt(); T = rnd() < .7 ? bolt() : null; }
+    if (re) { jitAt = now; B = bolt(); T = null; }
     const upto = u >= 1 ? Infinity : B[B.length - 1].s * (1 - (1 - u) * (1 - u));   // off the mark fast, easing in
     if (u < 1) T = null;   // the second strand only once the strike has landed (its length is its own)
     if (re) F = forks(B, upto);
@@ -8302,6 +8398,54 @@ function fastForward(evs, m) {
 let roundMark = null;
 const markable = (ev, evs, i) => !!ev && (ev.type === "freeSpinEnd" || (ev.type === "updateFreeSpin" && ev.amount >= 1));
 
+// ---- Encore: the spotlight, the neon ENCORE! and the flips (the symbols change on the board's own cells)
+const ENCORE_FLIP_GAP = 85;      // ms between one flip and the next
+async function encoreShow(ev) {
+  const at = p => ({ r: p.reel, y: Math.min(Math.max(p.row - 1, 0), ROWS - 1) });
+  const cells = (ev.positions || []).map(at).filter(c => cellEls[c.r] && cellEls[c.r][c.y]);
+  const to = ev.to, label = s => (SYM[s] || { label: s }).label;
+  sfx("encoreRiff");
+  tick(`<b>ENCORE!</b> \u2014 every ${label(ev.from)} turns into ${label(to)}`);
+  const board = $("board");
+  let spot = null, title = null;
+  if (!REDUCED_MOTION) {
+    title = document.createElement("div");
+    title.className = "encoretitle";
+    title.innerHTML = `<span>${T("ENCORE!")}</span>`;
+    board.appendChild(title);
+    if (!window.MOBILE) {            // a board-sized moving light: never on a phone (iOS layers)
+      spot = document.createElement("div");
+      spot.className = "encorespot";
+      spot.innerHTML = "<i></i>";
+      board.appendChild(spot);
+    }
+  }
+  if (spot) { await hold(40); spot.classList.add("on"); }
+  await hold(REDUCED_MOTION ? 200 : 900);
+  sfx("spotlight");
+  if (spot) spot.classList.add("land");
+  await hold(260);
+  for (const [k, c] of cells.entries()) {
+    const el = cellEls[c.r][c.y];
+    if (!REDUCED_MOTION) { el.classList.remove("eflipin"); restyle(el); el.classList.add("eflipout"); }
+    sfx("flip", 1 + .04 * k);
+    setTimeout(() => {
+      const prev = shownSym[c.r] && shownSym[c.r][c.y] ? shownSym[c.r][c.y] : {};
+      setCell(c.r, c.y, Object.assign({}, prev, { name: to }));
+      if (!REDUCED_MOTION) { el.classList.add("eflipin"); winFx(el); }
+      rigPlay(el, "land");
+    }, REDUCED_MOTION ? 0 : 170);
+    await hold(ENCORE_FLIP_GAP);
+  }
+  await hold(420);
+  sfx("crowdCheer");
+  if (window.WallFX && WallFX.surge) WallFX.surge(.6, 900);
+  await hold(520);
+  for (const c of cells) cellEls[c.r][c.y].classList.remove("eflipout", "eflipin");
+  if (spot) { spot.classList.add("off"); setTimeout(() => spot.remove(), 600); }
+  if (title) { title.classList.add("off"); setTimeout(() => title.remove(), 500); }
+}
+
 /** Animate a round's event stream, then settle it. Shared by play, resume and replay —
  *  a replay is watched, not played, so it never touches the wallet (settle: false). */
 async function presentRound(round, { settle = true, from = 0 } = {}) {
@@ -8409,8 +8553,8 @@ async function presentRound(round, { settle = true, from = 0 } = {}) {
 // The shop's cards (owner, 2026-11-05, Tipsy Harvest's format), in order. A mode the math does not
 // have (no MODE_COST) shows no card.
 const BUYS = [
-  { mode: "bonus", key: "fs", title: "Free Spins", desc: "10, 12 or 15 free spins. Multis stay all bonus.", heat: 3, acc: "#FFD54A", icon: () => SYM.BS.img },
-  { mode: "extremebonus", key: "xfs", title: "Xtreme Spins", desc: "17 free spins. Every Multi is x2 or more.", heat: 5, acc: "#3FE0FF", icon: () => SYM.ES.img, x: true },
+  { mode: "bonus", key: "fs", title: "Free Spins", desc: "10, 12 or 15 free spins. Record values stay all bonus.", heat: 3, acc: "#FFD54A", icon: () => SYM.BS.img },
+  { mode: "extremebonus", key: "xfs", title: "Xtreme Spins", desc: "17 free spins. Every Gold Record is x2 or more.", heat: 5, acc: "#3FE0FF", icon: () => SYM.ES.img, x: true },
   // Bonus Boost is not a buy: it is switched on, and every base spin after it is a boosted one (playRound)
   { mode: "boost", key: "boost", title: "Bonus Boost", desc: "Every spin 1.6x as likely to land free spins.", heat: 2, acc: "#FFD54A", toggle: true },
 ];
@@ -8580,7 +8724,7 @@ async function playRound(mode) {
   state.lastPlayAt = performance.now();
 
   state.playing = true; state.skip = false; state.mode = mode;
-  document.body.classList.add("poweron");   // the breaker on the frame is thrown
+  document.body.classList.add("poweron");   // (kept: the class some styles key on while a round plays)
   setButtons(false);
   bounceFx();
   // (the board's fire no longer flares on every spin: it pops only for a line, an FS trigger or a multiplier - boardFlash)
@@ -8823,7 +8967,7 @@ function setButtons(on) {
 // The bet is never carried over a reload (Engine review, 2026-11-16): a refresh with no round open always opens on
 // the server's defaultBetLevel from /authenticate; a round left open resumes at its own amount (boot).
 // last 50 rounds, per currency — no replay link because the RGS never returns the event id
-const histKey = () => "poweroutage.hist." + RGS.state.currency;
+const histKey = () => "broadway.hist." + RGS.state.currency;
 function recordRound(mode, amount, payout, mult) {
   try {
     const h = JSON.parse(localStorage.getItem(histKey()) || "[]");
@@ -8873,7 +9017,7 @@ function refreshBet() {
 // clip: FLAVOUR, an idle break on a random timer, and a REACTION driven by the game. Every clip starts and
 // ends on the idle's first pose, so a clip cuts in where the idle passes through that pose (its cues) and
 // hands straight back to the idle's first frame.
-const CHARACTERS = [];   // Power Outage has no character beside the board: the logo sign hangs there instead
+const CHARACTERS = [];   // Broadway has no character beside the board (owner, 2026-11-24): the bar's empty stage shows there
 // The pair redraw at most about 60 times a second: on the owner's 165 Hz screen each figure - its
 // frame, rim light and shadow - was drawn 165 times a second, the heaviest thing on an idle page.
 // 63 rather than 60 because Pixi rounds the time since its last frame down to whole ms before it
@@ -9498,10 +9642,24 @@ async function makeCharacter({ el, name, flavour, swap = {}, shadow = true }) {
   return { react, enter, exit };
 }
 
+// the title sign on a phone: one still picture over the board (no layers, nothing moving)
+function phoneSign() {
+  const board = $("board");
+  if (!board) return;
+  const sign = document.createElement("img");
+  sign.id = "phonesign"; sign.alt = ""; sign.draggable = false; sign.setAttribute("aria-hidden", "true");
+  sign.src = "assets/mobile/logo_sign_phone.webp";
+  board.appendChild(sign);
+}
+
 // the loading screen waits for both characters (their walk-on and idle decoded)
 let charsLoaded = Promise.resolve([]);
 (async function characters() {
-  if (window.MOBILE || !CHARACTERS.length) { for (const id of ["charfx", "camnear"]) { const el = $(id); if (el) el.remove(); } return; }   // no character
+  if (window.MOBILE || !CHARACTERS.length) {   // no character canvas
+    for (const id of ["charfx", "camnear"]) { const el = $(id); if (el) el.remove(); }
+    if (window.MOBILE) phoneSign();
+    return;
+  }
   charsLoaded = Promise.all(CHARACTERS.map(makeCharacter));
   const rigs = (await charsLoaded).filter(Boolean);
   if (!rigs.length) return;
@@ -10820,17 +10978,20 @@ function runFeatures() {
   wrap.setAttribute("aria-label", T("How the game works"));
   const box = (icon, title, text, short) => `<div class="fbox"><div class="fin"><div class="ficon">${icon}</div><h3>${title}</h3><p class="flong">${text}</p><p class="fshort">${short}</p></div></div>`;
   wrap.innerHTML =
-    `<img class="ftitle" src="${mobArt("assets/title_logo.webp")}" alt="${T("Power Outage")}" draggable="false">` +
+    `<img class="ftitle" src="${mobArt("assets/title_logo.webp")}" alt="${T("Broadway on Nashville")}" draggable="false">` +
     `<div class="fboxes">` +
-      box(`<img src="${SYM.M.img}" alt="${T("Multi")}" draggable="false"><div class="fmult" id="featMult" aria-label="x${fmtMult(FEATURE_VALUES[0])}">${[..."x" + fmtMult(FEATURE_VALUES[0])].map(ch => `<i class="vg g-${VGLYPH[ch] || ch}"></i>`).join("")}</div>`,
-        T("Multi"),
-        T(`Lands with a value from <b>x1.25</b> to <b>x1000</b> - sometimes in a line of 3 or 4, and once in a long while over the whole board. Every winning cluster is paid first; then it blows out and leaves its value on five cells, and a cluster on those cells is multiplied by the <b>sum</b> it covers. Winning clusters drop small multipliers under themselves too.`), T(`Lands at <b>x1.25</b> to <b>x1000</b>, clears 5 cells and leaves its value there - winning clusters on them are multiplied.`)) +
-      box(`<img src="${mobArt(SYM.BS.img)}" alt="${T("FS scatter")}" draggable="false">`,
-        T("FS scatter \u00b7 Bonus"),
-        T(`<b>3</b>, <b>4</b> or <b>5</b> anywhere award <b>10</b>, <b>12</b> or <b>15</b> free spins. Multis land more often and drop in lines, and every value - a Multi's or a cluster's drop - stays on the board for the whole bonus.`), T(`<b>3</b>, <b>4</b> or <b>5</b> award <b>10</b>, <b>12</b> or <b>15</b> free spins. Every value stays for the whole bonus.`)) +
-      box(`<img src="${mobArt(SYM.ES.img)}" alt="${T("XFS scatter")}" draggable="false">`,
-        T("XFS scatter \u00b7 Extreme"),
-        T(`<b>2</b> anywhere award <b>17</b> free spins under Extreme rules: Multis land more often still, drop in lines, and every value is <b>x2</b> or more. A FS scatter trigger with a XFS scatter on the same spin is upgraded to Extreme.`), T(`<b>2</b> award <b>17</b> Xtreme free spins. Every Multi is <b>x2</b> or more.`)) +
+      box(`<img src="${SYM.M.img}" alt="${T("Gold Record")}" draggable="false"><div class="fmult" id="featMult" aria-label="x${fmtMult(FEATURE_VALUES[0])}">${[..."x" + fmtMult(FEATURE_VALUES[0])].map(ch => `<i class="vg g-${VGLYPH[ch] || ch}"></i>`).join("")}</div>`,
+        T("Gold Record \u00b7 Multi"),
+        T(`Lands with a value from <b>x1.25</b> to <b>x1000</b> - its disc shows how much: bronze, silver, gold, platinum, diamond. Every winning cluster is {paid|counted} first; then it goes off and leaves its value on five cells, and a cluster on those cells is multiplied by their sum.`),
+        T(`<b>x1.25</b> to <b>x1000</b> on five cells.`)) +
+      box(`<img src="${mobArt("assets/flat/encore_icon.webp")}" alt="${T("Encore")}" draggable="false">`,
+        T("Encore!"),
+        T(`When the board stops {paying|winning}, the crowd can call an <b>Encore</b>: the spotlight lands on a top symbol and every copy of one regular symbol on the board turns into it - then the board is {paid|counted} again. More often in the bonus.`),
+        T(`One regular symbol turns into a top one.`)) +
+      box(`<img src="${mobArt(SYM.BS.img)}" alt="${T("FS scatter")}" draggable="false"><img src="${mobArt(SYM.ES.img)}" alt="${T("XFS scatter")}" draggable="false">`,
+        T("FS \u00b7 XFS \u00b7 Free Spins"),
+        T(`<b>3</b>, <b>4</b> or <b>5</b> FS award <b>10</b>, <b>12</b> or <b>15</b> free spins; <b>2</b> XFS award <b>17</b> Xtreme spins where every Gold Record is <b>x2</b> or more. Every value stays on the board for the whole bonus.`),
+        T(`<b>3+</b> FS: 10-15 spins. <b>2</b> XFS: 17.`)) +
     `</div>` +
     `<div class="fcont"><span class="fhit"><span class="ftxt">${T("Click to play")}</span></span></div>`;
   document.body.appendChild(wrap);
@@ -10905,15 +11066,32 @@ introDone = introDone.then(() => featuresDone);   // a resumed round waits for t
 // spins won and how the Multi works in here, and the player's click takes them in: black
 // again, then the bonus board with its spin counter. It waits for the click - Rapid and
 // Skip quicken animations, they never skip a screen - though Space and Enter count as one.
-const MULTI_RANGE = ["x1.25", "x1000"];   // the Multi's values, as rules.js states them
+const MULTI_RANGE = ["x1.25", "x1000"];   // the Gold Record's values, as rules.js states them
 const EXTREME_DIRECT_SPINS = 17;          // two Phantoms, straight in (DESIGN.md, bonus rounds)
+// The card an unfinished round asks first: Continue plays it from where it stood, Skip settles it as it is
+function resumeAsk() {
+  return new Promise(resolve => {
+    const w = document.createElement("div");
+    w.className = "resumeask";
+    w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-label", T("Unfinished round"));
+    w.innerHTML = `<div class="rabox"><h3>${T("Unfinished round")}</h3><p>${T("You have a round in progress. Continue to play it out, or skip to finish it now.")}</p>` +
+      `<div class="rabtns"><button type="button" class="racont">${T("Continue")}</button><button type="button" class="raskip">${T("Skip")}</button></div></div>`;
+    document.body.appendChild(w);
+    const done = v => { w.remove(); removeEventListener("keydown", key, true); resolve(v); };
+    const key = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); done("continue"); } };
+    w.querySelector(".racont").addEventListener("click", e => { e.stopPropagation(); done("continue"); });
+    w.querySelector(".raskip").addEventListener("click", e => { e.stopPropagation(); done("skip"); });
+    addEventListener("keydown", key, true);
+    setTimeout(() => { const b = w.querySelector(".racont"); if (b) b.focus(); }, 30);
+  });
+}
 function bonusIntroHow(extreme) {
-  return `<p><strong>${T("How the Multi works in here")}</strong></p>` +
-    `<p>${T(`A Multi lands with a value from <b>${MULTI_RANGE[0]}</b> to <b>${MULTI_RANGE[1]}</b>. Every winning cluster is paid first; then it blows out, clearing itself and the four symbols beside it, and each of those five cells keeps its value. A cluster that lands on those cells is multiplied by the <strong>sum</strong> of the values it covers, and values that meet add together.`)}</p>` +
+  return `<p><strong>${T("How the Gold Records work in here")}</strong></p>` +
+    `<p>${T(`A Gold Record lands with a value from <b>${MULTI_RANGE[0]}</b> to <b>${MULTI_RANGE[1]}</b>. Every winning cluster is {paid|counted} first; then the record goes off, clearing itself and the four symbols beside it, and each of those five cells keeps its value. A cluster that lands on those cells is multiplied by the <strong>sum</strong> of the values it covers, and values that meet add together.`)}</p>` +
     `<p>${T(extreme
-      ? `In the Extreme Bonus every value stays on the board for the whole feature, Multis land more often, and every value is <b>x2</b> or more.`
+      ? `In the Xtreme Bonus every value stays on the board for the whole feature, and every Gold Record is <b>x2</b> or more.`
       : `In the bonus every value stays on the board for the whole feature: nothing is wiped between spins, so the board only gets richer.`)}</p>` +
-    `<p>${T(`Multis drop in lines of <b>3</b> or <b>4</b> far more often in here, and every winning cluster drops a small multiplier under itself - all of it stays for the rest of the bonus.`)}</p>`;
+    `<p>${T(`Hit Parades - lines of <b>3</b> or <b>4</b> Gold Records - land far more often in here, every winning cluster leaves Tips (small multipliers) under itself, and an <b>Encore</b> comes far more often than in the base game.`)}</p>`;
 }
 function bonusIntro(spins, extreme) {
   musicTo("intro", .6);   // the base game's loop gives way to the intro's impact and build
@@ -11084,7 +11262,7 @@ const BUSES = [   // both live in the one volume panel over the speaker tab (HUD
   { key: "sfx",   btn: "audioBtn", pop: "volPop", bar: "sfxBar",   num: "sfxNum" },
   { key: "music", btn: "audioBtn", pop: "volPop", bar: "musicBar", num: "musicNum" },
 ];
-function saveVol() { try { localStorage.setItem("poweroutage.vol", JSON.stringify(vol)); } catch (e) { /* ignore */ } }
+function saveVol() { try { localStorage.setItem("broadway.vol", JSON.stringify(vol)); } catch (e) { /* ignore */ } }
 // The liquid rushes up over a longer beat than it drains, and a change big enough to see
 // sets the surface swelling and the capsule rocking. A drag is exempt: it tracks the finger.
 const volShown = {};
@@ -11307,12 +11485,12 @@ function setRapid(on) {
     btn.setAttribute("aria-pressed", on ? "true" : "false");
     btn.title = btn.getAttribute("aria-label");
   }
-  try { localStorage.setItem("poweroutage.rapid", on ? "1" : "0"); } catch (e) { /* storage blocked */ }
+  try { localStorage.setItem("broadway.rapid", on ? "1" : "0"); } catch (e) { /* storage blocked */ }
   syncTempo();
 }
 $("rapidBtn").addEventListener("click", () => { setRapid(!$("turbo").checked); sfx("toggle"); });
 let rapidWas = false;
-try { rapidWas = localStorage.getItem("poweroutage.rapid") === "1"; } catch (e) { /* storage blocked */ }
+try { rapidWas = localStorage.getItem("broadway.rapid") === "1"; } catch (e) { /* storage blocked */ }
 setRapid(rapidWas);
 if (SOCIAL) {   // restricted vocabulary: every static word on the page goes through T() too -
                 // labels, buttons, the chooser, the loading screen - and so do the names
@@ -11702,8 +11880,12 @@ async function boot() {
     await introDone;   // never replay a round behind the opening screen
     state.playing = true;
     setButtons(false);
-    notice(T("Resuming your round..."), false, 2600);
-    try { await presentRound(open, { from: resumePoint(open) }); } catch (e) { /* surfaced by presentRound */ }
+    const go = await resumeAsk();
+    if (go === "skip") {
+      try { await RGS.endRound(); setBalance(RGS.state.balance); } catch (err) { notice(`<b>${rgsMessage(err)}</b>`, true, 6000); }
+    } else {
+      try { await presentRound(open, { from: resumePoint(open) }); } catch (e) { /* surfaced by presentRound */ }
+    }
     state.playing = false;
     setButtons(true);
   }

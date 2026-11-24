@@ -1,93 +1,47 @@
-# Power Outage
+# Broadway on Nashville
 
-A dark-comedy slot for [Stake Engine](https://stake-engine.com): the power is out across the country, the
-companies are going under, and inside the president's oval office the only light is a few candles. Drawn as flat
-adult-animation-sitcom cartoons with chunky, simple casual-slot shapes. It is a reskin of
-[zeqpz/orleans](https://github.com/zeqpz/orleans) ("Voodoo on Bourbon", `main` ff43083); the math is unchanged
-(`math-sdk/games/outage_5x5` = orleans' `voodoo_5x5`, renamed): 5x5 cluster pays, tumbles, Multis, FS / XFS
-scatters, Bonus Boost, RTP 96.7%, max 10,000x. The four big books are over GitHub's file limit: they are kept locally
-and uploaded to engine.io from disk (`tools/stake_upload.py`).
+A Stake Engine slot on Lower Broadway in Nashville at night: honky-tonks, neon and a cowgirl guitarist, Rosie, who
+plays along with the game. Drawn in a flat adult-animation TV cartoon style with original characters. Built from
+[zeqpz/poweroutage](https://github.com/zeqpz/poweroutage) (e9f5c03, the iOS-fixed live build) with the
+[zeqpz/workflow](https://github.com/zeqpz/workflow) skills and agents. The spec is [docs/BROADWAY.md](docs/BROADWAY.md).
 
-## What changed
+The engine is Power Outage's: 5x5 cluster pays, tumbles, cell Multis, FS / XFS scatters, Bonus Boost, RTP 96.7%, max
+10,000x. New in this game: **Encore** (below), plus new art, animation, sound and music throughout.
+
+**Kept exactly as they were (owner):** the HUD, the bonus buy menu (layout and behaviour; its banner pictures are new)
+and the black-and-white SMUKIEZ introduction.
+
+## The game
 
 | Part | Now |
 |---|---|
-| Symbols | H1 The President (an unnamed caricature holding a candle), H2 The Bodyguard (flashlight under his chin), H3 Bankrupt CEO (in a barrel), H4 Market Crash (a chart smashing through its screen), H5 Red Hotline, H6 AI Server (smoking, sad face), H7 Broke Piggy Bank; L1 Candle, L3 Dead Battery, L4 Blown Bulb; **M** Power Surge (colour by value: cyan, green, violet, orange, red-hot); **BS = "FS"** on a lit bulb; **ES = "XFS"** on a high-voltage sign |
-| Animation | Every symbol has its own idle, land, win and multi clip, built and rendered in Blender (`tools/outage/blender/symanim.py`: the icon on a bone-bent mesh + flat cartoon effect sprites - coins, sparks, smoke, sweat, moths, red down-arrows, glass shards, cash) |
-| Wins | Winners don't burn away: they swell, buzz white-hot like a bulb about to blow, and short out in a yellow-and-cyan flash with sparks (`drawHex` / `drawHexLight` in index.html). The Multi crackles and flashes before it blows. The win line is a live electric arc (`drawWinLine`, from `tools/outage/pass5.py`): a jagged white-and-cyan bolt strikes through the cluster symbol to symbol, then keeps crackling with forks, a second strand and sparks |
-| Background | The oval office in a blackout, flat cartoon (`assets/bonus_wall.webp`), kept alive by `frontend/bgscene.js`: live flat candle flames and their light pools, lightning in the windows (twice, with a bolt), clouds drifting past the moon behind the dead skyline, a lit window now and then, the power sputtering back on in fits and dying again, and a bodyguard's flashlight sweeping the room |
-| Frame | A riveted breaker-panel frame with hazard stripes, a red breaker lever, cables over one corner, a frayed sparking wire and a dangling plug; the board backing is cut to its opening (`tools/outage/board_back.py`) |
-| Layout | No character: a riveted steel POWER OUTAGE sign at the board's left, lit like an OLED / LED sign: luminous letters (one image-model redraw, `tools/outage/gen_pass5.py`) that throw a humming glow on the plate, while the dead G and E stutter and now and then light up (`tools/outage/sign_layers.py` cuts every layer from that one picture) |
-| Multis | The values sit behind the symbols, coloured by value (green to red to purple), with a bright keyline round the figure, slightly see-through |
-| Xtreme Bonus | Its own red emergency room: an alarm lamp bolted to the wall (`tools/outage/beacon_mount.py` draws the bracket and conduit) whose beam turns about the lamp, and an alarm that sounds when an XFS lands and when the bonus triggers |
-| UI | Candle-yellow chunky lettering (BIG / MEGA / XTREME / TOTAL WIN, BONUS), cream cards, steel and hazard-stripe plates, cyan Multi numerals in a hazard-stripe ring, lightning-bolt volatility pips, a solid navy HUD with a thick black outline |
-| Music | A sneaky dark-comedy cartoon score (pizzicato strings, bassoon, oompah tuba, glockenspiel, muted trumpet, a mains hum): base D minor, intro A minor, bonus D minor, total F major, menu C (Lyria 3 Pro, `tools/music/cues.py`) |
-| Sounds | 51 sets (`tools/sfx/outage_spec.py`): breaker clunks, transformer hum, light switches, zaps and arcs, a bulb flickering on, cash registers, rotary phone bells, coins, timpani and orchestra stings, a landing sound per symbol. HUD button sounds are the base build's |
+| Symbols | H1 The Crooner, H2 The Bachelorette, H3 The Fiddler, H4 Mechanical Bull, H5 Hot Chicken, H6 Rhinestone Boot, H7 Banjo; L1 Horseshoe, L3 Guitar Pick, L4 Harmonica; **M Gold Record** (its disc shows its value: bronze to x2, silver to x5, gold to x20, platinum to x100, diamond above); **BS "FS"** neon on a marquee star; **ES "XFS"** neon over a jukebox |
+| Encore | When a spin's tumbles are over, Rosie can play an Encore: a spotlight lands on a top symbol and every copy of one regular symbol (with at least 3 copies on the board) turns into it, then the board pays and tumbles again. Event `encore` {from, to, positions}; math in `math-sdk/games/broadway_5x5` (see DESIGN.md, "Encore") |
+| Rosie | A live 2D rig built and animated in Blender (`tools/broadway/blender/rosie_rig.py`), played by `frontend/charrig.js`: 31 bones, IK legs, hands locked to the guitar (the fret hand slides on the neck, the strum hand strums), spring hair and skirt, 12 separate clips (idle, strum, anticipation, win, big_win, lose, multi, trigger, solo, and the idle breaks wink, stomp, hat_tip) and 7 reaction faces. Phones get still poses instead (no extra canvas) |
+| Background | The inside of an empty honky-tonk bar at night (no people), from a designed layout (`tools/broadway/gen_bg_bar.py`, v2 in `art/broadway-src/bg4/`): on the left a stage with a teal star backdrop, red curtains, footlights, a drum kit, an amp stack and two coloured stage lamps, where Rosie stands; a brick wall with neon and gold records in the middle; on the right a carved back-bar with teal back-lit bottle shelves, taps, a coffee pot, red stools, a cowhide rug and a jukebox; a polished floor that mirrors the neon, with an inlaid star. It is never still - `frontend/bgscene.js` flickers each of the five neon signs on its own (LIVE MUSIC, a pink guitar, HONKY TONK, a red boot, BAR) and chases the party bulbs and the stage footlights ("off" patches cut from a lights-off copy of the painting, `tools/broadway/bg_layers_bw.py`), sways two stage-light beams, turns two ceiling fans, drifts dust through the stage light, twinkles glints on the bottles, curls steam off the coffee pot, runs the jukebox's tubes through the colours and sweeps a shine over the gold records. Phones show it as a still picture (iOS memory rules). The Xtreme Bonus plays on a rooftop stage with fireworks |
+| Frame and sign | A honky-tonk stage frame with marquee bulbs; a neon BROADWAY ON NASHVILLE sign whose ON has a loose contact (`tools/broadway/sign_layers_bw.py`) |
+| Win line | A hot-pink neon tube drawn symbol to symbol |
+| Sound | Every sound effect remade with Seed Audio (`tools/sfx/broadway_spec.py`) except the HUD buttons; four Encore sounds; five honky-tonk music cues (`tools/music/cues.py`) |
 
-## Pipeline (`tools/outage/`, run with `ClaudeRoblox/smukiez-slot/.venv`)
+## Pipeline (`tools/broadway/`, Python from `ClaudeRoblox/smukiez-slot/.venv`)
 
 The OpenRouter key is read from `%USERPROFILE%\Documents\gamdevkey.txt`; scripts never print it.
 
-1. **Symbols**: `gen_anchor.py H1` (style anchor, with a crop of the reference screenshots for shape simplicity) ->
-   `gen_symbols.py` (H1 + the reference as refs; prompts in `art/outage-src/symbols.json`, `prompts/`).
-2. **UI**: `gen_ui.py gen` / `gen_extra.py gen` (Multi numerals, their ring, the shop banners); `flatten_face.py`,
-   `fix_checker.py` + `fix_checker2.py` clean the image model's habits (smudges in empty cards, fake checkerboards).
-3. **4K**: `upscale4k.py sym|ui|bg` (Real-ESRGAN x4), `prep_icons.py`, `gen_ui.py fit`, `gen_extra.py fit`, `vnum.py`.
-4. **Background**: `bg_layers.py` (window-sky mask, flame/pool/moon/chandelier positions, skyline lights ->
-   `frontend/assets/bg/`). The phone backgrounds are `assets/mobile/bg_portrait.webp` (a 2:3 redraw) and
-   `bg_landscape.webp`.
-5. **Blender**: `make_fx_sprites.py`, `patch_symanim.py` (the personalities), then
-   `sh tools/outage/blender/render_all.sh` (13 symbols, 5 at a time) -> `qa_sym.py all` -> `tools/blender/pack_frames.py`
-   -> `potion_tiers.py` (the surge's value colours) -> `make_phone_sheets.py`. The scenes can be opened and played in
-   Blender (`art/blender/symbols/<ID>.blend`), or built live over the MCP (`runpy` the script and call `build(ID)`).
-6. **Frame**: `frame_fit.py` (the opening's fractions and the board's per-side margins ->
-   `art/outage-src/frame_fit.json`), `board_back.py`, then the frame's three live parts, in this order (each starts
-   from the one before): `frame_lever.py` (the breaker's handle becomes `assets/lever.webp` on a clean switch box from
-   `gen_switchbox.py`) -> `frame_cable.py` (the dangling cord and plug come out: `assets/plug.webp`, `cable.json`) ->
-   `frame_spark.py` (the painted spark star comes off the frayed wire: `spark.json`), then `make_mobile_art.py`
-   (phone copies + `mobile_fit.json`). `sign_layers.py` makes the title sign's glow and lit-GE layers;
-   `beacon_mount.py` mounts the Xtreme room's alarm lamp on the wall and re-exports that room.
-   `desk_flat.py` paints the desk's fronts flat in both desktop rooms (its recessed panels read as a black box round
-   the bonus emblem sitting in front of them); run it before `upscale4k.py bg` and `beacon_mount.py`.
-   - `frontend/cable.js` swings the cord (a Verlet rope; capped speed, a solid frame bar, layout jumps ignored),
-     `frontend/spark.js` throws the wire's sparks (flash, jagged filaments, cooling streaks that bounce on the bar),
-     `frontend/hudfit.js` keeps the bar's three figures in their fixed columns (shrinking a long one) and moves the
-     bonus emblem off the bar on narrow windows. `node tools/outage/qa_pass4.js` checks all of it at six sizes.
-7. **Front end**: `reskin_outage.py` applies every edit to `frontend/index.html`, `rules.js` and `boardgl.js` from the
-   pristine orleans copies in `tools/outage/base/` as exact replacements (a changed base fails loudly).
-8. **Music**: `tools/music/lyria.py <cue> --takes 2`, `tools/music/keys.py` to pick takes by key, copy to
-   `art/music-src/`, `tools/music/build.py`, paste the printed MUSIC table into `reskin_outage.py`.
-9. **Sounds**: `tools/sfx/outage.py all`, then `node tools/sfx/encode_new.js <.tools/pw/node_modules/playwright> %TEMP%/outage_sfx/written.txt`.
+1. **Symbols**: `gen_symbols_v2.py` (gpt-image-2.6, Rosie v2 as the style reference) -> `symbols_v2_chain.sh`
+   (4K, icons, Blender `blender/symanim.py` for every clip, `qa_sym.py`, `tools/blender/pack_frames.py`,
+   `record_tiers.py` for the Gold Record metals, `make_phone_sheets.py`, `make_mobile_art.py`).
+2. **Rosie**: `gen_rosie_v2.py` (figure) -> `rosie_cut.py cut|complete|fit|faces|fitfaces` (pieces cut from the
+   figure along its ink lines, hidden areas completed by the model or inpainted) -> Blender
+   `blender/rosie_rig.py -- build,export,render` -> `qa_rosie.py` -> `pack_rosie.py` -> `rosie_stills.py` (phones).
+3. **Backgrounds**: `gen_bg_bar.py layout|gen|detail|pick|unlit|mobile|install` (the bar; `gen_bg_v2.py` made the
+   Xtreme rooftop and the earlier street, kept in `art/broadway-src/bg_street_old/`) -> `bg_layers_bw.py` (its `PROPS`
+   place the live details) -> `node tools/broadway/qa_bar.js`.
+4. **UI**: `gen_ui_bw.py gen|fit` (after `upscale4k.py ui`), `sign_layers_bw.py`, `frame_fit.py`, `board_back.py`,
+   `vnum.py` + `vnum_ink.py` + `vborder_bw.py`, `make_mobile_art.py`.
+5. **Front end**: `reskin_broadway.py` applies every edit to `frontend/index.html` and `rules.js` from Power Outage's
+   files in `tools/broadway/base/` as exact replacements (a changed base fails loudly).
+6. **Lobby art**: `gen_media_bw.py gen|build` (covers with no text; separate tile background and foreground layers).
 
-QA: `node tools/outage/qa_screens.js` (ident, features, board, shop), `node tools/outage/qa_win.js <event> [step] [s]`
-(films a Bet Replay; `MODE=bonus` for bonus books). Screenshots go to `%TEMP%/outage_qa`.
-
-### Phones (run this after every visual pass)
-
-An iPhone runs the game inside the casino's iframe, and Safari kills a page that outgrows its memory ("A problem
-repeatedly occurred" - Engine's live test, iPhone 12, 2026-11-20). The phone tier (`window.MOBILE`, `html.mob`,
-inherited from zeqpz/orleans) keeps a phone to the board's own canvases, no CSS filters or blend modes, no 3D
-transforms, nothing animating at idle, and only its own tier's art. On iOS every 2D canvas and every animating or
-3D-transformed element is a GPU layer at its layout size x DPR^2, and whatever is drawn over one gets a layer too.
-Anything new that is live (a canvas, a glow, a bob, a filter) must be switched off or made a still picture behind
-`window.MOBILE` / `html.mob` (`tools/outage/pass7.py`, `frontend/cable.js`, `frontend/spark.js` show how).
-
-- `node tools/outage/qa_phone.js` - the gate: those rules checked on an iPhone profile, both ways up.
-- `python tools/review/memprobe/iosprobe3.py out.json --boot --base http://localhost:8788` - the WebKit memory model
-  (boot should stay at or under orleans' ~67 MB; `--mode bonus --event 3` for a round).
-- `node tools/review/memprobe/wkboot.js http://localhost:8788 out.json` - the live game in a real WebKit engine
-  (`npx playwright install webkit` once): crash, page errors, the web process's memory.
-
-## Run it locally
-
-```
-smukiez-slot/.venv/Scripts/python.exe frontend/mock_rgs.py
-```
-Open http://localhost:8788/index.html?sessionID=test&rgs_url=http://localhost:8788&lang=en&device=desktop (the first
-run unpacks the books, about a minute). The Claude preview launch config is `poweroutage-game`.
-
-## Notes
-
-- The President is an original, unnamed caricature; there are no real names, official seals, brand names or logos
-  anywhere in the game (the companies "going down" are generic gags: a crashing chart, a CEO in a barrel, a broke
-  piggy bank, an AI server). Keep it that way for approval.
+Mock RGS: `frontend/mock_rgs.py` on port 8822 (launch config `broadway-game`). QA: `node tools/broadway/qa_screens.js`,
+`node tools/broadway/qa_win.js <event>` (Bet Replay film; `MODE=bonus|extremebonus`), `node tools/broadway/qa_phone.js`
+(the iOS phone-tier gate - run it after every visual pass).

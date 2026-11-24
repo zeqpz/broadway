@@ -1,223 +1,222 @@
-// Power Outage: the blacked-out office behind the board, kept alive.
+// Broadway on Nashville: the inside of a honky-tonk bar behind the board, kept alive (no people in it).
 //
-// The painting (assets/bonus_wall.webp; in the Xtreme Bonus assets/bonus_wall_xtreme.webp, the same room under red
-// emergency light) is the dark room; tools/outage/bg_layers.py measured where its candles, moon, chandelier and windows
-// are (assets/bg/scene.json) and cut the window sky as one shape (assets/bg/sky.webp).
-//
-// The light is soft and alive (owner pass 2, 2026-11-18: "more realistic lighting that flickers"):
-//   candles     each flame is a live flat cartoon flame over the painted one, and round it a soft halo, a pool of warm
-//               light on the wall and a wide faint glow into the room - all four driven by ONE flicker signal per
-//               candle (layered noise: a slow breath, a quicker waver and now and then a gutter), so the light in the
-//               room moves exactly with its flame
-//   room        the whole room's darkness breathes very slightly with the candles
-//   flashlights two bodyguards' beams: a soft cone from off-screen (left or right) with a bright hotspot where it
-//               lands, sweeping across the rug and the furniture with a hand's small jitter, on their own clocks
-//   lightning   the sky in the windows flashes twice, a flat bolt cracks in it and the room blinks pale blue (in the
-//               Xtreme Bonus far more often, and pinkish)
-//   clouds      flat clouds drift past the moon, behind the dark towers
-//   skyline     a lit window comes on somewhere in the dead city, and goes out again
-//   power       now and then the power sputters back on in fits and dies again (window "bgpower" event)
-//   alarm       in the Xtreme Bonus the red alarm lamp on the wall turns: its beam swings round the lamp's own
-//               upright axis (long from the side, foreshortened as it comes round), the glass flares as the beam
-//               passes us and the wall behind it lights as it passes the wall
-// Only opacity and transform change per frame (the compositor's work); the loop runs at up to 30 fps and stops while
-// the tab is hidden. Reduced motion: everything lit and still. Seeded: the room behaves the same on every load.
+// The painting (assets/bonus_wall.webp) is the empty bar with every neon sign and bulb LIT. tools/broadway/bg_layers_bw.py
+// compared it with the same room drawn with all of them switched off and cut that difference into patches
+// (assets/bg/scene.json): one "off" patch per neon sign, three chase groups each of the party bulbs and the stage's
+// footlights, and the jukebox's lit tubes.
+// It also says where the pieces drawn here go (scene.json "props"). Everything below is small and slow on purpose:
+//   neon        every sign hums along lit; now and then one stutters (a few quick drop-outs), and one tired sign
+//               (the red boot) does it often and sometimes dies for a second before it catches
+//   bulbs       the string of party bulbs under the ceiling chases in three groups; the stage's footlights run the
+//               other way, a little slower
+//   fans        two ceiling fans turn lazily (a top view of the blades, turned, then flattened as the eye sees it)
+//   stage       the pink and the blue stage light each throw a soft beam that sways and swells, crossing over the
+//               stage; dust drifts up through them
+//   bottles     a glint twinkles on one bottle or another along the back-bar
+//   coffee      steam curls off the pot on the counter
+//   jukebox     its glowing tubes run slowly through the colours
+//   records     a shine sweeps across the three gold records every so often
+//   Xtreme      the rooftop stage (its own painting): flat cartoon fireworks burst over the skyline
+//   WallFX.surge(k, ms)  (a bonus trigger, a big win) every sign blinks together and the bulbs flash
+// Only opacity, transform and (on the jukebox's small patch) a hue filter change; timers stop while the tab is hidden.
+// Reduced motion: everything lit and still. Phones never run it (html.mob #bgscene is hidden: the plate alone).
 (function () {
   "use strict";
+  // the page asks for WallFX.start() and .surge() whether or not the scene ever builds: there from the first line
+  window.WallFX = Object.assign(window.WallFX || {}, { start() {}, surge() {} });
   const wall = document.getElementById("bgwall");
-  if (!wall) return;
+  if (!wall || window.MOBILE) return;
   const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const scene = document.createElement("div");
   scene.id = "bgscene";
   scene.setAttribute("aria-hidden", "true");
   wall.appendChild(scene);
 
-  let seed = 2026;
+  let seed = 1997;
   const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
   const rr = (a, b) => a + (b - a) * rnd();
   const pct = v => (v * 100).toFixed(3) + "%";
-  const later = (ms, fn) => setTimeout(() => { if (document.hidden) later(2000, fn); else fn(); }, ms);
-  const el = (cls, parent = scene) => { const e = document.createElement("i"); e.className = cls; parent.appendChild(e); return e; };
+  const later = (ms, fn) => setTimeout(() => { if (document.hidden) later(1500, fn); else fn(); }, ms);
   const xtreme = () => document.body.classList.contains("xtreme");
+  const place = (e, [x, y, w, h]) => Object.assign(e.style, { left: pct(x), top: pct(y), width: pct(w), height: pct(h) });
+  const AR = 16 / 9;   // the scene's box: a share of its width is this many times that share of its height
 
-  const FLAME = `<svg viewBox="0 0 40 100" preserveAspectRatio="none"><path d="M20 2 C27 26 38 40 37 64 C36 86 29 98 20 98 C11 98 4 86 3 64 C2 40 13 26 20 2Z" fill="#FF9A3C" stroke="#3a1e08" stroke-width="3"/><path d="M20 30 C25 46 31 56 30 70 C29 84 25 91 20 91 C15 91 11 84 10 70 C9 56 15 46 20 30Z" fill="#FFD54A"/><path d="M20 56 C23 64 25 70 24.5 78 C24 85 22.5 88 20 88 C17.5 88 16 85 15.5 78 C15 70 17 64 20 56Z" fill="#FFF6C8"/></svg>`;
-  const BOLT = `<svg viewBox="0 0 60 200" preserveAspectRatio="none"><path d="M34 0 L8 92 L28 92 L12 200 L54 70 L32 70 L46 0Z" fill="#F4F8FF" stroke="#1a2440" stroke-width="3"/></svg>`;
-  const CLOUD = `<svg viewBox="0 0 200 80"><path d="M20 70 C2 70 0 50 16 44 C12 26 34 18 46 28 C52 8 84 4 94 24 C104 10 132 12 136 32 C152 22 176 30 172 48 C192 50 196 70 178 70Z" fill="#2B3A66" stroke="#141B33" stroke-width="3"/><path d="M28 44 C30 34 42 30 50 36 M98 28 C104 20 120 20 126 32" fill="none" stroke="#4A5C92" stroke-width="5" stroke-linecap="round"/></svg>`;
-
-  // a candle's flicker: 1 at rest, ~0.75-1.15 as it moves; smooth value noise on three scales plus rare gutters
-  function flicker(seedOffset) {
-    const ph = [rr(0, 6.3), rr(0, 6.3), rr(0, 6.3)];
-    let gutter = 0, nextGutter = rr(2, 7);
-    return t => {
-      const s = .06 * Math.sin(t * 1.3 + ph[0]) + .05 * Math.sin(t * 3.7 + ph[1]) * Math.sin(t * 1.1 + seedOffset)
-              + .04 * Math.sin(t * 9.3 + ph[2]) * Math.sin(t * 5.1);
-      if (t > nextGutter) { gutter = 1; nextGutter = t + rr(2.5, 9); }
-      gutter *= .9;                                                     // a quick dip that recovers
-      return 1 + s - .22 * gutter * (.6 + .4 * Math.sin(t * 40));
-    };
-  }
+  const BURST = (c1, c2) => `<svg viewBox="-50 -50 100 100">${Array.from({ length: 14 }, (_, i) => {
+    const a = i / 14 * Math.PI * 2, x = Math.cos(a), y = Math.sin(a);
+    return `<path d="M${(x * 12).toFixed(1)} ${(y * 12).toFixed(1)} L${(x * 44).toFixed(1)} ${(y * 44).toFixed(1)}" stroke="#111" stroke-width="7" stroke-linecap="round"/>` +
+           `<path d="M${(x * 12).toFixed(1)} ${(y * 12).toFixed(1)} L${(x * 44).toFixed(1)} ${(y * 44).toFixed(1)}" stroke="${i % 2 ? c1 : c2}" stroke-width="4" stroke-linecap="round"/>` +
+           `<circle cx="${(x * 46).toFixed(1)}" cy="${(y * 46).toFixed(1)}" r="3.4" fill="${i % 2 ? c2 : c1}" stroke="#111" stroke-width="1.6"/>`;
+  }).join("")}<circle r="9" fill="#FFF6D8" stroke="#111" stroke-width="2.5"/></svg>`;
+  const COLOURS = [["#FF3FA4", "#FFC23A"], ["#2FA8FF", "#F7F4FF"], ["#FFC23A", "#FF3B3B"], ["#7DFF6A", "#FF3FA4"]];
+  // a ceiling fan seen from straight below: four wooden paddles on brass arms (the page turns it, then flattens it)
+  const BLADE = `<g><rect x="10" y="-4.5" width="22" height="9" fill="#C9A040" stroke="#111" stroke-width="3"/>` +
+    `<rect x="26" y="-14" width="70" height="28" rx="13" fill="#9A6A3E" stroke="#111" stroke-width="4"/>` +
+    `<path d="M36 5 H86" stroke="#6E4526" stroke-width="5" stroke-linecap="round"/></g>`;
+  const FAN = `<svg viewBox="-100 -100 200 200">${[0, 90, 180, 270].map(a => `<g transform="rotate(${a})">${BLADE}</g>`).join("")}</svg>`;
+  const STAR4 = `<svg viewBox="-10 -10 20 20"><path d="M0 -10 L2.2 -2.2 L10 0 L2.2 2.2 L0 10 L-2.2 2.2 L-10 0 L-2.2 -2.2Z" fill="#FFFBE8"/></svg>`;
+  const WISP = `<svg viewBox="0 0 20 60" preserveAspectRatio="none"><path d="M10 58 C2 48 18 42 10 32 C2 22 18 16 10 4" fill="none" stroke="#F4F1E8" stroke-width="4" stroke-linecap="round"/></svg>`;
 
   fetch("assets/bg/scene.json").then(r => r.json()).then(build).catch(() => { /* the painting alone still reads */ });
 
   function build(S) {
-    const AR = S.size[1] / S.size[0];
-    const room = el("bgroom");                     // power-back / lightning wash
-    const dark = el("bgdark");                     // the room's darkness, breathing with the candles
-    const [cx, cy, cr] = S.chandelier;
-    const powerGlow = el("bgchand");
-    Object.assign(powerGlow.style, { left: pct(cx - cr), top: pct(cy - cr / AR), width: pct(cr * 2), height: pct(cr * 2 / AR) });
-
-    // window sky: clouds (masked to it), the flash and a bolt
-    const [sx, sy, sw, sh] = S.sky;
-    const skyBox = el("bgsky");
-    Object.assign(skyBox.style, { left: pct(sx), top: pct(sy), width: pct(sw), height: pct(sh) });
-    for (let i = 0; i < 3; i++) {
-      const c = el("bgcloud", skyBox);
-      c.innerHTML = CLOUD;
-      c.style.top = (8 + i * 13 + rr(-3, 3)).toFixed(1) + "%";
-      c.style.width = (18 + rr(0, 10)).toFixed(1) + "%";
-      c.style.setProperty("--dur", (70 + i * 28 + rr(0, 20)).toFixed(0) + "s");
-      c.style.setProperty("--delay", (-rr(0, 90)).toFixed(0) + "s");
+    // ---- the room's lights
+    const street = document.createElement("div");
+    street.className = "bgstreet";
+    scene.appendChild(street);
+    const add = (tag, cls, parent = street) => { const e = document.createElement(tag); e.className = cls; parent.appendChild(e); return e; };
+    const img = (src, box, cls) => {
+      const e = add("img", cls);
+      e.alt = ""; e.draggable = false; e.decoding = "async";
+      e.src = "assets/" + src;
+      place(e, box);
+      return e;
+    };
+    const signs = (S.signs || []).map(s => ({ el: img(s.src, s.box, "bgoff"), area: s.area, cx: s.cx }));
+    const bulbs = (S.bulbs || []).map(b => img(b.src, b.box, "bgoff bulb"));
+    const foot = (S.foot || []).map(b => img(b.src, b.box, "bgoff bulb"));
+    const off = (e, v) => { e.style.opacity = v ? "1" : "0"; };
+    if (S.sky) for (let i = 0; i < 18; i++) {   // (a scene under the open sky: a few stars twinkle)
+      const st = add("i", "bgstar");
+      st.style.left = pct(S.sky[0] + rr(.02, .98) * S.sky[2]);
+      st.style.top = pct(S.sky[1] + rr(.04, .8) * S.sky[3]);
+      st.style.setProperty("--d", rr(2.2, 5.5).toFixed(2) + "s");
+      st.style.setProperty("--o", (-rr(0, 6)).toFixed(2) + "s");
+      st.style.setProperty("--s", rr(.6, 1.3).toFixed(2));
     }
-    const flash = document.createElement("img");
-    flash.className = "bgflash"; flash.src = "assets/bg/sky.webp"; flash.alt = "";
-    skyBox.appendChild(flash);
-    const bolt = el("bgbolt", skyBox);
-    bolt.innerHTML = BOLT;
+    const P = S.props || {};
+    // ---- the ceiling fans: rod, turning blades, brass housing and a little lamp
+    for (const [i, [x, y, r]] of (P.fans || []).entries()) {
+      const f = add("i", "bgfan");
+      Object.assign(f.style, { left: pct(x - r), top: pct(y - r * AR), width: pct(2 * r), height: pct(2 * r * AR) });
+      f.innerHTML = `<b class="bgf-rod"></b><b class="bgf-disc"><b class="bgf-spin">${FAN}</b></b><b class="bgf-hub"></b><b class="bgf-lamp"></b>`;
+      f.style.setProperty("--d", (3.4 + i * .5).toFixed(2) + "s");
+      f.style.setProperty("--o", (-rr(0, 3)).toFixed(2) + "s");
+    }
+    // ---- the jukebox's tubes run through the colours
+    if (S.juke) img(S.juke.src, S.juke.box, "bgjuke");
+    // ---- a shine over each gold record, one after another
+    for (const [i, [x, y, r]] of (P.records || []).entries()) {
+      const d = add("i", "bgrec");
+      Object.assign(d.style, { left: pct(x - r), top: pct(y - r * AR), width: pct(2 * r), height: pct(2 * r * AR) });
+      d.innerHTML = "<b></b>";
+      d.style.setProperty("--o", (i * .28).toFixed(2) + "s");
+    }
+    if (REDUCED) { scene.classList.add("still"); return; }
 
-    const lights = S.lights.map(([x, y]) => {
-      const l = el("bglight");
-      Object.assign(l.style, { left: pct(x - .0022), top: pct(y - .0045), width: pct(.0044), height: pct(.009) });
-      return l;
-    });
-
-    // every candle: a wide faint room glow, a warm pool on the wall, a halo round the flame, the flame itself
-    const placeCandle = (c, [x, y, h]) => {
-      const g = .2, p = .055, hr = h * .9;
-      Object.assign(c.glow.style, { left: pct(x - g), top: pct(y - h * .5 - g / AR), width: pct(g * 2), height: pct(g * 2 / AR) });
-      Object.assign(c.pool.style, { left: pct(x - p), top: pct(y - h * .6 - p / AR), width: pct(p * 2), height: pct(p * 2 / AR) });
-      Object.assign(c.halo.style, { left: pct(x - hr * AR), top: pct(y - h * .55 - hr), width: pct(hr * 2 * AR), height: pct(hr * 2) });
-      const hh = h * 1.22, ww = hh * .46 * AR;
-      Object.assign(c.f.style, { left: pct(x - ww / 2), top: pct(y - hh), width: pct(ww), height: pct(hh) });
-    };
-    const candles = S.flames.map((spec, i) => {
-      const c = { glow: el("bgglow"), pool: el("bgpool"), halo: el("bghalo"), f: el("bgflame"), fl: flicker(i * 1.7) };
-      c.f.innerHTML = FLAME;
-      placeCandle(c, spec);
-      return c;
-    });
-    // the Xtreme Bonus swaps the painting for the red emergency room: its candles sit a touch lower, its windows
-    // already show the storm (the normal sky's flash, clouds and lit windows are put away), its beacon turns
-    const X = S.xtreme;
-    const setMode = () => {
-      const on = xtreme();
-      scene.classList.toggle("xtreme", on);
-      candles.forEach((c, i) => placeCandle(c, (on && X ? X.flames : S.flames)[i]));
-    };
-    new MutationObserver(setMode).observe(document.body, { attributes: true, attributeFilter: ["class"] });
-
-    // two flashlight beams, each a cone with a hotspot at its end, swung from off-screen
-    const beams = [{ side: 1 }, { side: -1 }].map(b => {
-      const root = el("bgbeam" + (b.side < 0 ? " left" : ""));
-      root.innerHTML = `<i class="cone"></i><i class="spot"></i>`;
-      return Object.assign(b, { root, on: 0, t0: 0, dur: 0, a0: 0, a1: 0, y: 0 });
-    });
-
-    // the Xtreme Bonus's alarm beacon on the ceiling
-    const beacon = el("bgbeacon");
-    beacon.innerHTML = `<i class="wash"></i><i class="ray"></i><i class="lamp"></i>`;
-    const [bWash, bRay, bLamp] = beacon.children;
-    const [bxp, byp] = X ? X.beacon : [cx + .07, cy - .03];
-    Object.assign(beacon.style, { left: pct(bxp), top: pct(byp) });
-    setMode();
-
-    if (REDUCED) return;
-
-    // the frame loop: candles, darkness, beams, beacon - opacity and transform only, at most 30 fps
-    let last = 0;
-    const loop = now => {
-      requestAnimationFrame(loop);
-      if (document.hidden || now - last < 33) return;
-      last = now;
-      const t = now / 1000;
-      let sum = 0;
-      for (const c of candles) {
-        const k = c.fl(t);
-        sum += k;
-        c.f.style.transform = `scale(${(.94 + .1 * k).toFixed(3)}, ${(.82 + .2 * k).toFixed(3)}) skewX(${(Math.sin(t * 2.3 + k * 3) * 4).toFixed(2)}deg)`;
-        c.halo.style.opacity = (.55 + .45 * (k - .75) / .4).toFixed(3);
-        c.halo.style.transform = `scale(${(.9 + .18 * k).toFixed(3)})`;
-        c.pool.style.opacity = (.45 + .55 * (k - .75) / .4).toFixed(3);
-        c.pool.style.transform = `scale(${(.94 + .1 * k).toFixed(3)})`;
-        c.glow.style.opacity = (.5 + .5 * (k - .75) / .4).toFixed(3);
+    // ---- the stage lights' beams: each a soft cone of its lens's colour from the lamp, swaying and swelling on its own clock
+    for (const [i, [x, y, deg, col]] of (P.beams || []).entries()) {
+      const len = P.beam_len || .6, w = len * .42 / AR;      // the cone's length (of the height) and its width at the far end
+      const bm = add("i", "bgbeam");
+      Object.assign(bm.style, { left: pct(x - w / 2), top: pct(y), width: pct(w), height: pct(len) });
+      bm.style.setProperty("--c", col);
+      bm.style.setProperty("--r", deg + "deg");
+      bm.style.setProperty("--d", (7 + i * 1.7).toFixed(1) + "s");
+      bm.style.setProperty("--o", (-i * 2.6).toFixed(1) + "s");
+    }
+    // ---- dust drifting up through the light over the stage
+    if (P.cone) {
+      const [cx, cy, cw, ch] = P.cone;
+      for (let i = 0; i < 16; i++) {
+        const m = add("i", "bgmote");
+        const v = rr(.05, .95);
+        m.style.left = pct(cx + rr(.05, .95) * cw);
+        m.style.top = pct(cy + v * ch);
+        m.style.setProperty("--dx", rr(-1.2, 1.2).toFixed(2) + "cqw");
+        m.style.setProperty("--dy", (-rr(2.5, 6)).toFixed(2) + "cqh");
+        m.style.setProperty("--a", rr(.25, .6).toFixed(2));
+        m.style.setProperty("--d", rr(7, 14).toFixed(1) + "s");
+        m.style.setProperty("--o", (-rr(0, 14)).toFixed(1) + "s");
+        m.style.setProperty("--s", rr(.6, 1.5).toFixed(2));
       }
-      const avg = sum / Math.max(1, candles.length);
-      dark.style.opacity = (.26 - .16 * (avg - .85)).toFixed(3);
-      for (const b of beams) {
-        if (!b.on) { b.root.style.opacity = 0; continue; }
-        const u = (now - b.t0) / b.dur;
-        if (u >= 1) { b.on = 0; b.root.style.opacity = 0; continue; }
-        const e = u * u * (3 - 2 * u);
-        const jit = Math.sin(t * 7.1) * .6 + Math.sin(t * 13.3) * .35;            // a hand holding it
-        const ang = b.a0 + (b.a1 - b.a0) * e + jit;
-        b.root.style.opacity = Math.min(1, Math.min(u, 1 - u) * 6).toFixed(3);
-        b.root.style.transform = `translateY(${b.y.toFixed(1)}%) rotate(${(b.side * ang).toFixed(2)}deg)`;
+    }
+    // ---- glints along the bottles
+    if (P.glints) {
+      const [gx, gy, gw, gh] = P.glints, rows = P.glint_rows || [.15, .68];
+      for (let i = 0; i < 7; i++) {
+        const g = add("i", "bgglint");
+        g.innerHTML = STAR4;
+        g.style.left = pct(gx + rr(.04, .96) * gw);
+        g.style.top = pct(gy + rows[i % rows.length] * gh + rr(-.03, .03) * gh);
+        g.style.setProperty("--d", rr(3.6, 7.5).toFixed(2) + "s");
+        g.style.setProperty("--o", (-rr(0, 7)).toFixed(2) + "s");
       }
-      if (xtreme()) {
-        // one reflector turning about the lamp's upright axis, a turn every 1.7 s: c is how far the beam points
-        // right (+) or left (-), s how far toward us (+) or into the wall (-)
-        const a = t * 3.7, c = Math.cos(a), s = Math.sin(a);
-        const near = Math.max(0, s) ** 3, far = Math.max(0, -s) ** 2;
-        bRay.style.transform = `scaleX(${c.toFixed(3)}) rotate(7deg)`;
-        bRay.style.opacity = ((.2 + .8 * Math.abs(c)) * (1 - .5 * far)).toFixed(3);
-        bLamp.style.opacity = (.5 + .5 * near).toFixed(3);
-        bLamp.style.transform = `scale(${(1 + 1.5 * near).toFixed(3)})`;
-        bWash.style.opacity = (.16 + .5 * far + .34 * near).toFixed(3);
+    }
+    // ---- steam off the coffee pot
+    if (P.steam) for (let i = 0; i < 3; i++) {
+      const w = add("i", "bgsteam");
+      w.innerHTML = WISP;
+      w.style.left = pct(P.steam[0] + (i - 1) * .0045);
+      w.style.top = pct(P.steam[1]);
+      w.style.setProperty("--d", (2.8 + i * .5).toFixed(2) + "s");
+      w.style.setProperty("--o", (-i * 1.1).toFixed(2) + "s");
+      w.style.setProperty("--k", i % 2 ? "-1" : "1");
+    }
+
+    // a sign's stutter: a few quick drop-outs, then lit again (a "dead" spell holds it off for a moment)
+    const stutter = (e, n, dead) => {
+      let t = 0;
+      for (let i = 0; i < n; i++) {
+        setTimeout(() => off(e, 1), t); t += 40 + rnd() * 90;
+        setTimeout(() => off(e, 0), t); t += 60 + rnd() * 220;
       }
+      if (dead) { setTimeout(() => off(e, 1), t); t += 450 + rnd() * 800; setTimeout(() => off(e, 0), t); t += 90; setTimeout(() => off(e, 1), t); t += 70; setTimeout(() => off(e, 0), t); }
+      return t;
     };
-    requestAnimationFrame(loop);
-
-    // lightning: a double flash of the sky, a bolt, the room blinks
-    const strike = () => {
-      const x = rr(8, 80), hot = xtreme();
-      bolt.style.left = x.toFixed(1) + "%";
-      bolt.style.transform = `scaleX(${rnd() < .5 ? -1 : 1})`;
-      const seq = [[0, .95], [70, 0], [160, .7], [230, .15], [330, 0]];
-      for (const [tt, o] of seq) setTimeout(() => {
-        flash.style.opacity = o; bolt.style.opacity = o > .5 ? 1 : 0; room.style.opacity = o * .55;
-        room.style.background = hot ? "rgba(255, 190, 220, .24)" : "rgba(190, 215, 255, .22)";
-      }, tt);
-      window.dispatchEvent(new CustomEvent("bgthunder"));
-      later(hot ? rr(3500, 8000) : rr(14000, 30000), strike);
-    };
-    later(rr(5000, 9000), strike);
-
-    const power = () => {
+    // the sign on its last legs: the one furthest right (the red boot, in view beside the title sign)
+    const tired = signs.length > 1 ? signs.reduce((m, s) => ((s.cx || 0) > (m.cx || 0) ? s : m), signs[0]) : null;
+    const flickerLoop = () => later(1800 + rnd() * 4200, () => {
+      if (!xtreme() && signs.length) {
+        const s = rnd() < .3 && tired ? tired : signs[Math.floor(rnd() * signs.length)];
+        stutter(s.el, 2 + Math.floor(rnd() * 4), s === tired && rnd() < .25);
+      }
+      flickerLoop();
+    });
+    flickerLoop();
+    // the bulbs chase: one group off at a time, round and round
+    let step = 0;
+    const chase = () => later(320, () => {
       if (!xtreme()) {
-        const fits = [[0, 1], [110, 0], [190, .8], [300, 0], [380, 1], [900, .9], [960, 0], [1040, .5], [1110, 0]];
-        for (const [tt, o] of fits) setTimeout(() => {
-          powerGlow.style.opacity = o; room.style.opacity = o; room.style.background = "rgba(255, 226, 150, .2)";
-        }, tt);
-        window.dispatchEvent(new CustomEvent("bgpower"));
+        bulbs.forEach((b, g) => off(b, g === step % bulbs.length));
+        if (foot.length > 1 && step % 2 === 0) foot.forEach((b, g) => off(b, g === (foot.length - 1 - (step / 2) % foot.length)));
       }
-      later(rr(28000, 52000), power);
-    };
-    later(rr(16000, 24000), power);
+      step++;
+      chase();
+    });
+    if (bulbs.length > 1 || foot.length > 1) chase();
 
-    const blink = () => {
-      const l = lights[Math.floor(rnd() * lights.length)];
-      if (l) { l.classList.add("on"); later(rr(1800, 6000), () => l.classList.remove("on")); }
-      later(rr(1500, 4500), blink);
-    };
-    later(1200, blink);
+    // ---- the Xtreme rooftop: fireworks (made once, shown only in the Xtreme Bonus)
+    const roof = document.createElement("div");
+    roof.className = "bgroof";
+    scene.appendChild(roof);
+    const fireworks = () => later(700 + rnd() * 1500, () => {
+      if (xtreme() && !document.hidden) {
+        const f = document.createElement("i");
+        f.className = "bgfw";
+        const [c1, c2] = COLOURS[Math.floor(rnd() * COLOURS.length)];
+        f.innerHTML = BURST(c1, c2);
+        const s = rr(.08, .15);
+        Object.assign(f.style, { left: pct(rr(.15, .85) - s / 2), top: pct(rr(.02, .22)), width: pct(s), height: pct(s * 16 / 9) });
+        roof.appendChild(f);
+        setTimeout(() => f.remove(), 1700);
+      }
+      fireworks();
+    });
+    fireworks();
+    const sync = () => scene.classList.toggle("xtreme", xtreme());
+    new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    sync();
 
-    // a beam swings across the room now and then; the two bodyguards take turns
-    const sweep = b => {
-      b.on = 1; b.t0 = performance.now(); b.dur = rr(5200, 8200);
-      b.a0 = rr(14, 22); b.a1 = rr(-24, -10); b.y = rr(-8, 10);
-      later(rr(22000, 40000), () => sweep(b));
-    };
-    later(rr(6000, 10000), () => sweep(beams[0]));
-    later(rr(17000, 26000), () => sweep(beams[1]));
+    // ---- every light at once, for a bonus or a big win
+    window.WallFX = Object.assign(window.WallFX || {}, {
+      surge(k = 1, ms = 1600) {
+        if (xtreme()) return;
+        const n = Math.round(3 + 2 * k);
+        let t = 0;
+        for (let i = 0; i < n; i++) {
+          setTimeout(() => { for (const s of signs) off(s.el, 1); for (const b of [...bulbs, ...foot]) off(b, 1); }, t); t += 70;
+          setTimeout(() => { for (const s of signs) off(s.el, 0); for (const b of [...bulbs, ...foot]) off(b, 0); }, t); t += Math.max(60, ms / n - 70);
+        }
+      },
+    });
   }
 })();

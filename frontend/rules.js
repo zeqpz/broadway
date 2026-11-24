@@ -28,10 +28,10 @@ const RULES = (() => {
     L4: [0.4, 0.4, 1.2, 2.8, 6, 20],
   };
   const NAMES = {
-    M: "Multi", BS: "FS scatter", ES: "XFS scatter",
-    H1: "The President", H2: "The Bodyguard", H3: "Bankrupt CEO", H4: "Market Crash", H5: "Red Hotline",
-    H6: "AI Server", H7: "Broke Piggy Bank",
-    L1: "Candle", L3: "Dead Battery", L4: "Blown Bulb",
+    M: "Gold Record", BS: "FS scatter", ES: "XFS scatter",
+    H1: "The Crooner", H2: "The Bachelorette", H3: "The Fiddler", H4: "Mechanical Bull", H5: "Hot Chicken",
+    H6: "Rhinestone Boot", H7: "Banjo",
+    L1: "Horseshoe", L3: "Guitar Pick", L4: "Harmonica",
   };
   const ORDER = ["H1", "H2", "H3", "H4", "H5", "H6", "H7", "L1", "L3", "L4"];   // the 5x5 game's ten paying symbols
   const RTP = "96.70%", MAX_WIN = 10000;
@@ -103,7 +103,7 @@ const RULES = (() => {
   const art = u => (window.mobArt ? window.mobArt(u) : u);   // (a phone takes the phone copy where there is one: index.html)
 
   function tile(sym, social) {
-    if (sym === "M") return `<div class="ptile multi"><span>x5</span><small>MULTI</small></div>`;
+    if (sym === "M") return `<img class="ptile" src="${art("assets/flat/M3.webp")}" alt="${esc(T("Gold Record", social))}" draggable="false">`;
     return `<img class="ptile" src="${art(`assets/flat/${sym}.webp`)}" alt="${esc(T(NAMES[sym], social))}" draggable="false">`;
   }
 
@@ -131,7 +131,7 @@ const RULES = (() => {
     const html = `
 <section>
   <h4>${t("About the game")}</h4>
-  <p>${t(`Power Outage is a 5-reel, 5-row video slot with cluster {pays|wins} and tumbling reels. A cluster is 5 or more matching symbols touching horizontally or vertically, anywhere on the board; every cluster on the board {pays|wins}, winning symbols are removed, new ones drop in, and the new board is {paid|checked for wins} again. The values below are multiples of the total bet, shown at your current {bet|play amount} of ${fmt(bet)}.`)}</p>
+  <p>${t(`Broadway on Nashville is a 5-reel, 5-row video slot with cluster {pays|wins} and tumbling reels. A cluster is 5 or more matching symbols touching horizontally or vertically, anywhere on the board; every cluster on the board {pays|wins}, winning symbols are removed, new ones drop in, and the new board is {paid|checked for wins} again. The values below are multiples of the total bet, shown at your current {bet|play amount} of ${fmt(bet)}.`)}</p>
   <div class="kvgrid">
     <div><span>RTP</span><b>${RTP}</b><small>${t("every mode")}</small></div>
     <div><span>${t("Max win")}</span><b>${x(MAX_WIN)}</b><small>${t("of the total bet")} · ${money(MAX_WIN)}</small></div>
@@ -160,12 +160,14 @@ const RULES = (() => {
 
 <section>
   <h4>${t("Special symbols")}</h4>
-  <div class="prow">${tile("M")}<div class="pname">${t("Multi — Multiplier")}<small>M</small></div>
-    <div class="ptext">${t(`Lands with a value from ${x(MULTI_MIN)} to ${x(MULTI_MAX)}, shown on the symbol. Every winning cluster on the board is {paid|counted} first; only then does it blow out: the Multi and the four symbols sharing an edge with it are removed, each of those five cells keeps the Multi's value, and new symbols drop in on top. A winning cluster that covers one or more of those cells is multiplied by the SUM of the values on the cells it covers. When two Multis reach the same cell their values add. In the base game the values last for the rest of the spin, including every tumble; in a bonus they stay on the board for the whole feature. The FS scatter and the XFS scatter are never removed by a Multi. The Multi does not form clusters and has no value of its own.`)}</div></div>
-  <div class="prow">${tile("M")}<div class="pname">${t("Surge Line and Grid Overload")}<small>M</small></div>
-    <div class="ptext">${t("Surge Line: a straight line of 3 or 4 Multis can land together, along a row or down a column; their blasts overlap, so the cells between them collect more than one value. It can land on any spin, and far more often in a bonus. Grid Overload: very rarely, in the base game, every cell of the board except a FS scatter or XFS scatter becomes a Multi at once; they all blow out together and the whole board drops in on top of their values.")}</div></div>
-  <div class="prow"><div class="ptile multi"><span>x1.25</span><small>DROP</small></div><div class="pname">${t("Line Drops")}</div>
-    <div class="ptext">${t("Every winning cluster, once {paid|counted}, leaves a small multiplier (x1.25, x1.5 or x2) on one of its own cells for every five symbols it held, chosen at random. A line drop adds to whatever value that cell already holds and lasts exactly as a Multi's value does: for the rest of the spin in the base game, for the whole feature in a bonus. It never changes the win of the cluster that left it.")}</div></div>
+  <div class="prow">${tile("M")}<div class="pname">${t("Gold Record — Multiplier")}<small>M</small></div>
+    <div class="ptext">${t(`Lands with a value from ${x(MULTI_MIN)} to ${x(MULTI_MAX)}, shown on the symbol. Every winning cluster on the board is {paid|counted} first; only then does it blow out: the Gold Record and the four symbols sharing an edge with it are removed, each of those five cells keeps the Gold Record's value, and new symbols drop in on top. A winning cluster that covers one or more of those cells is multiplied by the SUM of the values on the cells it covers. When two Gold Records reach the same cell their values add. In the base game the values last for the rest of the spin, including every tumble; in a bonus they stay on the board for the whole feature. The FS scatter and the XFS scatter are never removed by a Multi. The Multi does not form clusters and has no value of its own.`)}</div></div>
+  <div class="prow">${tile("M")}<div class="pname">${t("Record colours")}</div>
+    <div class="ptext">${t("A Gold Record's disc shows how much it is worth: bronze up to x2, silver up to x5, gold up to x20, platinum up to x100, and diamond (pink) above x100.")}</div></div>
+  <div class="prow">${tile("M")}<div class="pname">${t("Hit Parade and Sold-Out Show")}<small>M</small></div>
+    <div class="ptext">${t("Hit Parade: a straight line of 3 or 4 Gold Records can land together, along a row or down a column; their blasts overlap, so the cells between them collect more than one value. It can land on any spin, and far more often in a bonus. Sold-Out Show: very rarely, in the base game, every cell of the board except a FS scatter or XFS scatter becomes a Gold Record at once; they all blow out together and the whole board drops in on top of their values.")}</div></div>
+  <div class="prow"><div class="ptile multi"><span>x1.25</span><small>TIP</small></div><div class="pname">${t("Tips")}</div>
+    <div class="ptext">${t("Every winning cluster, once {paid|counted}, leaves a small multiplier (x1.25, x1.5 or x2) on one of its own cells for every five symbols it held, chosen at random. A tip adds to whatever value that cell already holds and lasts exactly as a Gold Record's value does: for the rest of the spin in the base game, for the whole feature in a bonus. It never changes the win of the cluster that left it.")}</div></div>
   <div class="prow"><img class="ptile" src="${art("assets/flat/BS.webp")}" alt="FS scatter" draggable="false"><div class="pname">${t("FS scatter — Bonus Scatter")}<small>BS</small></div>
     <div class="ptext">${t("Appears anywhere. 3, 4 or 5 FS scatters on one spin award 10, 12 or 15 free spins (the Standard Bonus). FS scatter does not form clusters and has no value of its own.")}</div></div>
   <div class="prow"><img class="ptile" src="${art("assets/flat/ES.webp")}" alt="The XFS scatter" draggable="false"><div class="pname">${t("The XFS scatter — Extreme Scatter")}<small>ES</small></div>
@@ -173,9 +175,15 @@ const RULES = (() => {
 </section>
 
 <section>
+  <h4>${t("Encore")}</h4>
+  <p>${t("When a spin's tumbles are over and the board {pays|wins} nothing more, the crowd can call an Encore. The spotlight picks a top symbol (The Crooner, The Bachelorette, The Fiddler, Mechanical Bull, Hot Chicken, Rhinestone Boot or Banjo) and every copy of one regular symbol (Horseshoe, Guitar Pick or Harmonica) that has at least 3 copies on the board turns into it. Scatters and Gold Records never change. The new board is then {paid|counted} like any other: its clusters pay through the values on their cells, Gold Records go off and the tumbles carry on.")}</p>
+  <p>${t("An Encore can come on any spin, winning or losing, at most once per spin (once per free spin in a bonus), and more often in the bonus than in the base game. It is part of the outcome of the spin: it never changes what the spin costs.")}</p>
+</section>
+
+<section>
   <h4>${t("Free spins")}</h4>
-  <p><b>${t("Standard Bonus")}</b> — ${t("3 / 4 / 5 FS scatters award 10 / 12 / 15 free spins. Multis land more often than in the base game and Surge Lines far more often, and every value on the board - a Multi's or a line drop's - stays there for the whole bonus.")}</p>
-  <p><b>${t("Extreme Bonus")}</b> — ${t("2 XFS scatters award 17 free spins; a FS scatter trigger with a XFS scatter on the same spin is upgraded to Extreme with its own spin count. Multis land more often still, every Multi is worth x2 or more, and Surge Lines land far more often than in the base game.")}</p>
+  <p><b>${t("Standard Bonus")}</b> — ${t("3 / 4 / 5 FS scatters award 10 / 12 / 15 free spins. Hit Parades land far more often than in the base game, and every value on the board - a Gold Record's or a tip's - stays there for the whole bonus.")}</p>
+  <p><b>${t("Extreme Bonus")}</b> — ${t("2 XFS scatters award 17 free spins; a FS scatter trigger with a XFS scatter on the same spin is upgraded to Extreme with its own spin count. every Gold Record is worth x2 or more, and Hit Parades land far more often than in the base game.")}</p>
   <p><b>${t("Spins")}</b> — ${t("a bonus plays exactly the free spins its trigger awarded. Free spins are not re-triggered and no spins are added during the feature.")}</p>
   <p class="fine">${t("Free spins are played at the {bet|play amount} and mode of the triggering spin. If the connection drops, reload the game to finish the round.")}</p>
 </section>
