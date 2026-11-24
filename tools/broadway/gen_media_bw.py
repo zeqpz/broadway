@@ -1,12 +1,12 @@
 """Broadway on Nashville: the engine.io lobby art. NO text, letters or logos on any of it (owner rule; Engine draws the
 title itself in the Media Editor).
-  covers  media/cover_16x9.png (3840 x 2160) and media/cover_3x4.png (3072 x 4096): Rosie rocking out on Lower Broadway
-          at night, a few of the game's symbols round her (the image model, refs = her figure, the street, two symbols),
+  covers  media/cover_16x9.png (3840 x 2160) and media/cover_3x4.png (3072 x 4096): The Crooner singing on the bar's stage, the
+          bachelorette and the fiddler beside him, gold records in the air (the image model, refs = the bar, three symbols),
           enlarged x4 (Real-ESRGAN)
   tiles   Engine's Media Editor wants SEPARATE layers (review of Power Outage, 2026-11-19):
-          media/tiles/bg_16x9.png (3840 x 2160), bg_3x4.png (2400 x 3200) - the street with no people, BRIGHT (the editor
-          warns under ~40 % perceived brightness) - and fg_rosie.png: Rosie herself, transparent, cut from her rig's parts
-          (no image model: exactly the character in the game)
+          media/tiles/bg_16x9.png (3840 x 2160), bg_3x4.png (2400 x 3200) - the bar with no people, BRIGHT (the editor
+          warns under ~40 % perceived brightness) - and fg_crooner.png: The Crooner symbol, transparent
+          (no cowgirl: the owner took her out of the game, 2026-11-24)
 usage: python tools/broadway/gen_media_bw.py gen [cover16,cover34,bg16,bg34] | build | check"""
 import json, os, sys
 from concurrent.futures import ThreadPoolExecutor
@@ -24,28 +24,29 @@ NOTEXT = ("NO text, NO letters, NO numbers, NO words, NO logo anywhere in the pi
 STYLE = ("Drawn in exactly the attached pictures' clean adult-animation TV style: uniform black line weight, flat matte "
          "colours with one hard shade, few highlights, no glossy shine, calm and well designed, no clutter, no realistic "
          "lighting, no blur, no texture noise.")
-COVER = ("A slot game's lobby cover illustration: ROSIE - the cowgirl in the first attached picture, exactly her (blue "
-         "cowboy hat with a white star, auburn curls, royal-blue fringed western shirt, short red skirt, red cowboy boots "
-         "with a white star on a blue medallion, her red electric guitar with rose decals) - rocking out mid-strum, big "
-         "confident smile, one boot kicked up, standing in the middle of LOWER BROADWAY in Nashville at night (the second "
-         "attached picture: brick honky-tonks covered in glowing neon signs, marquee bulbs, party lights strung over the "
-         "street). Gold records spin through the air around her with music notes and gold stars, and the bachelorette "
-         "and the old fiddler from the other attached pictures cheer her on from the sidewalk, smaller. Bright, vibrant, "
-         "joyful, poster-like composition with Rosie big in the centre. ")
+COVER = ("A slot game's lobby cover illustration, set INSIDE a Nashville honky-tonk bar at night (the first attached "
+         "picture: a small stage with a teal star backdrop and red curtains, a brick wall with glowing neon shapes, a "
+         "carved back-bar with teal-lit bottle shelves, a polished floor mirroring the neon). On the stage, big in the "
+         "centre, THE CROONER from the second attached picture - exactly him - sings into his vintage microphone under "
+         "a pink and a blue stage light, one arm thrown wide; the bachelorette and the old fiddler from the other "
+         "attached pictures whoop and play beside him, smaller. Gold records spin through the air with music notes and "
+         "gold stars, a red rhinestone cowboy boot and a banjo among them. Bright, vibrant, joyful, poster-like "
+         "composition. NO cowgirl, NO guitarist woman. ")
 STREET = ("A lobby-tile BACKGROUND (environment only - NO people, NO characters, NO faces) for a slot game: the attached "
-          "Lower Broadway street of honky-tonks, redrawn BRIGHT and VIBRANT like a candy-coloured cartoon poster at a "
-          "glowing purple-and-pink dusk: a bright violet-to-peach sky with the first stars, every neon sign blazing in "
-          "hot pink, electric blue, gold and green, warm amber windows, strings of party lights, bright brick colours, a "
-          "glossy street reflecting the neon. High-key and saturated: every area clearly lit and colourful, NO large "
-          "dark areas, NO heavy vignette. Keep the middle calm (a character will stand there). ")
+          "honky-tonk bar interior, redrawn BRIGHT and VIBRANT like a candy-coloured cartoon poster: the stage with its "
+          "teal star backdrop and red curtains, warm brick, every neon shape blazing in hot pink, electric blue, gold "
+          "and green, strings of party bulbs, the back-bar's teal-lit bottle shelves, a glossy floor reflecting the "
+          "neon. High-key and saturated: every area clearly lit and colourful, NO large dark areas, NO heavy vignette. "
+          "Keep the middle calm (a character will stand there). ")
+NOTEXT = ("NO text, NO letters, NO numbers, NO words, NO logo anywhere in the picture - every neon sign shows only a "
+          "shape or picture (a boot, a guitar, a star, a horseshoe, a cowboy hat), never words.")
 JOBS = {   # job: (prompt, aspect, refs)
-    "cover16": (COVER + NOTEXT + "\n" + STYLE, "16:9", ["rosie2/rosie_v2.png", "bg_v1.png", "H2_v1.png", "H3_v1.png"]),
-    "cover34": (COVER + NOTEXT + "\n" + STYLE, "3:4", ["rosie2/rosie_v2.png", "bg_mobile_v1.png", "H2_v1.png", "H3_v1.png"]),
-    "bg16": (STREET + NOTEXT + "\n" + STYLE, "16:9", ["bg_v1.png"]),
-    "bg34": (STREET + NOTEXT + "\n" + STYLE, "3:4", ["bg_mobile_v1.png"]),
+    "cover16": (COVER + NOTEXT + " " + STYLE, "16:9", ["bg_v1.png", "H1_v2.png", "H2_v2.png", "H3_v2.png"]),
+    "cover34": (COVER + NOTEXT + " " + STYLE, "3:4", ["bg_mobile_v1.png", "H1_v2.png", "H2_v2.png", "H3_v2.png"]),
+    "bg16": (STREET + NOTEXT + " " + STYLE, "16:9", ["bg_v1.png"]),
+    "bg34": (STREET + NOTEXT + " " + STYLE, "3:4", ["bg_mobile_v1.png"]),
 }
-BOOTS_NOTE = (" She is slim, in her tight fitted blue western shirt and tight red mini skirt; her boots are red with a white "
-              "star on a round blue medallion.")
+BOOTS_NOTE = ""
 
 
 def gen(job):
@@ -65,15 +66,13 @@ def brightness(im):
     return ImageStat.Stat(g).mean[0] / 255
 
 
-def fg_rosie():
-    """Rosie at rest from her rig's parts (the same assembly the game shows), trimmed, 2048 px tall."""
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import rosie_parts as R
-    fig = R.figure()
-    bb = fig.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
-    fig = fig.crop(bb)
-    k = 2048 / fig.height
-    return fig.convert("RGBa").resize((round(fig.width * k), 2048), Image.LANCZOS).convert("RGBA")
+def fg_crooner():
+    """The tile's foreground element: The Crooner (H1), the game's top symbol, transparent, 2048 px tall."""
+    im = Image.open(os.path.join(SRC, "H1_v2.png")).convert("RGBA")
+    im = im.crop(im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox())
+    import upscale4k
+    k = 2048 / im.height
+    return upscale4k.up4(im, (round(im.width * k), 2048), model="realesrgan-x4plus-anime")
 
 
 def build():
@@ -89,11 +88,11 @@ def build():
         if job.startswith("cover"):
             im.save(os.path.join(MEDIA, out.replace(".png", ".jpg")), quality=90)
         print("wrote", out, im.size, f"brightness {brightness(im):.0%}")
-    old = os.path.join(MEDIA, "tiles", "fg_president.png")
-    if os.path.exists(old):
-        os.remove(old)                                     # Power Outage's foreground
-    fg_rosie().save(os.path.join(MEDIA, "tiles", "fg_rosie.png"))
-    print("wrote tiles/fg_rosie.png")
+    for old in ("fg_president.png", "fg_rosie.png"):
+        if os.path.exists(os.path.join(MEDIA, "tiles", old)):
+            os.remove(os.path.join(MEDIA, "tiles", old))
+    fg_crooner().save(os.path.join(MEDIA, "tiles", "fg_crooner.png"))
+    print("wrote tiles/fg_crooner.png")
 
 
 if __name__ == "__main__":

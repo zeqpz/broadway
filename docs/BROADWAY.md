@@ -17,24 +17,12 @@ bar's neon sign: we take the idea - a neon cowgirl with a guitar - not its name 
 
 Palette: neon hot pink, neon electric blue, neon red, marquee-bulb amber/gold, warm honky-tonk wood, deep navy night.
 
-## The cowgirl (beside the board)
+## No character beside the board
 
-**Rosie** - an original, attractive, confident cartoon cowgirl (adult): blue cowboy hat, blue western shirt/jacket
-with white piping, fringe and little stars, a red short skirt, red-and-blue cowboy boots, a red electric guitar,
-auburn curls. A live 2D rig built and animated in Blender (parts split apart, separate clips), played by
-`frontend/charrig.js`. She reacts to the game:
-
-| clip | when |
-|---|---|
-| idle | always, never still (sway, foot tap, light strumming) |
-| strum | a spin starts |
-| antic | 2 FS on the board / a near miss (leans in, watching) |
-| cheer | a small win |
-| bigwin | BIG / MEGA / XTREME win (rocks out, hat tip, kick) |
-| multi | a Gold Record goes off (points, hat flick) |
-| trigger | a bonus triggers (guitar raised, jump) |
-| solo | **Encore** (shreds a solo, the spotlight lands) |
-| shrug | a dead spin now and then |
+(Owner, 2026-11-24: "get rid of the character".) The game was first built with a cowgirl guitarist, Rosie, as a live 2D rig
+left of the board with reaction clips. She is out of the game: no rig, no phone stills, no reactions, and no mention in
+the cards or rules. The bar's empty stage shows where she stood; the Encore card shows a red guitar in a spotlight
+(`tools/broadway/gen_encore_icon.py`). Her pipeline and source art stay in the repo, unused.
 
 ## Symbols (ids unchanged)
 
@@ -60,7 +48,7 @@ Multi numerals: neon-tube figures coloured by value (glow baked into the glyph a
 
 ## Encore (the new mechanic)
 
-When a spin's tumbles are over and the board pays nothing more, Rosie can launch into an **Encore**: a stage spotlight
+When a spin's tumbles are over and the board pays nothing more, the crowd can call an **Encore**: a stage spotlight
 sweeps the board and locks onto a premium symbol (the Headliner, H1-H7), and **every copy of one regular symbol
 (L1 / L3 / L4) on the board turns into the Headliner**. Then the board is paid again and the tumbles carry on as
 normal (Gold Records go off, cell multipliers count). At most one Encore per spin (per free spin in a bonus). It can
@@ -77,7 +65,7 @@ extreme); source = a low symbol on the board (weighted by its count, needs >= 3 
 emitted after that cascade's final `setWin`/`setTotalWin`, before the follow-up cascade's events (`winInfo`,
 `tumbleBoard`, `booster`, ...). The follow-up cascade has its own small tumble budget.
 
-Frontend: Rosie plays `solo`, a spotlight sweeps and lands, ENCORE! title in neon, each `from` cell flips to `to` with
+Frontend: a guitar riff, a spotlight sweeps and lands, ENCORE! title in neon, each `from` cell flips to `to` with
 a neon flash (positions in the event), riff + crowd cheer. Phones: no spotlight canvas (a still cone image), no filters.
 
 ## Background and layout
@@ -86,7 +74,7 @@ a neon flash (positions in the event), riff + crowd cheer. Phones: no spotlight 
 people"; later the same day: "more appealing, more detailed and less bland" - the v2 painting, `art/broadway-src/bg4/`.)
 The inside of an empty honky-tonk on Lower Broadway at night, seen straight on toward its back wall, in three clear
 zones so it reads rich but not chaotic: **the stage** on the left (teal backdrop with gold stars, red curtains, a riser
-with footlights, a drum kit, an amp stack, a mic and two coloured stage lamps - Rosie stands in front of it); **the
+with footlights, a drum kit, an amp stack, a mic and two coloured stage lamps - empty); **the
 brick wall** in the middle (gold records, hanging guitars); **the bar** on the right (a carved back-bar with two teal
 back-lit bottle shelves, taps, a coffee pot, red stools, a cowhide rug, a jukebox). The floor is dark polished wood that
 mirrors the neon, with an inlaid star. Five neon signs (LIVE MUSIC, a pink guitar, HONKY TONK, a red boot, BAR) and one
@@ -97,7 +85,7 @@ footlights chase, two stage-light beams (pink, blue) sway and swell, two ceiling
 stage light, glints twinkle on the bottles, steam curls off the coffee pot, the jukebox's tubes run through the colours
 and a shine sweeps the gold records. Phones show a still picture.
 Xtreme Bonus: its own rooftop stage over the skyline with fireworks. Board frame: a honky-tonk stage frame (wood,
-brass, marquee bulbs, neon trim). Title logo: BROADWAY ON NASHVILLE in neon. Rosie stands beside the board.
+brass, marquee bulbs, neon trim). Title logo: BROADWAY ON NASHVILLE in neon, right of the board (centred over it on a phone).
 
 ## Sound
 
